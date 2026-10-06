@@ -957,7 +957,7 @@
         <button type="button" id="autoPlayToggle" onclick="toggleAutoPlay()" role="switch" aria-checked="false" class="w-full mb-3 flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition text-left">
           <span class="min-w-0 flex flex-col">
             <span id="autoPlayLabel" class="text-xs font-extrabold uppercase text-gray-300 flex items-center gap-2"><i class="fa-solid fa-infinity"></i> AUTO PLAY IS OFF</span>
-            <span id="autoPlayHint" class="text-[10px] text-gray-400 normal-case font-medium mt-0.5">Turn on to add similar songs to the end of the queue</span>
+            <span id="autoPlayHint" class="text-[10px] text-gray-400 normal-case font-medium mt-0.5">Turn on to add similar songs to the end of the queue.</span>
           </span>
           <span class="autoplay-switch"><span class="autoplay-knob"></span></span>
         </button>
@@ -4574,9 +4574,9 @@ function togglePlay() {
       if (label) label.innerHTML = `<i class="fa-solid fa-infinity"></i> AUTO PLAY IS ${autoPlayEnabled ? 'ON' : 'OFF'}`;
       if (hint) {
         if (autoPlaySaveFailed) hint.textContent = "Not saved to your account yet. Run the Supabase SQL (see setup guide).";
-        else if (!autoPlayEnabled) hint.textContent = 'Turn on to add similar songs to the end of the queue';
-        else if (repeatMode !== 0) hint.textContent = 'Repeat is on. The queue loops and skips the similar songs.';
-        else hint.textContent = 'Similar songs are added to the end of the queue';
+        else if (!autoPlayEnabled) hint.textContent = 'Turn on to add similar songs to the end of the queue.';
+        else if (repeatMode !== 0) hint.textContent = 'Repeat is now on. The queue added similar songs.';
+        else hint.textContent = 'Similar songs are added to the end of the queue.';
       }
     }
 
