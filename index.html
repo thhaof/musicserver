@@ -4449,6 +4449,15 @@ function togglePlay() {
        MEDIA SESSION  (browser media popup, lock screen, mobile notification)
        Shows the song title and the artist on separate lines + the album cover.
     ========================================================== */
+    // iPhone lock screen / Control Center sizes the gap under the title from the title text itself
+    // (accents, brackets, no-descender titles like "Intro" all end up with different gaps).
+    // On iOS only, every title gets the same invisible trailing character so all songs are measured alike.
+    const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const LOCKSCREEN_TITLE_PAD = '\u2800';   // invisible braille blank; change/empty this if you want to test other values
+    function mediaTitleFor(song) {
+      return String(song.title || '').trim() + (IS_IOS ? LOCKSCREEN_TITLE_PAD : '');
+    }
+
     function updateMediaSession(song) {
       if (!('mediaSession' in navigator) || !song) return;
       try {
@@ -4457,7 +4466,7 @@ function togglePlay() {
         // Always exactly the same fields in the same shape (title, artist, ONE 512px cover),
         // so the lock screen lays every song out identically. No album line.
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: String(song.title || '').trim(),
+          title: mediaTitleFor(song),
           artist: String(song.artist || '').trim(),
           album: '',
           artwork: cover ? [{ src: cover, sizes: '512x512', type }] : []
@@ -4519,7 +4528,7 @@ function togglePlay() {
       if (!song || !audio.getAttribute('src')) return;
       try {
         const md = navigator.mediaSession.metadata;
-        if (!md || md.title !== song.title || md.artist !== song.artist) updateMediaSession(song);
+        if (!md || md.title !== mediaTitleFor(song) || md.artist !== String(song.artist || '').trim()) updateMediaSession(song);
         navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
       } catch (e) {}
       updateMediaPositionState();
