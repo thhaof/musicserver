@@ -205,12 +205,17 @@
       gap: 1.5rem;
       align-items: start;
     }
+    /* Artist/Category album cards: one large card per row. */
+    .artist-detail-grid .artist-albums-grid {
+      grid-template-columns: 1fr !important;
+    }
 
-    /* Categories: display every character in uppercase, including generated card text. */
+    /* Categories: force all visible/generated text to uppercase. */
     #categoryView,
-    #categoryView .normal-case {
+    #categoryView * {
       text-transform: uppercase !important;
     }
+
     @media (max-width: 1100px) {
       .artist-detail-grid { grid-template-columns: 1fr; }
     }
@@ -845,25 +850,28 @@
 
     <!-- Playback Controls & Progress -->
     <div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 w-[min(50%,36rem)]">
-      <div class="flex items-center justify-center gap-6">
-        <!-- Shuffle Button -->
-        <button onclick="toggleShuffle()" title="SHUFFLE" id="shuffleBtn" class="text-gray-400 hover:text-white text-sm transition p-2">
-          <i class="fa-solid fa-shuffle"></i>
-        </button>
+      <!-- Playback controls: Play is anchored to the exact center. -->
+      <div class="relative w-full h-11">
+        <div class="absolute left-0 top-0 h-11 flex items-center gap-6">
+          <!-- Shuffle Button -->
+          <button onclick="toggleShuffle()" title="SHUFFLE" id="shuffleBtn" class="text-gray-400 hover:text-white text-sm transition p-2">
+            <i class="fa-solid fa-shuffle"></i>
+          </button>
 
-        <!-- Previous Song -->
-        <button
-          onclick="prevSong()"
-          class="text-gray-300 hover:text-white text-sm transition p-2"
-          title="PREVIOUS SONG"
-        >
-          <i class="fa-solid fa-backward-step text-base"></i>
-        </button>
+          <!-- Previous Song -->
+          <button
+            onclick="prevSong()"
+            class="text-gray-300 hover:text-white text-sm transition p-2"
+            title="PREVIOUS SONG"
+          >
+            <i class="fa-solid fa-backward-step text-base"></i>
+          </button>
+        </div>
 
-        <!-- Play / Pause Button -->
+        <!-- Play / Pause Button: exact center reference -->
         <button
           onclick="togglePlay()"
-          class="w-11 h-11 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 text-white flex items-center justify-center hover:scale-105 transition shadow-lg shadow-blue-500/30 active:scale-95"
+          class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 text-white flex items-center justify-center hover:scale-105 transition shadow-lg shadow-blue-500/30 active:scale-95"
           title="PLAY / PAUSE"
         >
           <i
@@ -872,32 +880,34 @@
           ></i>
         </button>
 
-        <!-- Next Song -->
-        <button
-          onclick="nextSong()"
-          class="text-gray-300 hover:text-white text-sm transition p-2"
-          title="NEXT SONG"
-        >
-          <i class="fa-solid fa-forward-step text-base"></i>
-        </button>
+        <div class="absolute right-0 top-0 h-11 flex items-center gap-6">
+          <!-- Next Song -->
+          <button
+            onclick="nextSong()"
+            class="text-gray-300 hover:text-white text-sm transition p-2"
+            title="NEXT SONG"
+          >
+            <i class="fa-solid fa-forward-step text-base"></i>
+          </button>
 
-        <!-- Repeat Button -->
-        <button onclick="toggleRepeat()" title="REPEAT MODE" id="repeatBtn" class="text-gray-400 hover:text-white text-sm transition relative p-2">
-          <i class="fa-solid fa-repeat"></i>
-          <span id="repeatOneBadge" class="absolute -top-1 -right-1 text-[9px] font-extrabold bg-blue-600 text-white px-1.5 py-0.2 rounded-full hidden">1</span>
-        </button>
+          <!-- Repeat Button -->
+          <button onclick="toggleRepeat()" title="REPEAT MODE" id="repeatBtn" class="text-gray-400 hover:text-white text-sm transition relative p-2">
+            <i class="fa-solid fa-repeat"></i>
+            <span id="repeatOneBadge" class="absolute -top-1 -right-1 text-[9px] font-extrabold bg-blue-600 text-white px-1.5 py-0.2 rounded-full hidden">1</span>
+          </button>
 
-        <!-- Playing Queue -->
-        <button onclick="toggleQueueSidebar()" title="PLAYING QUEUE" id="queueToggleBtn" class="text-gray-400 hover:text-white text-sm transition p-2 relative">
-          <i class="fa-solid fa-list-check"></i>
-        </button>
+          <!-- Playing Queue -->
+          <button onclick="toggleQueueSidebar()" title="PLAYING QUEUE" id="queueToggleBtn" class="text-gray-400 hover:text-white text-sm transition p-2 relative">
+            <i class="fa-solid fa-list-check"></i>
+          </button>
+        </div>
       </div>
 
-      <!-- Progress Bar -->
-      <div class="flex items-center gap-3 w-full">
+      <!-- Progress Bar: three equal columns keep its center exactly under Play. -->
+      <div class="grid grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-3 w-full">
         <span
           id="currentTime"
-          class="text-xs text-gray-400 w-10 text-right font-medium"
+          class="text-xs text-gray-400 w-10 text-right font-medium justify-self-end"
         >
           0:00
         </span>
@@ -915,7 +925,7 @@
 
         <span
           id="durationTime"
-          class="text-xs text-gray-400 w-10 font-medium"
+          class="text-xs text-gray-400 w-10 font-medium justify-self-start"
         >
           0:00
         </span>
@@ -2711,6 +2721,15 @@
       return { ...counts, total: names.length, text: parts.join(' • ') };
     }
 
+
+    function forceCategoryUppercase() {
+      const categoryView = document.getElementById('categoryView');
+      if (!categoryView) return;
+      categoryView.querySelectorAll('*').forEach(el => {
+        el.style.textTransform = 'uppercase';
+      });
+    }
+
     function renderCategoryAlbumsOnly() {
       if (!categoryCountry || !categoryGenre) return;
       const songList = document.getElementById('categorySongList') || document.querySelector('#categoryView .artist-detail-grid');
@@ -2730,7 +2749,7 @@
           <div class="flex items-center gap-2 min-w-0"><h2 class="text-lg font-extrabold text-white uppercase">ALBUMS</h2><span class="text-xs text-gray-500 uppercase">${categoryAlbums.length}</span></div>
           <select data-sort-kind="categoryAlbums" onchange="handleSortSelectChange('categoryAlbums', this)" class="bg-[#1f202e] border border-gray-700/50 text-xs text-gray-300 rounded-xl px-3 py-2 uppercase focus:outline-none focus:border-blue-500"><option value="">SORT BY</option><option value="title">TITLE</option><option value="release">RELEASE DATE</option></select>
         </div>
-        <div class="artist-albums-grid grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div class="artist-albums-grid grid grid-cols-1 gap-5">
           ${categoryAlbums.map(alb => `
             <button type="button" onclick='openNestedAlbum("category", JSON.parse(decodeURIComponent(this.dataset.sourceKey)), decodeURIComponent(this.dataset.album))' data-source-key="${encodeDataValue(JSON.stringify({country: categoryCountry, genre: categoryGenre}))}" data-album="${encodeDataValue(alb.name)}" class="glass-card p-5 rounded-2xl text-left group">
               <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 shadow-xl">
@@ -2744,6 +2763,7 @@
             </button>`).join('')}
         </div>`;
       updateSortSelect('categoryAlbums');
+      forceCategoryUppercase();
     }
 
     function renderCategoryView() {
@@ -2824,7 +2844,7 @@
               <div class="flex items-center gap-2 min-w-0"><h2 class="text-lg font-extrabold text-white uppercase">ALBUMS</h2><span class="text-xs text-gray-500 uppercase">${categoryAlbums.length}</span></div>
               <select data-sort-kind="categoryAlbums" onchange="handleSortSelectChange('categoryAlbums', this)" class="bg-[#1f202e] border border-gray-700/50 text-xs text-gray-300 rounded-xl px-3 py-2 uppercase focus:outline-none focus:border-blue-500"><option value="">SORT BY</option><option value="title">TITLE</option><option value="release">RELEASE DATE</option></select>
             </div>
-            <div class="artist-albums-grid grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div class="artist-albums-grid grid grid-cols-1 gap-5">
               ${categoryAlbums.map(alb => `
                 <button type="button" onclick='openNestedAlbum("category", JSON.parse(decodeURIComponent(this.dataset.sourceKey)), decodeURIComponent(this.dataset.album))' data-source-key="${encodeDataValue(JSON.stringify({country: categoryCountry, genre: categoryGenre}))}" data-album="${encodeDataValue(alb.name)}" class="glass-card p-5 rounded-2xl text-left group">
                   <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 shadow-xl">
@@ -2855,6 +2875,7 @@
         queueContexts.category = [...sortedCategorySongs];
       }
       requestAnimationFrame(() => { observeScrollReveals(); updateFloatingNavControls(); });
+      forceCategoryUppercase();
     }
 
     function openCategoryCountry(country) { categoryCountry = country; categoryGenre = null; renderCategoryView(); }
@@ -2916,7 +2937,7 @@
           <div class="flex items-center gap-2"><h2 class="text-lg font-extrabold text-white uppercase">ALBUMS</h2><span class="text-xs text-gray-500 uppercase">${artistAlbums.length}</span></div>
           <select data-sort-kind="artistAlbums" onchange="handleSortSelectChange('artistAlbums', this)" class="bg-[#1f202e] border border-gray-700/50 text-xs text-gray-300 rounded-xl px-3 py-2 uppercase focus:outline-none focus:border-blue-500"><option value="">SORT BY</option><option value="title">TITLE</option><option value="release">RELEASE DATE</option></select>
         </div>
-        <div class="artist-albums-grid grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div class="artist-albums-grid grid grid-cols-1 gap-5">
           ${artistAlbums.map(alb => `
             <button type="button" onclick='openNestedAlbum("artist", decodeURIComponent(this.dataset.sourceKey), decodeURIComponent(this.dataset.album))' data-source-key="${encodeDataValue(filteredSongs[0]?.artist || '')}" data-album="${encodeDataValue(alb.name)}" class="glass-card p-5 rounded-2xl text-left group">
               <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 shadow-xl">
@@ -3002,7 +3023,7 @@
               <div class="flex items-center gap-2"><h2 class="text-lg font-extrabold text-white uppercase">ALBUMS</h2><span class="text-xs text-gray-500 uppercase">${artistAlbums.length}</span></div>
               <select data-sort-kind="artistAlbums" onchange="handleSortSelectChange('artistAlbums', this)" class="bg-[#1f202e] border border-gray-700/50 text-xs text-gray-300 rounded-xl px-3 py-2 uppercase focus:outline-none focus:border-blue-500"><option value="">SORT BY</option><option value="title">TITLE</option><option value="release">RELEASE DATE</option></select>
             </div>
-            <div class="artist-albums-grid grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div class="artist-albums-grid grid grid-cols-1 gap-5">
               ${artistAlbums.map(alb => `
                 <button type="button" onclick='openNestedAlbum("artist", decodeURIComponent(this.dataset.sourceKey), decodeURIComponent(this.dataset.album))' data-source-key="${encodeDataValue(filteredSongs[0]?.artist || '')}" data-album="${encodeDataValue(alb.name)}" class="glass-card p-5 rounded-2xl text-left group">
                   <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 shadow-xl">
