@@ -688,10 +688,6 @@
             <i id="settingsChevron" class="fa-solid fa-chevron-down text-[10px] transition-transform"></i>
           </button>
           <div id="settingsMenu" class="hidden ml-4 mr-1 mt-1 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
-            <button type="button" id="autoPlayToggle" onclick="toggleAutoPlay()" role="switch" aria-checked="false" title="KEEP PLAYING SIMILAR SONGS WHEN THE QUEUE ENDS" class="w-full mb-1 flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition uppercase">
-              <span class="flex items-center gap-3"><i class="fa-solid fa-forward w-4 text-center"></i> AUTO PLAY</span>
-              <span class="autoplay-switch"><span class="autoplay-knob"></span></span>
-            </button>
             <button type="button" onclick="openFeedbackModal()" class="w-full mb-1 flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-gray-400 hover:text-blue-300 hover:bg-blue-500/10 transition uppercase">
               <i class="fa-solid fa-comment-dots w-4 text-center"></i> FEEDBACK
             </button>
@@ -953,6 +949,15 @@
               <i class="fa-solid fa-xmark text-sm"></i>
             </button>
           </div>
+        </div>
+        <div class="flex items-center justify-between gap-3 mb-3 px-1">
+          <div class="min-w-0">
+            <p class="text-xs font-bold text-white uppercase flex items-center gap-2"><i class="fa-solid fa-infinity text-blue-500"></i> AUTOPLAY</p>
+            <p class="text-[10px] text-gray-400 normal-case font-medium mt-0.5">Add similar songs to the end of the queue</p>
+          </div>
+          <button type="button" id="autoPlayToggle" onclick="toggleAutoPlay()" role="switch" aria-checked="false" title="AUTOPLAY" class="flex-shrink-0 p-1.5 rounded-full">
+            <span class="autoplay-switch"><span class="autoplay-knob"></span></span>
+          </button>
         </div>
         <div id="queueListContainer" class="flex flex-col gap-2 max-h-[min(65vh,560px)] overflow-y-auto pr-1"></div>
       </div>
@@ -3738,6 +3743,7 @@
       document.getElementById('currentTitle').innerText = song.title;
       document.getElementById('currentArtist').innerText = `${song.artist} — ${song.album}`;
       updateBrowserTabMetadata(song, false);
+      ensureAutoPlayTail();
       updateMediaSession(song);
       schedulePlaybackSave();
 
@@ -4280,7 +4286,13 @@ function togglePlay() {
       if (!currentQueue.length || currentSongIndex < 0) {
         container.innerHTML = `<div class="text-center py-10 px-4 text-xs text-gray-500 uppercase">NO SONG IS CURRENTLY PLAYING</div>`;
       } else {
-        container.innerHTML = currentQueue.map((s, idx) => generateSongRowHTML(s, idx, 'queue')).join('');
+        const apStart = getAutoPlayStart();
+        container.innerHTML = currentQueue.map((s, idx) => {
+          const divider = (idx === apStart)
+            ? `<div class="flex items-center gap-2 px-1 pt-2 pb-1 text-[10px] font-extrabold tracking-widest text-blue-400 uppercase"><i class="fa-solid fa-infinity"></i> AUTOPLAY &middot; SIMILAR SONGS</div>`
+            : '';
+          return divider + generateSongRowHTML(s, idx, 'queue');
+        }).join('');
       }
       updateQueueGoToPlayingButton();
       requestAnimationFrame(() => {
@@ -4458,28 +4470,62 @@ function togglePlay() {
       } catch (e) {}
     }
 
-    (function setupMediaSessionHandlers() {
+    function registerMediaHandlers() {
       if (!('mediaSession' in navigator)) return;
       const set = (action, handler) => { try { navigator.mediaSession.setActionHandler(action, handler); } catch (e) {} };
-      set('play', () => { if (audio.paused) togglePlay(); });
-      set('pause', () => { if (!audio.paused) togglePlay(); });
+      set('play', async () => {
+        const song = currentQueue[currentSongIndex];
+        if (!song) return;
+        if (!audio.getAttribute('src')) loadSong(song, { autoScroll: false });
+        try { await audio.play(); } catch (e) { console.warn('Media Session play blocked:', e); }
+        reassertMediaSession();
+      });
+      set('pause', () => { audio.pause(); reassertMediaSession(); });
+      set('stop', () => { audio.pause(); reassertMediaSession(); });   // pause only, so the controls stay
       set('previoustrack', () => prevSong());
       set('nexttrack', () => nextSong());
-      set('seekbackward', (d) => { audio.currentTime = Math.max(0, audio.currentTime - ((d && d.seekOffset) || 10)); updateMediaPositionState(); });
-      set('seekforward', (d) => {
-        const max = Number.isFinite(audio.duration) ? audio.duration : Infinity;
-        audio.currentTime = Math.min(max, audio.currentTime + ((d && d.seekOffset) || 10));
-        updateMediaPositionState();
-      });
+      // No +-10s buttons: with these unset, phones show Previous / Next song instead.
+      set('seekbackward', null);
+      set('seekforward', null);
       set('seekto', (d) => {
         if (!d || !Number.isFinite(d.seekTime)) return;
         audio.currentTime = d.seekTime;
         updateMediaPositionState();
       });
-    })();
+    }
+    registerMediaHandlers();
 
-    audio.addEventListener('play', () => { try { navigator.mediaSession.playbackState = 'playing'; } catch (e) {} updateMediaPositionState(); });
-    audio.addEventListener('pause', () => { try { if (currentQueue[currentSongIndex]) navigator.mediaSession.playbackState = 'paused'; } catch (e) {} updateMediaPositionState(); });
+    // Keep the lock-screen / headset controls alive while paused.
+    function reassertMediaSession() {
+      if (!('mediaSession' in navigator)) return;
+      const song = currentQueue[currentSongIndex];
+      if (!song || !audio.getAttribute('src')) return;
+      try {
+        const md = navigator.mediaSession.metadata;
+        if (!md || md.title !== song.title || md.artist !== song.artist) updateMediaSession(song);
+        navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
+      } catch (e) {}
+      updateMediaPositionState();
+    }
+
+    let mediaKeepAliveTimer = null;
+    audio.addEventListener('play', () => {
+      clearInterval(mediaKeepAliveTimer);
+      mediaKeepAliveTimer = null;
+      reassertMediaSession();
+    });
+    audio.addEventListener('pause', () => {
+      reassertMediaSession();
+      setTimeout(reassertMediaSession, 300);
+      setTimeout(reassertMediaSession, 1500);
+      clearInterval(mediaKeepAliveTimer);
+      mediaKeepAliveTimer = setInterval(reassertMediaSession, 4000);
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') { registerMediaHandlers(); reassertMediaSession(); }
+    });
+    window.addEventListener('pageshow', () => { registerMediaHandlers(); reassertMediaSession(); });
+    window.addEventListener('focus', reassertMediaSession);
     audio.addEventListener('loadedmetadata', updateMediaPositionState);
     audio.addEventListener('durationchange', updateMediaPositionState);
     audio.addEventListener('seeked', updateMediaPositionState);
@@ -4527,10 +4573,48 @@ function togglePlay() {
       renderAutoPlayToggle();
     }
 
+    // Songs added by Autoplay always sit at the END of the queue, starting at autoPlayStart.
+    // autoPlayQueueRef remembers which queue array that belongs to: when you start a new
+    // list the queue is replaced, so the old Autoplay songs are dropped automatically.
+    let autoPlayStart = null;
+    let autoPlayQueueRef = null;
+
+    function getAutoPlayStart() {
+      if (autoPlayQueueRef !== currentQueue || autoPlayStart === null) return null;
+      return autoPlayStart < currentQueue.length ? autoPlayStart : null;
+    }
+
+    // Keep at least 5 similar songs waiting after the current one. Returns true if the queue changed.
+    function ensureAutoPlayTail(force = false) {
+      if (!autoPlayEnabled || !currentQueue.length || currentSongIndex < 0) return false;
+      const upcoming = currentQueue.length - 1 - currentSongIndex;
+      if (!force && upcoming >= 5) return false;
+      const added = buildAutoPlaySongs(10);
+      if (!added.length) return false;
+      const start = getAutoPlayStart() ?? currentQueue.length;
+      currentQueue = [...currentQueue, ...added];
+      autoPlayQueueRef = currentQueue;
+      autoPlayStart = start;
+      return true;
+    }
+
+    // Turning Autoplay off removes the songs it added that have not played yet.
+    function removeAutoPlayTail() {
+      const start = getAutoPlayStart();
+      if (start !== null) {
+        currentQueue = currentQueue.slice(0, Math.max(start, currentSongIndex + 1));
+      }
+      autoPlayQueueRef = null;
+      autoPlayStart = null;
+    }
+
     function toggleAutoPlay() {
       autoPlayEnabled = !autoPlayEnabled;
       renderAutoPlayToggle();
       saveAutoPlayPreference();
+      if (autoPlayEnabled) ensureAutoPlayTail(); else removeAutoPlayTail();
+      renderQueueSidebarList();
+      schedulePlaybackSave();
     }
 
     function buildAutoPlaySongs(count = 10) {
@@ -4554,21 +4638,12 @@ function togglePlay() {
         .map(x => x.s);
     }
 
+    // Safety net used when a song ends on the very last queue entry.
     function autoPlayContinue() {
-      const added = buildAutoPlaySongs(10);
-      if (!added.length) return false;
-      const firstNew = currentQueue.length;
-      currentQueue = [...currentQueue, ...added];
-      currentSongIndex = firstNew;
-      loadSong(currentQueue[currentSongIndex], { autoScroll: true });
-      audio.play().then(() => {
-        isPlaying = true;
-        updatePlayIconsUI();
-      }).catch(err => {
-        console.error('Auto Play error:', err);
-        isPlaying = false;
-        updatePlayIconsUI();
-      });
+      const before = currentQueue.length;
+      ensureAutoPlayTail(true);
+      if (currentQueue.length <= before) return false;
+      nextSong();
       return true;
     }
 
@@ -4592,6 +4667,7 @@ function togglePlay() {
         index: currentSongIndex,
         position: pos,
         wasPlaying: !audio.paused,
+        autoStart: getAutoPlayStart(),
         savedAt: Date.now()
       };
     }
@@ -4660,6 +4736,11 @@ function togglePlay() {
           if (queue.length) {
             currentQueue = queue;
             currentSongIndex = index;
+            const savedStart = Number(state.autoStart);
+            if (Number.isInteger(savedStart) && savedStart > 0 && savedStart < queue.length && savedStart <= queue.length) {
+              autoPlayQueueRef = currentQueue;
+              autoPlayStart = savedStart;
+            } else { autoPlayQueueRef = null; autoPlayStart = null; }
             const position = Number(state.position) || 0;
             if (position > 0) {
               audio.addEventListener('loadedmetadata', () => {
