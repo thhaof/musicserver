@@ -428,7 +428,10 @@
 .thhaof-sort-dropdown:not(.open) .thhaof-sort-menu { display:none; }
 </style>
 <style>
-/* ===== Auto Play switch (Settings) ===== */
+/* Artist / album / song names always keep their original capitalization. */
+.keep-case, .keep-case * { text-transform: none !important; }
+#categoryView .keep-case, #categoryView .keep-case * { text-transform: none !important; }
+/* ===== Auto Play switch ===== */
 .autoplay-switch { position: relative; width: 2.1rem; height: 1.15rem; border-radius: 9999px; background: #374151; flex-shrink: 0; transition: background-color .2s ease, box-shadow .2s ease; }
 .autoplay-knob { position: absolute; top: 2px; left: 2px; width: calc(1.15rem - 4px); height: calc(1.15rem - 4px); border-radius: 50%; background: #fff; transition: transform .2s ease; }
 #autoPlayToggle[aria-checked="true"] .autoplay-switch { background: #3b82f6; box-shadow: 0 0 12px rgba(59,130,246,.45); }
@@ -993,7 +996,7 @@
         <i class="fa-solid fa-music text-2xl"></i>
       </div>
 
-      <div class="overflow-hidden cursor-pointer" onclick="togglePlay()" title="PLAY / PAUSE">
+      <div class="overflow-hidden cursor-pointer" onclick="goToCurrentSongAlbum()" title="GO TO ALBUM">
         <h4
           id="currentTitle"
           class="text-sm font-bold truncate text-white hover:text-blue-400 transition normal-case"
@@ -2024,6 +2027,7 @@
       playbackSaveTimer = null;
       playbackRestored = false;
       currentUser = null;
+      resetPlayModes();
       playlists = [];
       currentActivePlaylistId = null;
       currentActivePublicPlaylistId = null;
@@ -2645,9 +2649,9 @@
       document.getElementById('homeRecommended').innerHTML = recommended.map((s, idx) => generateSongRowHTML(s, idx, 'homeRecommended')).join('');
 
       const albums = [...new Map(songs.map(s => [s.album, s])).values()].slice(-4).reverse();
-      document.getElementById('homeNewAlbums').innerHTML = albums.map(s => `<div onclick='openGroupDetail("album", decodeURIComponent(this.dataset.album))' data-album="${encodeDataValue(s.album)}" class="cursor-pointer group"><img src="${s.cover}" class="w-full aspect-square object-cover rounded-xl mb-2 group-hover:scale-[1.02] transition"><p class="text-xs font-bold text-white truncate normal-case">${s.album}</p><p class="text-[10px] text-gray-500 truncate uppercase">${s.artist} • ${albumType(s.album)}</p></div>`).join('');
+      document.getElementById('homeNewAlbums').innerHTML = albums.map(s => `<div onclick='openGroupDetail("album", decodeURIComponent(this.dataset.album))' data-album="${encodeDataValue(s.album)}" class="cursor-pointer group"><img src="${s.cover}" class="w-full aspect-square object-cover rounded-xl mb-2 group-hover:scale-[1.02] transition"><p class="text-xs font-bold text-white truncate normal-case">${s.album}</p><p class="text-[10px] text-gray-500 truncate uppercase"><span class="keep-case">${s.artist}</span> • ${albumType(s.album)}</p></div>`).join('');
       const artists = [...new Map(songs.map(s => [s.artist, s])).values()].slice(-4).reverse();
-      document.getElementById('homeNewArtists').innerHTML = artists.map(s => `<div onclick='openGroupDetail("artist", decodeURIComponent(this.dataset.artist))' data-artist="${encodeDataValue(s.artist)}" class="cursor-pointer group text-center"><img src="${s.cover}" class="w-full aspect-square rounded-full object-cover mb-3 border border-white/10 group-hover:scale-[1.03] transition shadow-xl"><p class="text-xs font-bold text-white truncate uppercase">${s.artist}</p></div>`).join('');
+      document.getElementById('homeNewArtists').innerHTML = artists.map(s => `<div onclick='openGroupDetail("artist", decodeURIComponent(this.dataset.artist))' data-artist="${encodeDataValue(s.artist)}" class="cursor-pointer group text-center"><img src="${s.cover}" class="w-full aspect-square rounded-full object-cover mb-3 border border-white/10 group-hover:scale-[1.03] transition shadow-xl"><p class="text-xs font-bold text-white truncate keep-case">${s.artist}</p></div>`).join('');
     }
 
     function generateSongRowHTML(song, index, queueSource) {
@@ -3107,8 +3111,8 @@
               </div>
             </div>
           </div>
-          <h3 class="font-bold text-base text-white truncate w-full normal-case">${alb.name}</h3>
-          <p class="text-xs text-gray-400 truncate w-full mt-1 uppercase font-semibold">${alb.type} • ${alb.artist} • ${formatCount(alb.count, 'SONG')}</p>
+          <h3 class="font-bold text-base text-white truncate w-full normal-case keep-case">${alb.name}</h3>
+          <p class="text-xs text-gray-400 truncate w-full mt-1 uppercase font-semibold">${alb.type} • <span class="keep-case">${alb.artist}</span> • ${formatCount(alb.count, 'SONG')}</p>
         </div>
       `).join('');
       updateSortSelect('albums');
@@ -3177,8 +3181,8 @@
                   <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/40"><i class="fa-solid fa-play text-base ml-0.5"></i></div>
                 </div>
               </div>
-              <span class="block w-full text-base font-bold text-white truncate normal-case">${alb.name}</span>
-              <span class="block w-full truncate text-xs text-gray-400 mt-1 uppercase font-semibold">${alb.type} • ${alb.artist} • ${formatCount(alb.count, 'SONG')}</span>
+              <span class="block w-full text-base font-bold text-white truncate normal-case keep-case">${alb.name}</span>
+              <span class="block w-full truncate text-xs text-gray-400 mt-1 uppercase font-semibold">${alb.type} • <span class="keep-case">${alb.artist}</span> • ${formatCount(alb.count, 'SONG')}</span>
             </button>`).join('')}
         </div>`;
       updateSortSelect('categoryAlbums');
@@ -3275,8 +3279,8 @@
                       <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/40"><i class="fa-solid fa-play text-base ml-0.5"></i></div>
                     </div>
                   </div>
-                  <span class="block w-full text-base font-bold text-white truncate normal-case">${alb.name}</span>
-                  <span class="block w-full truncate text-xs text-gray-400 mt-1 uppercase font-semibold">${alb.type} • ${alb.artist} • ${formatCount(alb.count, 'SONG')}</span>
+                  <span class="block w-full text-base font-bold text-white truncate normal-case keep-case">${alb.name}</span>
+                  <span class="block w-full truncate text-xs text-gray-400 mt-1 uppercase font-semibold">${alb.type} • <span class="keep-case">${alb.artist}</span> • ${formatCount(alb.count, 'SONG')}</span>
                 </button>`).join('')}
             </div>
           </section>
@@ -3334,7 +3338,7 @@
               </div>
             </div>
           </div>
-          <h3 class="font-bold text-base text-white truncate w-full uppercase">${art.name}</h3>
+          <h3 class="font-bold text-base text-white truncate w-full keep-case">${art.name}</h3>
           <p class="text-xs text-gray-400 truncate w-full mt-1 uppercase font-semibold">${(() => { const rs = getCategoryReleaseSummary(songs.filter(s => s.artist === art.name)); return [rs.text, art.count ? formatCount(art.count, 'SONG') : ''].filter(Boolean).join(' • '); })()}</p>
         </div>
       `).join('');
@@ -3368,7 +3372,7 @@
                   <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/40"><i class="fa-solid fa-play text-base ml-0.5"></i></div>
                 </div>
               </div>
-              <span class="block w-full text-base font-bold text-white truncate normal-case">${alb.name}</span>
+              <span class="block w-full text-base font-bold text-white truncate normal-case keep-case">${alb.name}</span>
               <span class="block w-full truncate text-xs text-gray-400 mt-1 uppercase font-semibold">${alb.type} • ${formatCount(alb.count, 'SONG')}</span>
             </button>`).join('')}
         </div>`;
@@ -3414,7 +3418,7 @@
       document.getElementById('groupDetailView').classList.remove('hidden');
 
       const filteredSongs = type === 'album' ? songs.filter(s=>s.album===key) : songs.filter(s=>s.artist===key);
-      document.getElementById('groupDetailType').innerText = type === 'album' ? `${albumType(key)} BY ${filteredSongs[0]?.artist || ''}` : 'ARTIST';
+      document.getElementById('groupDetailType').innerHTML = type === 'album' ? `${albumType(key)} BY <span class="keep-case">${filteredSongs[0]?.artist || ''}</span>` : 'ARTIST';
 
       document.getElementById('groupDetailTitle').innerText = key;
       const groupReleaseSummary = type === 'artist' ? getCategoryReleaseSummary(filteredSongs) : null;
@@ -3456,7 +3460,7 @@
                       </div>
                     </div>
                   </div>
-                  <span class="block w-full text-base font-bold text-white truncate normal-case">${alb.name}</span>
+                  <span class="block w-full text-base font-bold text-white truncate normal-case keep-case">${alb.name}</span>
                   <span class="block w-full truncate text-xs text-gray-400 mt-1 uppercase font-semibold">${alb.type} • ${formatCount(alb.count, 'SONG')}</span>
                 </button>
               `).join('')}
@@ -4153,6 +4157,7 @@ function togglePlay() {
 
     function toggleShuffle() {
       shuffleMode = !shuffleMode;
+      savePlayModePreference();
       const btn = document.getElementById('shuffleBtn');
       if (shuffleMode) {
         btn.classList.add('text-blue-500');
@@ -4448,12 +4453,14 @@ function togglePlay() {
       if (!('mediaSession' in navigator) || !song) return;
       try {
         const cover = song.cover || '';
-        const sizes = ['96x96', '128x128', '192x192', '256x256', '384x384', '512x512'];
+        const type = /\.png(\?|$)/i.test(cover) ? 'image/png' : 'image/jpeg';
+        // Always exactly the same fields in the same shape (title, artist, ONE 512px cover),
+        // so the lock screen lays every song out identically. No album line.
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: song.title,
-          artist: song.artist,
-          album: song.album,
-          artwork: cover ? sizes.map(s => ({ src: cover, sizes: s })) : []
+          title: String(song.title || '').trim(),
+          artist: String(song.artist || '').trim(),
+          album: '',
+          artwork: cover ? [{ src: cover, sizes: '512x512', type }] : []
         });
         navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
       } catch (e) { console.warn('Media Session metadata skipped:', e); }
@@ -4666,6 +4673,7 @@ function togglePlay() {
     // Repeat ON: similar songs stay in the list, but playback loops inside the current queue.
     function onRepeatChangedForAutoPlay() {
       if (autoPlayEnabled) ensureAutoPlayTail();
+      savePlayModePreference();
       renderAutoPlayToggle();
       renderQueueSidebarList();
       schedulePlaybackSave();
@@ -4709,6 +4717,65 @@ function togglePlay() {
       if (currentQueue.length <= before) return false;
       nextSong();
       return true;
+    }
+
+    /* =========================================================
+       SHUFFLE + REPEAT  (saved per account)
+    ========================================================== */
+    const PLAYMODE_STORAGE_KEY = 'howies-music-server-playmode';
+    let playModeSaveTimer = null;
+
+    function renderPlayModeButtons() {
+      const sh = document.getElementById('shuffleBtn');
+      const rp = document.getElementById('repeatBtn');
+      const badge = document.getElementById('repeatOneBadge');
+      if (sh) { sh.classList.toggle('text-blue-500', shuffleMode); sh.classList.toggle('text-gray-400', !shuffleMode); }
+      if (rp) { rp.classList.toggle('text-blue-500', repeatMode !== 0); rp.classList.toggle('text-gray-400', repeatMode === 0); }
+      if (badge) badge.classList.toggle('hidden', repeatMode !== 2);
+    }
+
+    function savePlayModePreference() {
+      if (!currentUser) return;
+      const uid = currentUser.id;
+      const payload = { shuffle: shuffleMode, repeat: repeatMode };
+      try { localStorage.setItem(`${PLAYMODE_STORAGE_KEY}_${uid}`, JSON.stringify(payload)); } catch (e) {}
+      clearTimeout(playModeSaveTimer);
+      playModeSaveTimer = setTimeout(async () => {
+        if (!currentUser || currentUser.id !== uid) return;
+        try {
+          const { error } = await supabaseClient.from('user_preferences').upsert({
+            user_id: uid,
+            shuffle_mode: payload.shuffle,
+            repeat_mode: payload.repeat,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id' });
+          if (error) console.warn('Could not save shuffle/repeat:', error.message);
+        } catch (e) { console.warn('Shuffle/repeat save skipped:', e); }
+      }, 300);
+    }
+
+    async function loadPlayModePreference() {
+      let shuffle = false, repeat = 0;
+      try {
+        const raw = localStorage.getItem(`${PLAYMODE_STORAGE_KEY}_${currentUser.id}`);
+        if (raw) { const o = JSON.parse(raw); shuffle = o.shuffle === true; repeat = [0, 1, 2].includes(o.repeat) ? o.repeat : 0; }
+      } catch (e) {}
+      try {
+        const { data, error } = await supabaseClient.from('user_preferences').select('shuffle_mode, repeat_mode').eq('user_id', currentUser.id).maybeSingle();
+        if (!error && data) {
+          if (typeof data.shuffle_mode === 'boolean') shuffle = data.shuffle_mode;
+          if ([0, 1, 2].includes(data.repeat_mode)) repeat = data.repeat_mode;
+        }
+      } catch (e) {}
+      shuffleMode = shuffle;
+      repeatMode = repeat;
+      renderPlayModeButtons();
+    }
+
+    function resetPlayModes() {
+      shuffleMode = false;
+      repeatMode = 0;
+      renderPlayModeButtons();
     }
 
     /* =========================================================
@@ -4826,8 +4893,19 @@ function togglePlay() {
     }
 
     async function loadAccountPlayerState() {
+      await loadPlayModePreference();
       await loadAutoPlayPreference();
       await restorePlaybackState();
+    }
+
+    // Clicking the song name in the bottom player opens that song's album.
+    // (The play/pause button on the cover still plays and pauses.)
+    function goToCurrentSongAlbum() {
+      const song = currentQueue[currentSongIndex];
+      if (!song || !song.album) return;
+      if (window.innerWidth < 1024) closeMobileDrawer();
+      openGroupDetail('album', song.album);
+      document.querySelector('main')?.scrollTo({ top: 0 });
     }
 
     /* =========================================================
