@@ -433,7 +433,8 @@
 .autoplay-knob { position: absolute; top: 2px; left: 2px; width: calc(1.15rem - 4px); height: calc(1.15rem - 4px); border-radius: 50%; background: #fff; transition: transform .2s ease; }
 #autoPlayToggle[aria-checked="true"] .autoplay-switch { background: #3b82f6; box-shadow: 0 0 12px rgba(59,130,246,.45); }
 #autoPlayToggle[aria-checked="true"] .autoplay-knob { transform: translateX(calc(2.1rem - 1.15rem)); }
-#autoPlayToggle[aria-checked="true"] { color: #93c5fd; }
+#autoPlayToggle[aria-checked="true"] { border-color: rgba(59,130,246,.5); background: rgba(37,99,235,.14); }
+#autoPlayToggle[aria-checked="true"] #autoPlayLabel { color: #93c5fd; }
 /* ===== Feedback modal ===== */
 #feedbackText { resize: none; }
 .feedback-status { min-height: 16px; font-size: 11px; font-weight: 800; letter-spacing: .08em; margin-top: 10px; text-align: center; }
@@ -950,15 +951,13 @@
             </button>
           </div>
         </div>
-        <div class="flex items-center justify-between gap-3 mb-3 px-1">
-          <div class="min-w-0">
-            <p class="text-xs font-bold text-white uppercase flex items-center gap-2"><i class="fa-solid fa-infinity text-blue-500"></i> AUTOPLAY</p>
-            <p class="text-[10px] text-gray-400 normal-case font-medium mt-0.5">Add similar songs to the end of the queue</p>
-          </div>
-          <button type="button" id="autoPlayToggle" onclick="toggleAutoPlay()" role="switch" aria-checked="false" title="AUTOPLAY" class="flex-shrink-0 p-1.5 rounded-full">
-            <span class="autoplay-switch"><span class="autoplay-knob"></span></span>
-          </button>
-        </div>
+        <button type="button" id="autoPlayToggle" onclick="toggleAutoPlay()" role="switch" aria-checked="false" class="w-full mb-3 flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition text-left">
+          <span class="min-w-0 flex flex-col">
+            <span id="autoPlayLabel" class="text-xs font-extrabold uppercase text-gray-300 flex items-center gap-2"><i class="fa-solid fa-infinity"></i> AUTO PLAY IS OFF</span>
+            <span id="autoPlayHint" class="text-[10px] text-gray-400 normal-case font-medium mt-0.5">Turn on to add similar songs to the end of the queue</span>
+          </span>
+          <span class="autoplay-switch"><span class="autoplay-knob"></span></span>
+        </button>
         <div id="queueListContainer" class="flex flex-col gap-2 max-h-[min(65vh,560px)] overflow-y-auto pr-1"></div>
       </div>
     </aside>
@@ -2683,6 +2682,12 @@
               <i class="fa-solid fa-plus text-xs"></i>
             </button>` : ''}
 
+            ${queueSource === 'queue' && !isThisPlaying ? `
+            <!-- Remove from Playing Queue -->
+            <button onclick="event.stopPropagation(); removeFromQueue(${index})" title="REMOVE FROM QUEUE" class="text-gray-500 hover:text-red-400 p-2 rounded-lg hover:bg-red-500/10 transition">
+              <i class="fa-solid fa-xmark text-xs"></i>
+            </button>` : ''}
+
             ${queueSource === 'playlist' ? `
             <!-- Remove from Current Playlist -->
             <button onclick="event.stopPropagation(); removeSongFromPlaylist('${currentActivePlaylistId}', ${song.id})" title="REMOVE FROM PLAYLIST" class="text-gray-500 hover:text-red-400 p-2 rounded-lg hover:bg-red-500/10 transition">
@@ -4175,6 +4180,7 @@ function togglePlay() {
         btn.classList.add('text-blue-500');
         badge.classList.remove('hidden');
       }
+      onRepeatChangedForAutoPlay();
     }
 
     /* =========================================================
@@ -4296,7 +4302,11 @@ function togglePlay() {
       }
       updateQueueGoToPlayingButton();
       requestAnimationFrame(() => {
-        if (!document.getElementById('queueSidebar')?.classList.contains('hidden')) { positionQueueSidebar(); scrollQueueToPlaying(); }
+        if (!document.getElementById('queueSidebar')?.classList.contains('hidden')) {
+          positionQueueSidebar();
+          if (queueRestoreScrollTop !== null) { container.scrollTop = queueRestoreScrollTop; queueRestoreScrollTop = null; }
+          else scrollQueueToPlaying();
+        }
       });
     }
 
@@ -4538,9 +4548,20 @@ function togglePlay() {
     const AUTOPLAY_STORAGE_KEY = 'howies-music-server-autoplay';
     let autoPlayEnabled = false;
 
+    let autoPlaySaveFailed = false;
     function renderAutoPlayToggle() {
       const btn = document.getElementById('autoPlayToggle');
-      if (btn) btn.setAttribute('aria-checked', String(autoPlayEnabled));
+      if (!btn) return;
+      btn.setAttribute('aria-checked', String(autoPlayEnabled));
+      const label = document.getElementById('autoPlayLabel');
+      const hint = document.getElementById('autoPlayHint');
+      if (label) label.innerHTML = `<i class="fa-solid fa-infinity"></i> AUTO PLAY IS ${autoPlayEnabled ? 'ON' : 'OFF'}`;
+      if (hint) {
+        if (autoPlaySaveFailed) hint.textContent = "Not saved to your account yet. Run the Supabase SQL (see setup guide).";
+        else if (!autoPlayEnabled) hint.textContent = 'Turn on to add similar songs to the end of the queue';
+        else if (repeatMode !== 0) hint.textContent = 'Paused while Repeat is on. The queue just repeats.';
+        else hint.textContent = 'Similar songs are added to the end of the queue';
+      }
     }
 
     async function saveAutoPlayPreference() {
@@ -4555,8 +4576,10 @@ function togglePlay() {
           autoplay: autoPlayEnabled,
           updated_at: new Date().toISOString()
         }, { onConflict: 'user_id' });
+        autoPlaySaveFailed = !!error;
         if (error) console.warn('Could not save Auto Play:', error.message);
-      } catch (e) { console.warn('Auto Play save skipped:', e); }
+      } catch (e) { autoPlaySaveFailed = true; console.warn('Auto Play save skipped:', e); }
+      renderAutoPlayToggle();
     }
 
     async function loadAutoPlayPreference() {
@@ -4586,7 +4609,7 @@ function togglePlay() {
 
     // Keep at least 5 similar songs waiting after the current one. Returns true if the queue changed.
     function ensureAutoPlayTail(force = false) {
-      if (!autoPlayEnabled || !currentQueue.length || currentSongIndex < 0) return false;
+      if (!autoPlayEnabled || repeatMode !== 0 || !currentQueue.length || currentSongIndex < 0) return false;
       const upcoming = currentQueue.length - 1 - currentSongIndex;
       if (!force && upcoming >= 5) return false;
       const added = buildAutoPlaySongs(10);
@@ -4636,6 +4659,39 @@ function togglePlay() {
         .sort((a, b) => b.score - a.score)
         .slice(0, count)
         .map(x => x.s);
+    }
+
+    // Repeat ON = loop the queue you have, so similar songs are taken out.
+    // Repeat OFF = similar songs come back at the end of the queue.
+    function onRepeatChangedForAutoPlay() {
+      if (autoPlayEnabled) {
+        if (repeatMode !== 0) removeAutoPlayTail(); else ensureAutoPlayTail();
+      }
+      renderAutoPlayToggle();
+      renderQueueSidebarList();
+      schedulePlaybackSave();
+    }
+
+    // Remove one song from the Playing Queue (the song that is playing can't be removed).
+    var queueRestoreScrollTop = null;
+    function removeFromQueue(index) {
+      if (index < 0 || index >= currentQueue.length || index === currentSongIndex) return;
+      const container = document.getElementById('queueListContainer');
+      queueRestoreScrollTop = container ? container.scrollTop : null;
+      const start = getAutoPlayStart();
+      const newQueue = currentQueue.filter((_, i) => i !== index);
+      if (index < currentSongIndex) currentSongIndex--;
+      currentQueue = newQueue;
+      if (start !== null) {
+        const newStart = index < start ? start - 1 : start;
+        if (newStart >= newQueue.length) { autoPlayQueueRef = null; autoPlayStart = null; }
+        else { autoPlayQueueRef = newQueue; autoPlayStart = newStart; }
+      }
+      ensureAutoPlayTail();
+      renderQueueSidebarList();
+      updateHighlightItem();
+      updateFloatingNavControls();
+      schedulePlaybackSave();
     }
 
     // Safety net used when a song ends on the very last queue entry.
