@@ -232,16 +232,16 @@
 
     /* =========================================================
        MOBILE VERSION (phones / small tablets)
-       Desktop layout is untouched above 768px.
+       Desktop layout is untouched above 1024px.
     ========================================================== */
     #mobileTopBar, #sidebarOverlay { display: none; }
 
-    @media (max-width: 767px) {
+    @media (max-width: 1023px) {
       body { height: 100vh; height: 100dvh; font-size: 14px; }
 
       /* Top bar with menu button */
       #mobileTopBar {
-        display: flex; align-items: center; gap: 0.75rem;
+        display: flex !important; align-items: center; gap: 0.75rem;
         padding: calc(env(safe-area-inset-top, 0px) + 0.6rem) 1rem 0.6rem;
         background: #12131b; border-bottom: 1px solid rgba(75,85,99,0.4);
         flex-shrink: 0; z-index: 30;
@@ -4016,7 +4016,7 @@ function togglePlay() {
       const overlay = document.getElementById('sidebarOverlay');
       if (!aside) return;
       const home = { parent: aside.parentNode, next: aside.nextSibling };
-      const mq = window.matchMedia('(max-width: 767px)');
+      const mq = window.matchMedia('(max-width: 1023px)');
       function place() {
         if (mq.matches) {
           if (aside.parentNode !== document.body) document.body.appendChild(aside);
@@ -4031,7 +4031,7 @@ function togglePlay() {
     })();
     // Close the drawer after choosing a page or playlist (not when just expanding menus).
     document.getElementById('mainSidebar')?.addEventListener('click', (event) => {
-      if (window.innerWidth >= 768) return;
+      if (window.innerWidth >= 1024) return;
       if (event.target.closest('a[onclick*="switchView"], .sidebar-playlist-btn, a[onclick*="openGroupDetail"]')) closeMobileDrawer();
     });
     // Keep the floating buttons and queue sheet just above the (taller) mobile player.
@@ -4039,7 +4039,7 @@ function togglePlay() {
       const f = document.getElementById('playerFooter');
       if (f) document.documentElement.style.setProperty('--footer-h', f.offsetHeight + 'px');
     }
-    window.addEventListener('resize', () => { if (window.innerWidth >= 768) closeMobileDrawer(); updateFooterHeightVar(); });
+    window.addEventListener('resize', () => { if (window.innerWidth >= 1024) closeMobileDrawer(); updateFooterHeightVar(); });
     window.addEventListener('orientationchange', updateFooterHeightVar);
     window.addEventListener('load', updateFooterHeightVar);
     if (window.ResizeObserver && document.getElementById('playerFooter')) new ResizeObserver(updateFooterHeightVar).observe(document.getElementById('playerFooter'));
@@ -4049,7 +4049,7 @@ function togglePlay() {
       const sidebar = document.getElementById('queueSidebar');
       const button = document.getElementById('queueToggleBtn');
       if (!sidebar || !button || sidebar.classList.contains('hidden')) return;
-      if (window.innerWidth < 768) return; // mobile: bottom sheet handled by CSS
+      if (window.innerWidth < 1024) return; // mobile: bottom sheet handled by CSS
 
       const rect = button.getBoundingClientRect();
       const gap = 10;
