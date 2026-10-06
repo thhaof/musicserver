@@ -4905,7 +4905,9 @@ function togglePlay() {
       if (!song || !song.album) return;
       if (window.innerWidth < 1024) closeMobileDrawer();
       openGroupDetail('album', song.album);
+      // Start at the top, then glide to the song that is playing once the album list has rendered.
       document.querySelector('main')?.scrollTo({ top: 0 });
+      requestAnimationFrame(() => requestAnimationFrame(() => scrollToPlayingSong(true)));
     }
 
     /* =========================================================
