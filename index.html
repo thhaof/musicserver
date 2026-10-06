@@ -263,6 +263,15 @@
         box-shadow: 0 0 40px rgba(0,0,0,0.6);
       }
       #mainSidebar.drawer-open { transform: translateX(0); }
+      #mainSidebar {
+        display: flex !important; flex-direction: column; justify-content: flex-start !important;
+        height: 100vh; height: 100dvh; overflow: hidden; visibility: visible; opacity: 1;
+      }
+      #mainSidebar .sidebar-scroll {
+        flex: 1 1 0%; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1.5rem);
+      }
+      #mainSidebar.login-success-effect { animation: none !important; }
       #sidebarOverlay {
         display: block; position: fixed; inset: 0; z-index: 60;
         background: rgba(0,0,0,0.6); backdrop-filter: blur(2px);
@@ -4000,6 +4009,26 @@ function togglePlay() {
       const open = document.getElementById('mainSidebar')?.classList.contains('drawer-open');
       open ? closeMobileDrawer() : openMobileDrawer();
     }
+    // On phones, move the sidebar + overlay straight under <body> so no parent
+    // (overflow / stacking) can hide or clip the drawer. Put it back on desktop.
+    (function () {
+      const aside = document.getElementById('mainSidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      if (!aside) return;
+      const home = { parent: aside.parentNode, next: aside.nextSibling };
+      const mq = window.matchMedia('(max-width: 767px)');
+      function place() {
+        if (mq.matches) {
+          if (aside.parentNode !== document.body) document.body.appendChild(aside);
+          if (overlay && overlay.parentNode !== document.body) document.body.appendChild(overlay);
+        } else {
+          closeMobileDrawer();
+          if (aside.parentNode === document.body && home.parent) home.parent.insertBefore(aside, home.next);
+        }
+      }
+      (mq.addEventListener ? mq.addEventListener('change', place) : mq.addListener(place));
+      place();
+    })();
     // Close the drawer after choosing a page or playlist (not when just expanding menus).
     document.getElementById('mainSidebar')?.addEventListener('click', (event) => {
       if (window.innerWidth >= 768) return;
