@@ -3728,9 +3728,9 @@
       }
 
       if (favicon) {
-        // Use the original cover directly so the browser tab icon has no artificial rounded corners.
-        favicon.removeAttribute('type');
-        favicon.href = song.cover || defaultIcon;
+        // The tab keeps Howie's original icon while playing (no album cover).
+        favicon.type = 'image/png';
+        favicon.href = defaultIcon;
       }
     }
 
@@ -3869,7 +3869,7 @@ function togglePlay() {
           currentSongIndex = 0;
         }
       } else {
-        currentSongIndex = (currentSongIndex + 1) % currentQueue.length;
+        currentSongIndex = getSequentialNextIndex();
       }
 
       loadSong(currentQueue[currentSongIndex], { autoScroll: true });
@@ -4559,7 +4559,7 @@ function togglePlay() {
       if (hint) {
         if (autoPlaySaveFailed) hint.textContent = "Not saved to your account yet. Run the Supabase SQL (see setup guide).";
         else if (!autoPlayEnabled) hint.textContent = 'Turn on to add similar songs to the end of the queue';
-        else if (repeatMode !== 0) hint.textContent = 'Paused while Repeat is on. The queue just repeats.';
+        else if (repeatMode !== 0) hint.textContent = 'Repeat is on. The queue loops and skips the similar songs.';
         else hint.textContent = 'Similar songs are added to the end of the queue';
       }
     }
@@ -4609,7 +4609,9 @@ function togglePlay() {
 
     // Keep at least 5 similar songs waiting after the current one. Returns true if the queue changed.
     function ensureAutoPlayTail(force = false) {
-      if (!autoPlayEnabled || repeatMode !== 0 || !currentQueue.length || currentSongIndex < 0) return false;
+      if (!autoPlayEnabled || !currentQueue.length || currentSongIndex < 0) return false;
+      // While Repeat is on the queue loops, so similar songs are only added once (no endless top-ups).
+      if (repeatMode !== 0 && getAutoPlayStart() !== null) return false;
       const upcoming = currentQueue.length - 1 - currentSongIndex;
       if (!force && upcoming >= 5) return false;
       const added = buildAutoPlaySongs(10);
@@ -4661,15 +4663,21 @@ function togglePlay() {
         .map(x => x.s);
     }
 
-    // Repeat ON = loop the queue you have, so similar songs are taken out.
-    // Repeat OFF = similar songs come back at the end of the queue.
+    // Repeat ON: similar songs stay in the list, but playback loops inside the current queue.
     function onRepeatChangedForAutoPlay() {
-      if (autoPlayEnabled) {
-        if (repeatMode !== 0) removeAutoPlayTail(); else ensureAutoPlayTail();
-      }
+      if (autoPlayEnabled) ensureAutoPlayTail();
       renderAutoPlayToggle();
       renderQueueSidebarList();
       schedulePlaybackSave();
+    }
+
+    // Next index in the queue. With Repeat on, the last song of the current queue jumps back
+    // to the first song instead of moving on to the similar songs.
+    function getSequentialNextIndex() {
+      const next = currentSongIndex + 1;
+      const start = getAutoPlayStart();
+      if (repeatMode !== 0 && start !== null && currentSongIndex < start && next >= start) return 0;
+      return next % currentQueue.length;
     }
 
     // Remove one song from the Playing Queue (the song that is playing can't be removed).
