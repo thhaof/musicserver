@@ -849,29 +849,26 @@
 
 
     <!-- Playback Controls & Progress -->
-    <div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 w-[min(50%,36rem)]">
-      <!-- Playback controls: Play is anchored to the exact center. -->
-      <div class="relative w-full h-11">
-        <div class="absolute left-0 top-0 h-11 flex items-center gap-6">
-          <!-- Shuffle Button -->
-          <button onclick="toggleShuffle()" title="SHUFFLE" id="shuffleBtn" class="text-gray-400 hover:text-white text-sm transition p-2">
-            <i class="fa-solid fa-shuffle"></i>
-          </button>
+    <div class="flex flex-col items-center gap-2 w-1/2 max-w-xl mx-auto">
+      <div class="flex items-center justify-center gap-6">
+        <!-- Shuffle Button -->
+        <button onclick="toggleShuffle()" title="SHUFFLE" id="shuffleBtn" class="text-gray-400 hover:text-white text-sm transition p-2">
+          <i class="fa-solid fa-shuffle"></i>
+        </button>
 
-          <!-- Previous Song -->
-          <button
-            onclick="prevSong()"
-            class="text-gray-300 hover:text-white text-sm transition p-2"
-            title="PREVIOUS SONG"
-          >
-            <i class="fa-solid fa-backward-step text-base"></i>
-          </button>
-        </div>
+        <!-- Previous Song -->
+        <button
+          onclick="prevSong()"
+          class="text-gray-300 hover:text-white text-sm transition p-2"
+          title="PREVIOUS SONG"
+        >
+          <i class="fa-solid fa-backward-step text-base"></i>
+        </button>
 
-        <!-- Play / Pause Button: exact center reference -->
+        <!-- Play / Pause Button -->
         <button
           onclick="togglePlay()"
-          class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 text-white flex items-center justify-center hover:scale-105 transition shadow-lg shadow-blue-500/30 active:scale-95"
+          class="w-11 h-11 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 text-white flex items-center justify-center hover:scale-105 transition shadow-lg shadow-blue-500/30 active:scale-95"
           title="PLAY / PAUSE"
         >
           <i
@@ -880,27 +877,25 @@
           ></i>
         </button>
 
-        <div class="absolute right-0 top-0 h-11 flex items-center gap-6">
-          <!-- Next Song -->
-          <button
-            onclick="nextSong()"
-            class="text-gray-300 hover:text-white text-sm transition p-2"
-            title="NEXT SONG"
-          >
-            <i class="fa-solid fa-forward-step text-base"></i>
-          </button>
+        <!-- Next Song -->
+        <button
+          onclick="nextSong()"
+          class="text-gray-300 hover:text-white text-sm transition p-2"
+          title="NEXT SONG"
+        >
+          <i class="fa-solid fa-forward-step text-base"></i>
+        </button>
 
-          <!-- Repeat Button -->
-          <button onclick="toggleRepeat()" title="REPEAT MODE" id="repeatBtn" class="text-gray-400 hover:text-white text-sm transition relative p-2">
-            <i class="fa-solid fa-repeat"></i>
-            <span id="repeatOneBadge" class="absolute -top-1 -right-1 text-[9px] font-extrabold bg-blue-600 text-white px-1.5 py-0.2 rounded-full hidden">1</span>
-          </button>
+        <!-- Repeat Button -->
+        <button onclick="toggleRepeat()" title="REPEAT MODE" id="repeatBtn" class="text-gray-400 hover:text-white text-sm transition relative p-2">
+          <i class="fa-solid fa-repeat"></i>
+          <span id="repeatOneBadge" class="absolute -top-1 -right-1 text-[9px] font-extrabold bg-blue-600 text-white px-1.5 py-0.2 rounded-full hidden">1</span>
+        </button>
 
-          <!-- Playing Queue -->
-          <button onclick="toggleQueueSidebar()" title="PLAYING QUEUE" id="queueToggleBtn" class="text-gray-400 hover:text-white text-sm transition p-2 relative">
-            <i class="fa-solid fa-list-check"></i>
-          </button>
-        </div>
+        <!-- Playing Queue -->
+        <button onclick="toggleQueueSidebar()" title="PLAYING QUEUE" id="queueToggleBtn" class="text-gray-400 hover:text-white text-sm transition p-2 relative">
+          <i class="fa-solid fa-list-check"></i>
+        </button>
       </div>
 
       <!-- Progress Bar: three equal columns keep its center exactly under Play. -->
