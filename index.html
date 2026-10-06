@@ -201,9 +201,15 @@
 
     .artist-detail-grid {
       display: grid;
-      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.25fr);
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
       gap: 1.5rem;
       align-items: start;
+    }
+
+    /* Categories: display every character in uppercase, including generated card text. */
+    #categoryView,
+    #categoryView .normal-case {
+      text-transform: uppercase !important;
     }
     @media (max-width: 1100px) {
       .artist-detail-grid { grid-template-columns: 1fr; }
@@ -838,7 +844,7 @@
 
 
     <!-- Playback Controls & Progress -->
-    <div class="flex flex-col items-center gap-2 w-1/2 max-w-xl mx-auto">
+    <div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 w-[min(50%,36rem)]">
       <div class="flex items-center justify-center gap-6">
         <!-- Shuffle Button -->
         <button onclick="toggleShuffle()" title="SHUFFLE" id="shuffleBtn" class="text-gray-400 hover:text-white text-sm transition p-2">
