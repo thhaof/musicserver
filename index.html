@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#12131b">
   <title>Howie's Music Server</title>
   <link id="dynamicFavicon" rel="icon" type="image/png" href="https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/icon%20browser%20tab.png">
 
@@ -227,6 +228,94 @@
 
     @media (max-width: 1100px) {
       .artist-detail-grid { grid-template-columns: 1fr; }
+    }
+
+    /* =========================================================
+       MOBILE VERSION (phones / small tablets)
+       Desktop layout is untouched above 768px.
+    ========================================================== */
+    #mobileTopBar, #sidebarOverlay { display: none; }
+
+    @media (max-width: 767px) {
+      body { height: 100vh; height: 100dvh; font-size: 14px; }
+
+      /* Top bar with menu button */
+      #mobileTopBar {
+        display: flex; align-items: center; gap: 0.75rem;
+        padding: calc(env(safe-area-inset-top, 0px) + 0.6rem) 1rem 0.6rem;
+        background: #12131b; border-bottom: 1px solid rgba(75,85,99,0.4);
+        flex-shrink: 0; z-index: 30;
+      }
+      #mobileTopBar button {
+        width: 2.5rem; height: 2.5rem; border-radius: 0.75rem;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(255,255,255,0.06); color: #e5e7eb; font-size: 1.1rem;
+      }
+
+      /* Sidebar becomes a slide-out drawer */
+      #mainSidebar {
+        position: fixed; top: 0; bottom: 0; left: 0;
+        width: min(82vw, 20rem) !important;
+        transform: translateX(-102%);
+        transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+        z-index: 70 !important;
+        padding-top: env(safe-area-inset-top, 0px);
+        box-shadow: 0 0 40px rgba(0,0,0,0.6);
+      }
+      #mainSidebar.drawer-open { transform: translateX(0); }
+      #sidebarOverlay {
+        display: block; position: fixed; inset: 0; z-index: 60;
+        background: rgba(0,0,0,0.6); backdrop-filter: blur(2px);
+        opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+      }
+      #sidebarOverlay.show { opacity: 1; pointer-events: auto; }
+
+      /* Content */
+      main { padding: 1rem !important; }
+      #contentView h1 { font-size: 1.6rem; line-height: 1.2; }
+      #contentView h2 { word-break: break-word; }
+      #playlistDetailHero { padding: 1rem !important; gap: 1rem !important; align-items: center !important; text-align: center; }
+      #playlistDetailHero > div:first-child { width: 8rem !important; height: 8rem !important; }
+      #playlistDetailHero .flex-wrap { justify-content: center; }
+      #playlistDetailHero > .flex-1 { width: 100%; }
+      .song-item-card { padding: 0.6rem !important; gap: 0.5rem; }
+      .artist-detail-grid { gap: 1rem !important; }
+      .artist-detail-grid > section { padding: 0.9rem !important; }
+      .w-96 { width: auto !important; max-width: calc(100vw - 2rem) !important; }
+      .fixed.inset-0 > .w-96, .fixed.inset-0 > div[class*="w-96"] { width: calc(100vw - 2rem) !important; }
+
+      /* Player footer: two rows */
+      #playerFooter {
+        height: auto !important; flex-wrap: wrap; align-items: center;
+        padding: 0.6rem 0.9rem calc(env(safe-area-inset-bottom, 0px) + 0.6rem) !important;
+        row-gap: 0.4rem;
+      }
+      #playerFooter .player-info { width: 100% !important; order: 1; gap: 0.75rem !important; }
+      #playerFooter .player-info > div:last-of-type, #playerFooter .player-info h4 { min-width: 0; }
+      #playerFooter .player-info > .overflow-hidden { flex: 1; min-width: 0; }
+      #playerFooter .player-info button[title="ADD TO PLAYLIST"] { margin-left: auto !important; }
+      #playerFooter .player-controls {
+        position: static !important; transform: none !important;
+        width: 100% !important; order: 2; gap: 0.35rem !important;
+      }
+      #playerFooter .player-controls > .grid { gap: 0.5rem !important; }
+      #playerFooter .player-controls > .grid > div { gap: 0.9rem !important; }
+      #playerFooter .player-controls button { padding: 0.55rem !important; }
+      #playerFooter .player-volume { display: none !important; }
+      #progressBar { height: 6px; }
+      input[type="range"]::-webkit-slider-thumb { width: 16px; height: 16px; }
+
+      /* Queue popup becomes a bottom sheet above the player */
+      #queueSidebar {
+        left: 0.5rem !important; right: 0.5rem !important;
+        width: auto !important; max-width: none !important;
+        top: auto !important; bottom: calc(var(--footer-h, 8.5rem) + 0.5rem) !important;
+      }
+      #queueListContainer { max-height: 42vh !important; }
+
+      /* Floating buttons clear the taller footer */
+      #floatingNavControls { right: 0.9rem !important; bottom: calc(var(--footer-h, 8.5rem) + 0.75rem) !important; }
+      #queueGoToPlayingBtn span { display: none; }
     }
 
     .scroll-nav-btn:active {
@@ -495,12 +584,20 @@
   <!-- =========================================================
        MAIN LAYOUT CONTAINER
   ========================================================== -->
+  <!-- MOBILE TOP BAR (only visible on phones) -->
+  <div id="mobileTopBar">
+    <button type="button" onclick="toggleMobileDrawer()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+    <span class="font-extrabold tracking-wider text-sm bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">HOWIE'S MUSIC SERVER</span>
+  </div>
+  <div id="sidebarOverlay" onclick="closeMobileDrawer()"></div>
+
   <div class="flex flex-1 overflow-hidden relative">
 
     <!-- =======================================================
          SIDEBAR NAVIGATION
     ======================================================== -->
     <aside
+      id="mainSidebar"
       class="w-64 bg-[#12131b] flex flex-col justify-between border-r border-gray-800/60 z-20 flex-shrink-0 overflow-hidden"
     >
       <!-- Welcome Header -->
@@ -809,10 +906,11 @@
        PLAYER FOOTER CONTROLS
   ========================================================== -->
   <footer
+    id="playerFooter"
     class="h-24 px-6 flex items-center justify-between z-40 footer-player-glow relative"
   >
     <!-- Song Info -->
-    <div class="flex items-center gap-4 w-1/4">
+    <div class="player-info flex items-center gap-4 w-1/4">
       <div id="currentCoverWrap" class="relative group flex-shrink-0 hidden">
         <img
           id="currentCover"
@@ -858,7 +956,7 @@
 
 
     <!-- Playback Controls & Progress -->
-    <div class="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 w-[min(50%,36rem)]">
+    <div class="player-controls absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 w-[min(50%,36rem)]">
       <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-6 w-full">
         <div class="flex items-center justify-end gap-6">
         <!-- Shuffle Button -->
@@ -942,7 +1040,7 @@
 
 
     <!-- Volume & Queue Toggle -->
-    <div class="flex items-center gap-4 w-1/4 justify-end">
+    <div class="player-volume flex items-center gap-4 w-1/4 justify-end">
       <div class="flex items-center gap-2.5">
         <button type="button" onclick="toggleMute()" title="MUTE / UNMUTE" class="w-7 h-7 rounded-lg hover:bg-gray-800/80 flex items-center justify-center transition">
           <i
@@ -3886,10 +3984,43 @@ function togglePlay() {
     /* =========================================================
        RIGHT QUEUE SIDEBAR
     ========================================================== */
+
+    /* =========================================================
+       MOBILE DRAWER + LAYOUT HELPERS
+    ========================================================== */
+    function openMobileDrawer() {
+      document.getElementById('mainSidebar')?.classList.add('drawer-open');
+      document.getElementById('sidebarOverlay')?.classList.add('show');
+    }
+    function closeMobileDrawer() {
+      document.getElementById('mainSidebar')?.classList.remove('drawer-open');
+      document.getElementById('sidebarOverlay')?.classList.remove('show');
+    }
+    function toggleMobileDrawer() {
+      const open = document.getElementById('mainSidebar')?.classList.contains('drawer-open');
+      open ? closeMobileDrawer() : openMobileDrawer();
+    }
+    // Close the drawer after choosing a page or playlist (not when just expanding menus).
+    document.getElementById('mainSidebar')?.addEventListener('click', (event) => {
+      if (window.innerWidth >= 768) return;
+      if (event.target.closest('a[onclick*="switchView"], .sidebar-playlist-btn, a[onclick*="openGroupDetail"]')) closeMobileDrawer();
+    });
+    // Keep the floating buttons and queue sheet just above the (taller) mobile player.
+    function updateFooterHeightVar() {
+      const f = document.getElementById('playerFooter');
+      if (f) document.documentElement.style.setProperty('--footer-h', f.offsetHeight + 'px');
+    }
+    window.addEventListener('resize', () => { if (window.innerWidth >= 768) closeMobileDrawer(); updateFooterHeightVar(); });
+    window.addEventListener('orientationchange', updateFooterHeightVar);
+    window.addEventListener('load', updateFooterHeightVar);
+    if (window.ResizeObserver && document.getElementById('playerFooter')) new ResizeObserver(updateFooterHeightVar).observe(document.getElementById('playerFooter'));
+    updateFooterHeightVar();
+
     function positionQueueSidebar() {
       const sidebar = document.getElementById('queueSidebar');
       const button = document.getElementById('queueToggleBtn');
       if (!sidebar || !button || sidebar.classList.contains('hidden')) return;
+      if (window.innerWidth < 768) return; // mobile: bottom sheet handled by CSS
 
       const rect = button.getBoundingClientRect();
       const gap = 10;
