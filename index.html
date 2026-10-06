@@ -205,9 +205,13 @@
       gap: 1.5rem;
       align-items: start;
     }
-    /* Artist/Category album cards: one large card per row. */
+    /* Artist/Category album cards: same size as Featured Albums cards. */
+    #contentView { container-type: inline-size; --featured-card-w: 100cqw; }
+    @media (min-width: 768px)  { #contentView { --featured-card-w: calc((100cqw - 1.25rem) / 2); } }
+    @media (min-width: 1024px) { #contentView { --featured-card-w: calc((100cqw - 2.5rem) / 3); } }
     .artist-detail-grid .artist-albums-grid {
-      grid-template-columns: 1fr !important;
+      grid-template-columns: repeat(auto-fill, min(var(--featured-card-w), 100%)) !important;
+      justify-content: start;
     }
 
     /* Categories: force all visible/generated text to uppercase. */
@@ -218,9 +222,6 @@
 
     @media (max-width: 1100px) {
       .artist-detail-grid { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 640px) {
-      .artist-detail-grid > section:first-child .artist-albums-grid { grid-template-columns: 1fr; }
     }
 
     .scroll-nav-btn:active {
@@ -850,7 +851,8 @@
 
     <!-- Playback Controls & Progress -->
     <div class="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 w-[min(50%,36rem)]">
-      <div class="flex items-center justify-center gap-6">
+      <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-6 w-full">
+        <div class="flex items-center justify-end gap-6">
         <!-- Shuffle Button -->
         <button onclick="toggleShuffle()" title="SHUFFLE" id="shuffleBtn" class="text-gray-400 hover:text-white text-sm transition p-2">
           <i class="fa-solid fa-shuffle"></i>
@@ -864,6 +866,7 @@
         >
           <i class="fa-solid fa-backward-step text-base"></i>
         </button>
+        </div>
 
         <!-- Play / Pause Button -->
         <button
@@ -877,6 +880,7 @@
           ></i>
         </button>
 
+        <div class="flex items-center justify-start gap-6">
         <!-- Next Song -->
         <button
           onclick="nextSong()"
@@ -896,6 +900,7 @@
         <button onclick="toggleQueueSidebar()" title="PLAYING QUEUE" id="queueToggleBtn" class="text-gray-400 hover:text-white text-sm transition p-2 relative">
           <i class="fa-solid fa-list-check"></i>
         </button>
+        </div>
       </div>
 
       <!-- Progress Bar: three equal columns keep its center exactly under Play. -->
@@ -1091,7 +1096,7 @@
       { id: 96, title: "On My Soul", artist: "Bruno Mars", album: "The Romantic", releaseDate: "27/02/2026", genres: "R&B, Soul", country: "US/UK", releaseType: "Album", cover: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/cover.jpg", src: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/On%20My%20Soul.mp3" },
       { id: 97, title: "Something Serious", artist: "Bruno Mars", album: "The Romantic", releaseDate: "27/02/2026", genres: "R&B, Soul", country: "US/UK", releaseType: "Album", cover: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/cover.jpg", src: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/Something%20Serious.mp3" },
       { id: 98, title: "Nothing Left", artist: "Bruno Mars", album: "The Romantic", releaseDate: "27/02/2026", genres: "R&B, Soul", country: "US/UK", releaseType: "Album", cover: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/cover.jpg", src: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/Nothing%20Left.mp3" },
-      { id: 99, title: "Electronic/Dance With Me", artist: "Bruno Mars", album: "The Romantic", releaseDate: "27/02/2026", genres: "R&B, Soul", country: "US/UK", releaseType: "Album", cover: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/cover.jpg", src: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/Electronic/Dance%20With%20Me.mp3" },
+      { id: 99, title: "Dance With Me", artist: "Bruno Mars", album: "The Romantic", releaseDate: "27/02/2026", genres: "R&B, Soul", country: "US/UK", releaseType: "Album", cover: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/cover.jpg", src: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/Dance%20With%20Me.mp3" },
       
       { id: 100, title: "Body to Body", artist: "BTS (방탄소년단)", album: "ARIRANG", releaseDate: "19/03/2026", genres: "Pop, Rap/Hip-Hop", country: "South Korea", releaseType: "Album", cover: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/ARIRANG%20by%20BTS/cover.jpg", src: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/ARIRANG%20by%20BTS/Body%20to%20Body.mp3" },
       { id: 101, title: "Hooligan", artist: "BTS (방탄소년단)", album: "ARIRANG", releaseDate: "19/03/2026", genres: "Pop, Rap/Hip-Hop", country: "South Korea", releaseType: "Album", cover: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/ARIRANG%20by%20BTS/cover.jpg", src: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/ARIRANG%20by%20BTS/Hooligan.mp3" },
@@ -2747,14 +2752,14 @@
         <div class="artist-albums-grid grid grid-cols-1 gap-5">
           ${categoryAlbums.map(alb => `
             <button type="button" onclick='openNestedAlbum("category", JSON.parse(decodeURIComponent(this.dataset.sourceKey)), decodeURIComponent(this.dataset.album))' data-source-key="${encodeDataValue(JSON.stringify({country: categoryCountry, genre: categoryGenre}))}" data-album="${encodeDataValue(alb.name)}" class="glass-card p-5 rounded-2xl text-left group">
-              <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 shadow-xl">
+              <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-4 shadow-xl">
                 <img src="${alb.cover}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="album">
                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                   <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/40"><i class="fa-solid fa-play text-base ml-0.5"></i></div>
                 </div>
               </div>
-              <span class="block text-base font-bold text-white truncate normal-case">${alb.name}</span>
-              <span class="block text-xs text-gray-400 mt-1 uppercase font-semibold">${alb.type} • ${alb.artist} • ${formatCount(alb.count, 'SONG')}</span>
+              <span class="block w-full text-base font-bold text-white truncate normal-case">${alb.name}</span>
+              <span class="block w-full truncate text-xs text-gray-400 mt-1 uppercase font-semibold">${alb.type} • ${alb.artist} • ${formatCount(alb.count, 'SONG')}</span>
             </button>`).join('')}
         </div>`;
       updateSortSelect('categoryAlbums');
@@ -2842,14 +2847,14 @@
             <div class="artist-albums-grid grid grid-cols-1 gap-5">
               ${categoryAlbums.map(alb => `
                 <button type="button" onclick='openNestedAlbum("category", JSON.parse(decodeURIComponent(this.dataset.sourceKey)), decodeURIComponent(this.dataset.album))' data-source-key="${encodeDataValue(JSON.stringify({country: categoryCountry, genre: categoryGenre}))}" data-album="${encodeDataValue(alb.name)}" class="glass-card p-5 rounded-2xl text-left group">
-                  <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 shadow-xl">
+                  <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-4 shadow-xl">
                     <img src="${alb.cover}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="album">
                     <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                       <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/40"><i class="fa-solid fa-play text-base ml-0.5"></i></div>
                     </div>
                   </div>
-                  <span class="block text-base font-bold text-white truncate normal-case">${alb.name}</span>
-                  <span class="block text-xs text-gray-400 mt-1 uppercase font-semibold">${alb.type} • ${alb.artist} • ${formatCount(alb.count, 'SONG')}</span>
+                  <span class="block w-full text-base font-bold text-white truncate normal-case">${alb.name}</span>
+                  <span class="block w-full truncate text-xs text-gray-400 mt-1 uppercase font-semibold">${alb.type} • ${alb.artist} • ${formatCount(alb.count, 'SONG')}</span>
                 </button>`).join('')}
             </div>
           </section>
@@ -2935,14 +2940,14 @@
         <div class="artist-albums-grid grid grid-cols-1 gap-5">
           ${artistAlbums.map(alb => `
             <button type="button" onclick='openNestedAlbum("artist", decodeURIComponent(this.dataset.sourceKey), decodeURIComponent(this.dataset.album))' data-source-key="${encodeDataValue(filteredSongs[0]?.artist || '')}" data-album="${encodeDataValue(alb.name)}" class="glass-card p-5 rounded-2xl text-left group">
-              <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 shadow-xl">
+              <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-4 shadow-xl">
                 <img src="${alb.cover}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="album">
                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                   <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/40"><i class="fa-solid fa-play text-base ml-0.5"></i></div>
                 </div>
               </div>
-              <span class="block text-base font-bold text-white truncate normal-case">${alb.name}</span>
-              <span class="block text-xs text-gray-400 mt-1 uppercase font-semibold">${alb.type} • ${formatCount(alb.count, 'SONG')}</span>
+              <span class="block w-full text-base font-bold text-white truncate normal-case">${alb.name}</span>
+              <span class="block w-full truncate text-xs text-gray-400 mt-1 uppercase font-semibold">${alb.type} • ${formatCount(alb.count, 'SONG')}</span>
             </button>`).join('')}
         </div>`;
       updateSortSelect('artistAlbums');
@@ -3021,7 +3026,7 @@
             <div class="artist-albums-grid grid grid-cols-1 gap-5">
               ${artistAlbums.map(alb => `
                 <button type="button" onclick='openNestedAlbum("artist", decodeURIComponent(this.dataset.sourceKey), decodeURIComponent(this.dataset.album))' data-source-key="${encodeDataValue(filteredSongs[0]?.artist || '')}" data-album="${encodeDataValue(alb.name)}" class="glass-card p-5 rounded-2xl text-left group">
-                  <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-3 shadow-xl">
+                  <div class="relative w-full aspect-square rounded-xl overflow-hidden mb-4 shadow-xl">
                     <img src="${alb.cover}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="album">
                     <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                       <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/40">
@@ -3029,8 +3034,8 @@
                       </div>
                     </div>
                   </div>
-                  <span class="block text-base font-bold text-white truncate normal-case">${alb.name}</span>
-                  <span class="block text-xs text-gray-400 mt-1 uppercase font-semibold">${alb.type} • ${formatCount(alb.count, 'SONG')}</span>
+                  <span class="block w-full text-base font-bold text-white truncate normal-case">${alb.name}</span>
+                  <span class="block w-full truncate text-xs text-gray-400 mt-1 uppercase font-semibold">${alb.type} • ${formatCount(alb.count, 'SONG')}</span>
                 </button>
               `).join('')}
             </div>
