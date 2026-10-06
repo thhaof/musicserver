@@ -201,7 +201,7 @@
 
     .artist-detail-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      grid-template-columns: min(calc(var(--featured-card-w) + 2.5rem + 2px), 100%) minmax(0, 1fr);
       gap: 1.5rem;
       align-items: start;
     }
@@ -218,6 +218,11 @@
     #categoryView,
     #categoryView * {
       text-transform: uppercase !important;
+    }
+    /* ...except song names (and their artist/album line), which keep original format. */
+    #categoryView .song-item-card,
+    #categoryView .song-item-card * {
+      text-transform: none !important;
     }
 
     @media (max-width: 1100px) {
@@ -1096,7 +1101,7 @@
       { id: 96, title: "On My Soul", artist: "Bruno Mars", album: "The Romantic", releaseDate: "27/02/2026", genres: "R&B, Soul", country: "US/UK", releaseType: "Album", cover: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/cover.jpg", src: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/On%20My%20Soul.mp3" },
       { id: 97, title: "Something Serious", artist: "Bruno Mars", album: "The Romantic", releaseDate: "27/02/2026", genres: "R&B, Soul", country: "US/UK", releaseType: "Album", cover: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/cover.jpg", src: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/Something%20Serious.mp3" },
       { id: 98, title: "Nothing Left", artist: "Bruno Mars", album: "The Romantic", releaseDate: "27/02/2026", genres: "R&B, Soul", country: "US/UK", releaseType: "Album", cover: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/cover.jpg", src: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/Nothing%20Left.mp3" },
-      { id: 99, title: "Dance With Me", artist: "Bruno Mars", album: "The Romantic", releaseDate: "27/02/2026", genres: "R&B, Soul", country: "US/UK", releaseType: "Album", cover: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/cover.jpg", src: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/Dance%20With%20Me.mp3" },
+      { id: 99, title: "Electronic/Dance With Me", artist: "Bruno Mars", album: "The Romantic", releaseDate: "27/02/2026", genres: "R&B, Soul", country: "US/UK", releaseType: "Album", cover: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/cover.jpg", src: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/The%20Romantic%20by%20Bruno%20Mars/Electronic/Dance%20With%20Me.mp3" },
       
       { id: 100, title: "Body to Body", artist: "BTS (방탄소년단)", album: "ARIRANG", releaseDate: "19/03/2026", genres: "Pop, Rap/Hip-Hop", country: "South Korea", releaseType: "Album", cover: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/ARIRANG%20by%20BTS/cover.jpg", src: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/ARIRANG%20by%20BTS/Body%20to%20Body.mp3" },
       { id: 101, title: "Hooligan", artist: "BTS (방탄소년단)", album: "ARIRANG", releaseDate: "19/03/2026", genres: "Pop, Rap/Hip-Hop", country: "South Korea", releaseType: "Album", cover: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/ARIRANG%20by%20BTS/cover.jpg", src: "https://pub-c53200e2456046529b88e014d8a71fcb.r2.dev/ARIRANG%20by%20BTS/Hooligan.mp3" },
