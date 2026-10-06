@@ -427,6 +427,19 @@
 .thhaof-sort-dropdown.open .thhaof-sort-menu { display:block; }
 .thhaof-sort-dropdown:not(.open) .thhaof-sort-menu { display:none; }
 </style>
+<style>
+/* ===== Auto Play switch (Settings) ===== */
+.autoplay-switch { position: relative; width: 2.1rem; height: 1.15rem; border-radius: 9999px; background: #374151; flex-shrink: 0; transition: background-color .2s ease, box-shadow .2s ease; }
+.autoplay-knob { position: absolute; top: 2px; left: 2px; width: calc(1.15rem - 4px); height: calc(1.15rem - 4px); border-radius: 50%; background: #fff; transition: transform .2s ease; }
+#autoPlayToggle[aria-checked="true"] .autoplay-switch { background: #3b82f6; box-shadow: 0 0 12px rgba(59,130,246,.45); }
+#autoPlayToggle[aria-checked="true"] .autoplay-knob { transform: translateX(calc(2.1rem - 1.15rem)); }
+#autoPlayToggle[aria-checked="true"] { color: #93c5fd; }
+/* ===== Feedback modal ===== */
+#feedbackText { resize: none; }
+.feedback-status { min-height: 16px; font-size: 11px; font-weight: 800; letter-spacing: .08em; margin-top: 10px; text-align: center; }
+.feedback-status.ok { color: #22c55e; }
+.feedback-status.err { color: #ef4444; }
+</style>
 </head>
 
 <body class="h-screen flex flex-col select-none uppercase">
@@ -590,6 +603,36 @@
   </div>
 
 
+
+  <!-- =========================================================
+       FEEDBACK MODAL
+  ========================================================== -->
+  <div id="feedbackModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center hidden backdrop-blur-sm">
+    <div class="bg-[#181922] p-6 rounded-2xl w-96 border border-gray-800 shadow-2xl view-transition">
+      <h3 class="text-lg font-bold mb-1 text-white uppercase">FEEDBACK</h3>
+      <p class="text-xs text-gray-400 mb-4 font-medium">Tell me what to fix or add. Every message goes straight to Howie.</p>
+
+      <label class="block text-xs text-gray-400 mb-1 font-semibold uppercase">TYPE</label>
+      <select id="feedbackCategory" class="w-full bg-[#222331] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 mb-4 transition uppercase">
+        <option value="suggestion">SUGGESTION</option>
+        <option value="bug">BUG REPORT</option>
+        <option value="song_request">SONG REQUEST</option>
+        <option value="other">OTHER</option>
+      </select>
+
+      <label class="block text-xs text-gray-400 mb-1 font-semibold uppercase">YOUR MESSAGE</label>
+      <textarea id="feedbackText" rows="5" maxlength="1000" oninput="updateFeedbackCounter()" placeholder="Write your feedback here..." class="w-full bg-[#222331] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition normal-case"></textarea>
+      <p id="feedbackCounter" class="text-[10px] text-gray-500 text-right mt-1 font-semibold">0 / 1000</p>
+
+      <p id="feedbackStatus" class="feedback-status" aria-live="polite"></p>
+
+      <div class="flex justify-end gap-3 mt-3">
+        <button type="button" onclick="closeModal('feedbackModal')" class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-xs rounded-xl font-medium transition text-gray-300 uppercase">CANCEL</button>
+        <button type="button" id="feedbackSendBtn" onclick="submitFeedback()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-xs rounded-xl font-bold transition shadow-md shadow-blue-600/30 uppercase disabled:opacity-50">SEND</button>
+      </div>
+    </div>
+  </div>
+
   <!-- =========================================================
        MAIN LAYOUT CONTAINER
   ========================================================== -->
@@ -645,6 +688,13 @@
             <i id="settingsChevron" class="fa-solid fa-chevron-down text-[10px] transition-transform"></i>
           </button>
           <div id="settingsMenu" class="hidden ml-4 mr-1 mt-1 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+            <button type="button" id="autoPlayToggle" onclick="toggleAutoPlay()" role="switch" aria-checked="false" title="KEEP PLAYING SIMILAR SONGS WHEN THE QUEUE ENDS" class="w-full mb-1 flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition uppercase">
+              <span class="flex items-center gap-3"><i class="fa-solid fa-forward w-4 text-center"></i> AUTO PLAY</span>
+              <span class="autoplay-switch"><span class="autoplay-knob"></span></span>
+            </button>
+            <button type="button" onclick="openFeedbackModal()" class="w-full mb-1 flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-gray-400 hover:text-blue-300 hover:bg-blue-500/10 transition uppercase">
+              <i class="fa-solid fa-comment-dots w-4 text-center"></i> FEEDBACK
+            </button>
             <button type="button" onclick="logout()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition uppercase">
               <i class="fa-solid fa-right-from-bracket w-4 text-center"></i> LOG OUT
             </button>
@@ -1910,6 +1960,7 @@
       await loadSavedPlaylistsPermanent();
       await loadSortPreferences();
       await loadVolumePreference();
+      await loadAccountPlayerState();
       switchView('home');
 
       loginButton.dataset.processing = 'false';
@@ -1942,6 +1993,7 @@
         await loadSavedPlaylistsPermanent();
         await loadSortPreferences();
         await loadVolumePreference();
+        await loadAccountPlayerState();
         switchView('home');
       }
     }
@@ -1964,6 +2016,9 @@
 
       clearTimeout(volumeSaveTimer);
       volumeSaveTimer = null;
+      clearTimeout(playbackSaveTimer);
+      playbackSaveTimer = null;
+      playbackRestored = false;
       currentUser = null;
       playlists = [];
       currentActivePlaylistId = null;
@@ -3640,6 +3695,7 @@
        AUDIO PLAYBACK ENGINE & QUEUE
     ========================================================== */
     function updateBrowserTabMetadata(song = null, playing = false) {
+      if (!song) clearMediaSession();
       const titleEl = document.querySelector('title');
       const favicon = document.getElementById('dynamicFavicon');
       const defaultTitle = "Howie's Music Server";
@@ -3682,6 +3738,8 @@
       document.getElementById('currentTitle').innerText = song.title;
       document.getElementById('currentArtist').innerText = `${song.artist} — ${song.album}`;
       updateBrowserTabMetadata(song, false);
+      updateMediaSession(song);
+      schedulePlaybackSave();
 
       updateHighlightItem();
       renderQueueSidebarList();
@@ -4074,6 +4132,8 @@ function togglePlay() {
         audio.play();
       } else if (repeatMode === 1 || currentSongIndex < currentQueue.length - 1) {
         nextSong();
+      } else if (autoPlayEnabled && autoPlayContinue()) {
+        // Auto Play appended similar songs and started the next one.
       } else {
         isPlaying = false;
         updatePlayIconsUI();
@@ -4355,6 +4415,329 @@ function togglePlay() {
     const mainScroller = document.querySelector('main');
     if (mainScroller) {
       mainScroller.addEventListener('scroll', updateFloatingNavControls, { passive: true });
+    }
+
+
+    /* =========================================================
+       MEDIA SESSION  (browser media popup, lock screen, mobile notification)
+       Shows the song title and the artist on separate lines + the album cover.
+    ========================================================== */
+    function updateMediaSession(song) {
+      if (!('mediaSession' in navigator) || !song) return;
+      try {
+        const cover = song.cover || '';
+        const sizes = ['96x96', '128x128', '192x192', '256x256', '384x384', '512x512'];
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: song.title,
+          artist: song.artist,
+          album: song.album,
+          artwork: cover ? sizes.map(s => ({ src: cover, sizes: s })) : []
+        });
+        navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
+      } catch (e) { console.warn('Media Session metadata skipped:', e); }
+    }
+
+    function clearMediaSession() {
+      if (!('mediaSession' in navigator)) return;
+      try {
+        navigator.mediaSession.metadata = null;
+        navigator.mediaSession.playbackState = 'none';
+      } catch (e) {}
+    }
+
+    function updateMediaPositionState() {
+      if (!('mediaSession' in navigator) || !navigator.mediaSession.setPositionState) return;
+      const d = audio.duration;
+      if (!Number.isFinite(d) || d <= 0) return;
+      try {
+        navigator.mediaSession.setPositionState({
+          duration: d,
+          playbackRate: audio.playbackRate || 1,
+          position: Math.max(0, Math.min(audio.currentTime || 0, d))
+        });
+      } catch (e) {}
+    }
+
+    (function setupMediaSessionHandlers() {
+      if (!('mediaSession' in navigator)) return;
+      const set = (action, handler) => { try { navigator.mediaSession.setActionHandler(action, handler); } catch (e) {} };
+      set('play', () => { if (audio.paused) togglePlay(); });
+      set('pause', () => { if (!audio.paused) togglePlay(); });
+      set('previoustrack', () => prevSong());
+      set('nexttrack', () => nextSong());
+      set('seekbackward', (d) => { audio.currentTime = Math.max(0, audio.currentTime - ((d && d.seekOffset) || 10)); updateMediaPositionState(); });
+      set('seekforward', (d) => {
+        const max = Number.isFinite(audio.duration) ? audio.duration : Infinity;
+        audio.currentTime = Math.min(max, audio.currentTime + ((d && d.seekOffset) || 10));
+        updateMediaPositionState();
+      });
+      set('seekto', (d) => {
+        if (!d || !Number.isFinite(d.seekTime)) return;
+        audio.currentTime = d.seekTime;
+        updateMediaPositionState();
+      });
+    })();
+
+    audio.addEventListener('play', () => { try { navigator.mediaSession.playbackState = 'playing'; } catch (e) {} updateMediaPositionState(); });
+    audio.addEventListener('pause', () => { try { if (currentQueue[currentSongIndex]) navigator.mediaSession.playbackState = 'paused'; } catch (e) {} updateMediaPositionState(); });
+    audio.addEventListener('loadedmetadata', updateMediaPositionState);
+    audio.addEventListener('durationchange', updateMediaPositionState);
+    audio.addEventListener('seeked', updateMediaPositionState);
+
+    /* =========================================================
+       AUTO PLAY
+       When the queue ends, keep playing similar songs
+       (same artist > same genre > same country) that are not in the queue yet.
+    ========================================================== */
+    const AUTOPLAY_STORAGE_KEY = 'howies-music-server-autoplay';
+    let autoPlayEnabled = false;
+
+    function renderAutoPlayToggle() {
+      const btn = document.getElementById('autoPlayToggle');
+      if (btn) btn.setAttribute('aria-checked', String(autoPlayEnabled));
+    }
+
+    async function saveAutoPlayPreference() {
+      try {
+        const key = currentUser?.id ? `${AUTOPLAY_STORAGE_KEY}_${currentUser.id}` : AUTOPLAY_STORAGE_KEY;
+        localStorage.setItem(key, autoPlayEnabled ? '1' : '0');
+      } catch (e) {}
+      if (!currentUser) return;
+      try {
+        const { error } = await supabaseClient.from('user_preferences').upsert({
+          user_id: currentUser.id,
+          autoplay: autoPlayEnabled,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
+        if (error) console.warn('Could not save Auto Play:', error.message);
+      } catch (e) { console.warn('Auto Play save skipped:', e); }
+    }
+
+    async function loadAutoPlayPreference() {
+      let value = null;
+      try {
+        const raw = localStorage.getItem(`${AUTOPLAY_STORAGE_KEY}_${currentUser.id}`);
+        if (raw !== null) value = raw === '1';
+      } catch (e) {}
+      try {
+        const { data, error } = await supabaseClient.from('user_preferences').select('autoplay').eq('user_id', currentUser.id).maybeSingle();
+        if (!error && data && typeof data.autoplay === 'boolean') value = data.autoplay;
+      } catch (e) {}
+      autoPlayEnabled = value === true;
+      renderAutoPlayToggle();
+    }
+
+    function toggleAutoPlay() {
+      autoPlayEnabled = !autoPlayEnabled;
+      renderAutoPlayToggle();
+      saveAutoPlayPreference();
+    }
+
+    function buildAutoPlaySongs(count = 10) {
+      const last = currentQueue[currentSongIndex];
+      const inQueue = new Set(currentQueue.map(s => s.id));
+      const pool = songs.filter(s => !inQueue.has(s.id));
+      if (!pool.length) return [];
+      const lastGenres = new Set(last ? normalizeGenres(last.genres) : []);
+      return pool
+        .map(s => {
+          let score = Math.random();
+          if (last) {
+            if (s.artist === last.artist) score += 3;
+            if (normalizeGenres(s.genres).some(g => lastGenres.has(g))) score += 2;
+            if (s.country && s.country === last.country) score += 1;
+          }
+          return { s, score };
+        })
+        .sort((a, b) => b.score - a.score)
+        .slice(0, count)
+        .map(x => x.s);
+    }
+
+    function autoPlayContinue() {
+      const added = buildAutoPlaySongs(10);
+      if (!added.length) return false;
+      const firstNew = currentQueue.length;
+      currentQueue = [...currentQueue, ...added];
+      currentSongIndex = firstNew;
+      loadSong(currentQueue[currentSongIndex], { autoScroll: true });
+      audio.play().then(() => {
+        isPlaying = true;
+        updatePlayIconsUI();
+      }).catch(err => {
+        console.error('Auto Play error:', err);
+        isPlaying = false;
+        updatePlayIconsUI();
+      });
+      return true;
+    }
+
+    /* =========================================================
+       REMEMBER WHAT I WAS PLAYING (per account, survives refresh)
+       Saved to localStorage (instant) + Supabase user_preferences.playback_state (every device).
+    ========================================================== */
+    const PLAYBACK_STORAGE_KEY = 'howies-music-server-playback';
+    let playbackRestored = false;
+    let playbackSaveTimer = null;
+    let lastLocalPlaybackSave = 0;
+    let lastRemotePlaybackSave = 0;
+
+    function getPlaybackSnapshot() {
+      const song = currentQueue[currentSongIndex];
+      if (!song || !currentQueue.length) return null;
+      const pos = Number.isFinite(audio.currentTime) ? Math.round(audio.currentTime * 10) / 10 : 0;
+      return {
+        queue: currentQueue.map(s => s.id),
+        songId: song.id,
+        index: currentSongIndex,
+        position: pos,
+        wasPlaying: !audio.paused,
+        savedAt: Date.now()
+      };
+    }
+
+    function savePlaybackLocal() {
+      if (!currentUser || !playbackRestored) return;
+      const snap = getPlaybackSnapshot();
+      if (!snap) return;
+      try { localStorage.setItem(`${PLAYBACK_STORAGE_KEY}_${currentUser.id}`, JSON.stringify(snap)); } catch (e) {}
+      lastLocalPlaybackSave = Date.now();
+    }
+
+    async function savePlaybackRemote() {
+      if (!currentUser || !playbackRestored) return;
+      const snap = getPlaybackSnapshot();
+      if (!snap) return;
+      lastRemotePlaybackSave = Date.now();
+      try {
+        const { error } = await supabaseClient.from('user_preferences').upsert({
+          user_id: currentUser.id,
+          playback_state: snap,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
+        if (error) console.warn('Could not save playback state:', error.message);
+      } catch (e) { console.warn('Playback save skipped:', e); }
+    }
+
+    // Debounced save used for song changes, pause, seek, etc.
+    function schedulePlaybackSave() {
+      clearTimeout(playbackSaveTimer);
+      playbackSaveTimer = setTimeout(() => { savePlaybackLocal(); savePlaybackRemote(); }, 600);
+    }
+
+    audio.addEventListener('timeupdate', () => {
+      if (!playbackRestored || audio.paused) return;
+      const now = Date.now();
+      if (now - lastLocalPlaybackSave > 1000) savePlaybackLocal();
+      if (now - lastRemotePlaybackSave > 10000) savePlaybackRemote();
+    });
+    ['pause', 'play', 'seeked', 'ended'].forEach(ev => audio.addEventListener(ev, schedulePlaybackSave));
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') { savePlaybackLocal(); savePlaybackRemote(); }
+    });
+    window.addEventListener('pagehide', () => { savePlaybackLocal(); savePlaybackRemote(); });
+
+    async function restorePlaybackState() {
+      playbackRestored = false;
+      if (!currentUser) return;
+      let state = null;
+      try {
+        const raw = localStorage.getItem(`${PLAYBACK_STORAGE_KEY}_${currentUser.id}`);
+        if (raw) state = JSON.parse(raw);
+      } catch (e) {}
+      try {
+        const { data, error } = await supabaseClient.from('user_preferences').select('playback_state').eq('user_id', currentUser.id).maybeSingle();
+        const remote = !error ? data?.playback_state : null;
+        if (remote && (!state || Number(remote.savedAt || 0) >= Number(state.savedAt || 0))) state = remote;
+      } catch (e) {}
+
+      try {
+        if (state && Array.isArray(state.queue) && state.queue.length) {
+          const byId = new Map(songs.map(s => [s.id, s]));
+          const queue = state.queue.map(id => byId.get(Number(id))).filter(Boolean);
+          let index = queue.findIndex(s => s.id === Number(state.songId));
+          if (index < 0) index = Math.max(0, Math.min(Number(state.index) || 0, queue.length - 1));
+          if (queue.length) {
+            currentQueue = queue;
+            currentSongIndex = index;
+            const position = Number(state.position) || 0;
+            if (position > 0) {
+              audio.addEventListener('loadedmetadata', () => {
+                const max = Number.isFinite(audio.duration) ? Math.max(0, audio.duration - 0.5) : position;
+                try { audio.currentTime = Math.min(position, max); } catch (e) {}
+              }, { once: true });
+            }
+            suppressSongAutoScroll = true;
+            loadSong(currentQueue[currentSongIndex], { autoScroll: false });
+            // Browsers only allow sound after a user gesture; with Auto Play on we try
+            // to resume, and if the browser blocks it the song just stays paused.
+            if (autoPlayEnabled && state.wasPlaying) {
+              audio.play().catch(() => { isPlaying = false; updatePlayIconsUI(); });
+            }
+          }
+        }
+      } catch (e) { console.warn('Could not restore playback:', e); }
+      playbackRestored = true;
+    }
+
+    async function loadAccountPlayerState() {
+      await loadAutoPlayPreference();
+      await restorePlaybackState();
+    }
+
+    /* =========================================================
+       FEEDBACK  ->  Supabase table "feedback"
+    ========================================================== */
+    function setFeedbackStatus(type, message) {
+      const el = document.getElementById('feedbackStatus');
+      if (!el) return;
+      el.className = 'feedback-status' + (type ? ' ' + type : '');
+      el.textContent = message || '';
+    }
+
+    function updateFeedbackCounter() {
+      const t = document.getElementById('feedbackText');
+      const c = document.getElementById('feedbackCounter');
+      if (t && c) c.textContent = `${t.value.length} / 1000`;
+    }
+
+    function openFeedbackModal() {
+      if (window.innerWidth < 1024) closeMobileDrawer();
+      document.getElementById('feedbackText').value = '';
+      document.getElementById('feedbackCategory').value = 'suggestion';
+      document.getElementById('feedbackSendBtn').disabled = false;
+      updateFeedbackCounter();
+      setFeedbackStatus('', '');
+      openModal('feedbackModal');
+      setTimeout(() => document.getElementById('feedbackText')?.focus(), 50);
+    }
+
+    async function submitFeedback() {
+      const btn = document.getElementById('feedbackSendBtn');
+      const message = document.getElementById('feedbackText').value.trim();
+      const category = document.getElementById('feedbackCategory').value;
+
+      if (!currentUser) { setFeedbackStatus('err', 'PLEASE LOG IN FIRST!'); return; }
+      if (message.length < 3) { setFeedbackStatus('err', 'PLEASE WRITE YOUR FEEDBACK FIRST!'); return; }
+
+      btn.disabled = true;
+      setFeedbackStatus('', 'SENDING...');
+      try {
+        const { error } = await supabaseClient.from('feedback').insert({
+          user_id: currentUser.id,
+          username: (currentUser.email || '').split('@')[0] || null,
+          category,
+          message,
+          user_agent: navigator.userAgent.slice(0, 300)
+        });
+        if (error) throw error;
+        setFeedbackStatus('ok', 'THANK YOU! FEEDBACK SENT.');
+        setTimeout(() => closeModal('feedbackModal'), 1300);
+      } catch (err) {
+        console.error('Feedback error:', err);
+        setFeedbackStatus('err', 'COULD NOT SEND. TRY AGAIN.');
+        btn.disabled = false;
+      }
     }
 
     /* =========================================================
