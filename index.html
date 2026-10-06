@@ -746,6 +746,7 @@
             </div>
             <div class="flex-1">
               <p id="playlistDetailType" class="text-xs uppercase font-bold playlist-accent-private tracking-wider mb-1">MY PLAYLIST</p>
+              <p id="playlistDetailCreator" class="hidden text-xs font-semibold text-gray-300 uppercase tracking-wide mb-1"></p>
               <h1 id="playlistDetailTitle" class="text-3xl sm:text-4xl font-extrabold mt-1 mb-3 text-white uppercase">MY PLAYLIST</h1>
               <p id="playlistDetailCount" class="text-xs text-gray-400 mb-5 font-medium uppercase">0 SONGS</p>
               <div class="flex items-center gap-3 flex-wrap">
@@ -1801,12 +1802,36 @@
       await loadPublicPlaylists();
     }
 
+    const profileNameCache = {};
+    async function fetchCreatorNames(userIds) {
+      const missing = [...new Set(userIds.filter(Boolean))].filter(id => !(id in profileNameCache));
+      if (missing.length) {
+        try {
+          const { data } = await supabaseClient.from('profiles').select('id,username').in('id', missing);
+          (data || []).forEach(row => { profileNameCache[row.id] = row.username; });
+        } catch (e) { console.error('Could not load creators:', e); }
+      }
+      return profileNameCache;
+    }
+
+    function setPlaylistCreator(name) {
+      const el = document.getElementById('playlistDetailCreator');
+      if (!el) return;
+      if (name) {
+        el.innerHTML = `<i class="fa-solid fa-user mr-1.5 text-[10px]"></i>CREATED BY ${String(name).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}`;
+        el.classList.remove('hidden');
+      } else {
+        el.textContent = '';
+        el.classList.add('hidden');
+      }
+    }
+
     async function loadPublicPlaylists() {
       const container = document.getElementById('publicSidebarPlaylists');
       if (!container) return;
       const { data, error } = await supabaseClient
         .from('playlists')
-        .select('id,name,share_token,created_at,playlist_songs(song_id)')
+        .select('id,name,user_id,share_token,created_at,playlist_songs(song_id)')
         .eq('is_public', true)
         .order('created_at', { ascending: false })
         .limit(30);
@@ -1820,7 +1845,9 @@
         container.innerHTML = '<p class="px-4 py-2 text-[10px] text-gray-600 uppercase">NO PUBLIC PLAYLISTS</p>';
         return;
       }
+      const creatorNames = await fetchCreatorNames(data.map(pl => pl.user_id));
       data.forEach(pl => {
+        pl.creatorName = creatorNames[pl.user_id] || '';
         const btn = document.createElement('button');
         btn.className = `sidebar-playlist-btn public ${currentActivePublicPlaylistId === pl.id ? 'active-public' : ''} w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition`;
         btn.dataset.publicPlaylistId = String(pl.id);
@@ -1854,6 +1881,8 @@
       ['homeView','searchView','discoverView','albumsView','artistsView','categoryView','groupDetailView'].forEach(v => document.getElementById(v)?.classList.add('hidden'));
       document.getElementById('playlistDetailView').classList.remove('hidden');
       document.getElementById('playlistDetailTitle').innerText = pl.name;
+      setPlaylistCreator(pl.creatorName || (currentUser && pl.user_id === currentUser.id ? profileNameCache[currentUser.id] : ''));
+      if (!pl.creatorName && pl.user_id) fetchCreatorNames([pl.user_id]).then(names => { if (String(currentActivePublicPlaylistId) === String(pl.id)) setPlaylistCreator(names[pl.user_id]); });
       const publicHero = document.getElementById('playlistDetailHero');
       const publicType = document.getElementById('playlistDetailType');
       publicHero?.classList.remove('playlist-theme-private');
@@ -2877,15 +2906,16 @@
 
       if (!categoryCountry) {
         document.getElementById('categoryViewTitle').textContent = 'CATEGORIES';
-        subtitle.innerHTML = `<span class="text-xs text-gray-400 uppercase">${formatCount(countries.length, 'COUNTRY')}</span>`;
+        subtitle.innerHTML = `<span class="text-xs text-gray-400 uppercase">${formatCount(countries.length, 'COUNTRY', 'COUNTRIES')}</span>`;
         countryList.innerHTML = countries.map(country => {
           const countrySongs = getCategorySongs(country);
           const genres = [...new Set(countrySongs.flatMap(song => getSongCategory(song).genres))].sort(compareText);
           const releaseSummary = getCategoryReleaseSummary(countrySongs);
 
-          const countryStats = [formatCount(countrySongs.length, 'SONG')];
+          const countryStats = [];
           if (genres.length) countryStats.push(`${formatCount(genres.length, 'GENRE')}`);
           if (releaseSummary.text) countryStats.push(releaseSummary.text);
+          if (countrySongs.length) countryStats.push(formatCount(countrySongs.length, 'SONG'));
           return `<button type="button" onclick='openCategoryCountry(${JSON.stringify(country)})' class="glass-card p-5 rounded-2xl cursor-pointer group text-left w-full">
             <div class="w-full h-28 rounded-xl bg-gradient-to-br from-emerald-600/25 via-blue-600/10 to-purple-600/10 border border-white/5 flex items-center justify-center mb-4 group-hover:border-emerald-400/30 transition"><i class="fa-solid fa-earth-americas text-4xl text-emerald-400/80 group-hover:text-emerald-300 transition"></i></div>
             <h3 class="font-bold text-base text-white uppercase">${formatCountryName(country)}</h3>
@@ -2904,8 +2934,9 @@
         const count = genreSongs.length;
         const releaseSummary = getCategoryReleaseSummary(genreSongs);
 
-        const genreStats = [`${formatCount(count, 'SONG')}`];
+        const genreStats = [];
         if (releaseSummary.text) genreStats.push(releaseSummary.text);
+        if (count) genreStats.push(formatCount(count, 'SONG'));
         return `<div onclick='openCategoryGenre(${JSON.stringify(genre)})' class="glass-card p-5 rounded-2xl cursor-pointer group"><div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-400/10 flex items-center justify-center mb-4 group-hover:bg-blue-500/20 transition"><i class="fa-solid fa-music text-blue-400"></i></div><h3 class="font-bold text-base text-white">${genre}</h3><p class="text-xs text-gray-400 mt-1">${genreStats.join(' • ')}</p></div>`;
       }).join('')}</div>`;
 
@@ -2920,10 +2951,11 @@
         }, { Album: 0, EP: 0, Single: 0 });
         const genreAlbumTotal = genreAlbumNames.length;
 
-        const genreCountParts = [formatCount(filtered.length, 'SONG')];
+        const genreCountParts = [];
         if (genreReleaseCounts.Album) genreCountParts.push(formatReleaseTypeCount(genreReleaseCounts.Album, 'Album'));
         if (genreReleaseCounts.EP) genreCountParts.push(formatReleaseTypeCount(genreReleaseCounts.EP, 'EP'));
         if (genreReleaseCounts.Single) genreCountParts.push(formatReleaseTypeCount(genreReleaseCounts.Single, 'Single'));
+        if (filtered.length) genreCountParts.push(formatCount(filtered.length, 'SONG'));
         const genreCountText = genreCountParts.join(' • ');
         const albumsMap = {};
         filtered.forEach(s => {
@@ -3008,7 +3040,7 @@
             </div>
           </div>
           <h3 class="font-bold text-base text-white truncate w-full uppercase">${art.name}</h3>
-          <p class="text-xs text-gray-400 truncate w-full mt-1 uppercase font-semibold">${formatCount(art.count, 'SONG')}${(() => { const rs = getCategoryReleaseSummary(songs.filter(s => s.artist === art.name)); return rs.text ? ' • ' + rs.text : ''; })()}</p>
+          <p class="text-xs text-gray-400 truncate w-full mt-1 uppercase font-semibold">${(() => { const rs = getCategoryReleaseSummary(songs.filter(s => s.artist === art.name)); return [rs.text, art.count ? formatCount(art.count, 'SONG') : ''].filter(Boolean).join(' • '); })()}</p>
         </div>
       `).join('');
       updateSortSelect('artists');
@@ -3092,7 +3124,7 @@
       document.getElementById('groupDetailTitle').innerText = key;
       const groupReleaseSummary = type === 'artist' ? getCategoryReleaseSummary(filteredSongs) : null;
       document.getElementById('groupDetailCount').innerText = type === 'artist'
-        ? [formatCount(filteredSongs.length, 'SONG'), groupReleaseSummary?.text].filter(Boolean).join(' • ')
+        ? [groupReleaseSummary?.text, formatCount(filteredSongs.length, 'SONG')].filter(Boolean).join(' • ')
         : formatCount(filteredSongs.length, 'SONG');
       document.getElementById('groupDetailCover').src = filteredSongs[0]?.cover || '';
       queueContexts.group = [...filteredSongs];
@@ -3174,6 +3206,8 @@
       const pl=playlists.find(p=>p.id===playlistId);
       if(!pl) return;
       document.getElementById('playlistDetailTitle').innerText=pl.name;
+      setPlaylistCreator(pl.isPublic ? (profileNameCache[currentUser?.id] || '') : '');
+      if (pl.isPublic && currentUser && !profileNameCache[currentUser.id]) fetchCreatorNames([currentUser.id]).then(n => setPlaylistCreator(n[currentUser.id]));
       const playlistHero = document.getElementById('playlistDetailHero');
       const playlistType = document.getElementById('playlistDetailType');
       playlistHero?.classList.toggle('playlist-theme-public', !!pl.isPublic);
@@ -3262,7 +3296,7 @@
       if (!token) return false;
       const { data, error } = await supabaseClient
         .from('playlists')
-        .select('id,name,share_token,playlist_songs(song_id)')
+        .select('id,name,user_id,share_token,playlist_songs(song_id)')
         .eq('share_token', token)
         .eq('is_public', true)
         .maybeSingle();
@@ -3276,6 +3310,8 @@
       ['homeView','searchView','discoverView','albumsView','artistsView','categoryView','groupDetailView'].forEach(v=>document.getElementById(v)?.classList.add('hidden'));
       document.getElementById('playlistDetailView').classList.remove('hidden');
       document.getElementById('playlistDetailTitle').innerText=data.name;
+      setPlaylistCreator('');
+      if (data.user_id) fetchCreatorNames([data.user_id]).then(n => setPlaylistCreator(n[data.user_id]));
       const sharedHero = document.getElementById('playlistDetailHero');
       const sharedType = document.getElementById('playlistDetailType');
       sharedHero?.classList.remove('playlist-theme-private');
