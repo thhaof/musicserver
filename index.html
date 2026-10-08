@@ -4890,7 +4890,7 @@ function togglePlay() {
       // Show the top of the page (e.g. the album card) for a moment, then glide down to the playing song.
       document.querySelector('main')?.scrollTo({ top: 0, behavior: 'instant' });
       clearTimeout(playingPlaceTimer);
-      playingPlaceTimer = setTimeout(() => scrollToPlayingSong(1600), 2200);
+      playingPlaceTimer = setTimeout(() => scrollToPlayingSong(500), 500);
     }
 
     /* =========================================================
