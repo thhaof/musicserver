@@ -290,7 +290,7 @@
       #sidebarOverlay.show { opacity: 1; pointer-events: auto; }
 
       /* Content */
-      main { padding: 0.75rem 1rem 1rem !important; }
+      main { padding: 1rem !important; }
       #contentView h1 { font-size: 1.6rem; line-height: 1.2; }
       #contentView h2 { word-break: break-word; }
       #playlistDetailHero { padding: 1rem !important; gap: 1rem !important; align-items: center !important; text-align: center; }
@@ -580,16 +580,11 @@ button.menu-item:hover i { color: #60a5fa; }
    Sidebar pull in / out (desktop). On phones the same button opens the drawer.
 ========================================================= */
 @media (min-width: 1024px) {
-  #mainSidebar {
-    transition: width .28s cubic-bezier(0.22, 1, 0.36, 1), border-color .28s ease, visibility 0s linear 0s;
-  }
-  body.sidebar-collapsed #mainSidebar {
-    width: 0 !important; border-right-color: transparent; visibility: hidden;
-    transition: width .28s cubic-bezier(0.22, 1, 0.36, 1), border-color .28s ease, visibility 0s linear .28s;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  #mainSidebar, #settingsDropdown { transition: none !important; animation: none !important; }
+  /* The slide itself is animated from JavaScript (toggleSidebar) so it always plays. These are the settled states. */
+  #mainSidebar > * { width: calc(16rem - 1px); flex-shrink: 0; }
+  body.sidebar-collapsed #mainSidebar { width: 0; border-right-color: transparent; }
+  body.sidebar-collapsed #mainSidebar > * { opacity: 0; transform: translateX(-1.5rem); }
+  body.sidebar-hidden #mainSidebar { visibility: hidden; }
 }
 
 /* =========================================================
@@ -749,16 +744,6 @@ html[data-theme="light"] .theme-seg button.is-active { color: #ffffff; }
   .topbar-brand-text { font-size: 0.78rem; }
 }
 
-/* sidebar pull in / out: content stays 16rem wide and slides + fades while the width animates */
-@media (min-width: 1024px) {
-  #mainSidebar { will-change: width; }
-  #mainSidebar > * {
-    width: calc(16rem - 1px); flex-shrink: 0;
-    transition: opacity .22s ease .06s, transform .3s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  body.sidebar-collapsed #mainSidebar > * { opacity: 0; transform: translateX(-1.5rem); transition-delay: 0s; }
-}
-@media (prefers-reduced-motion: reduce) { #mainSidebar > * { transition: none !important; } }
 
 /* notifications */
 .notif-btn { position: relative; }
@@ -790,6 +775,9 @@ html[data-theme="light"] .theme-seg button.is-active { color: #ffffff; }
 .notif-sub { font-size: 0.65rem; font-weight: 600; color: var(--tx-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .notif-dot { width: 0.55rem; height: 0.55rem; border-radius: 9999px; background: #3b82f6; flex-shrink: 0; margin-left: auto; }
 .notif-item:not(.unread) .notif-dot { display: none; }
+.notif-more { width: 100%; margin-top: 0.3rem; padding: 0.7rem; border-radius: 0.75rem; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.08em; color: #60a5fa; transition: background-color .15s ease; }
+.notif-more:hover { background: var(--menu-hover); }
+html[data-theme="light"] .notif-more { color: #2563eb; }
 @media (max-width: 1023px) {
   #notifDropdown { position: fixed; left: 0.75rem; right: 0.75rem; width: auto; }
 }
@@ -1015,60 +1003,59 @@ html[data-theme="light"] .notif-btn.has-unread i { color: #2563eb; }
   </div>
 
   <!-- =========================================================
-       ACCOUNT COVER MODAL
+       ACCOUNT MODAL  (Change avatar | Change password)
   ========================================================== -->
   <div id="coverModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center hidden backdrop-blur-sm p-4">
-    <div class="bg-[#181922] p-6 rounded-2xl w-96 max-w-full border border-gray-800 shadow-2xl view-transition">
+    <div class="bg-[#181922] p-6 rounded-2xl w-96 max-w-full max-h-[92vh] overflow-y-auto border border-gray-800 shadow-2xl view-transition">
       <h3 class="text-lg font-bold mb-1 text-white uppercase">ACCOUNT</h3>
-      <p id="coverUsername" class="text-xs text-blue-400 font-bold mb-1 normal-case keep-case"></p>
-      <p class="text-xs text-gray-400 mb-5 font-medium normal-case">Change your account cover. The picture is cropped to a square and shown in the top-right corner.</p>
+      <p id="coverUsername" class="text-xs text-blue-400 font-bold mb-4 normal-case keep-case"></p>
 
-      <div class="flex justify-center mb-5">
-        <span id="coverPreview" class="avatar avatar-xl">
-          <img class="avatar-img hidden" alt="">
-          <span class="avatar-initial"><i class="fa-solid fa-user"></i></span>
-        </span>
+      <div class="theme-seg acct-tabs" role="tablist" aria-label="Account" style="margin: 0 0 1.1rem;">
+        <button type="button" role="tab" data-acct-tab="avatar" onclick="switchAccountTab('avatar')"><i class="fa-solid fa-image"></i> CHANGE AVATAR</button>
+        <button type="button" role="tab" data-acct-tab="password" onclick="switchAccountTab('password')"><i class="fa-solid fa-key"></i> CHANGE PASSWORD</button>
       </div>
 
-      <input type="file" id="coverFileInput" accept="image/*" class="hidden" onchange="onCoverFileChosen(this)">
-      <div class="flex justify-center gap-2 mb-2 flex-wrap">
-        <button type="button" onclick="document.getElementById('coverFileInput').click()" class="px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-xs rounded-xl font-bold transition text-gray-300 uppercase"><i class="fa-solid fa-upload mr-2"></i>CHOOSE IMAGE</button>
-        <button type="button" id="coverRemoveBtn" onclick="removeCoverPending()" class="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-xs rounded-xl font-bold transition text-red-400 uppercase"><i class="fa-solid fa-trash mr-2"></i>REMOVE</button>
+      <!-- Part 1: avatar -->
+      <div id="acctPanelAvatar">
+        <p class="text-xs text-gray-400 mb-4 font-medium normal-case">The picture is cropped to a square and shown in the top-right corner.</p>
+        <div class="flex justify-center mb-5">
+          <span id="coverPreview" class="avatar avatar-xl">
+            <img class="avatar-img hidden" alt="">
+            <span class="avatar-initial"><i class="fa-solid fa-user"></i></span>
+          </span>
+        </div>
+        <input type="file" id="coverFileInput" accept="image/*" class="hidden" onchange="onCoverFileChosen(this)">
+        <div class="flex justify-center gap-2 mb-2 flex-wrap">
+          <button type="button" onclick="document.getElementById('coverFileInput').click()" class="px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-xs rounded-xl font-bold transition text-gray-300 uppercase"><i class="fa-solid fa-upload mr-2"></i>CHOOSE IMAGE</button>
+          <button type="button" id="coverRemoveBtn" onclick="removeCoverPending()" class="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-xs rounded-xl font-bold transition text-red-400 uppercase"><i class="fa-solid fa-trash mr-2"></i>REMOVE</button>
+        </div>
+        <p id="coverStatus" class="feedback-status" aria-live="polite"></p>
+        <div class="flex justify-end gap-3 mt-3">
+          <button type="button" onclick="closeModal('coverModal')" class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-xs rounded-xl font-medium transition text-gray-300 uppercase">CANCEL</button>
+          <button type="button" id="coverSaveBtn" onclick="saveCover()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-xs rounded-xl font-bold transition shadow-md shadow-blue-600/30 uppercase disabled:opacity-50">SAVE</button>
+        </div>
       </div>
 
-      <p id="coverStatus" class="feedback-status" aria-live="polite"></p>
+      <!-- Part 2: password -->
+      <form id="acctPanelPassword" class="hidden" onsubmit="changePassword(event)" autocomplete="off">
+        <p class="text-xs text-gray-400 mb-4 font-medium normal-case">Enter your current password, then choose a new one (at least 6 characters).</p>
 
-      <div class="flex justify-end gap-3 mt-3">
-        <button type="button" onclick="closeModal('coverModal')" class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-xs rounded-xl font-medium transition text-gray-300 uppercase">CANCEL</button>
-        <button type="button" id="coverSaveBtn" onclick="saveCover()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-xs rounded-xl font-bold transition shadow-md shadow-blue-600/30 uppercase disabled:opacity-50">SAVE</button>
-      </div>
+        <label class="block text-xs text-gray-400 mb-1 font-semibold uppercase">CURRENT PASSWORD</label>
+        <div class="mb-4"><input type="password" id="pwCurrent" autocomplete="current-password" required class="w-full bg-[#222331] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition normal-case"></div>
+
+        <label class="block text-xs text-gray-400 mb-1 font-semibold uppercase">NEW PASSWORD</label>
+        <div class="mb-4"><input type="password" id="pwNew" autocomplete="new-password" required minlength="6" class="w-full bg-[#222331] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition normal-case"></div>
+
+        <label class="block text-xs text-gray-400 mb-1 font-semibold uppercase">CONFIRM NEW PASSWORD</label>
+        <div class="mb-2"><input type="password" id="pwConfirm" autocomplete="new-password" required minlength="6" class="w-full bg-[#222331] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition normal-case"></div>
+
+        <p id="pwStatus" class="feedback-status" aria-live="polite"></p>
+        <div class="flex justify-end gap-3 mt-3">
+          <button type="button" onclick="closeModal('coverModal')" class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-xs rounded-xl font-medium transition text-gray-300 uppercase">CANCEL</button>
+          <button type="submit" id="pwSaveBtn" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-xs rounded-xl font-bold transition shadow-md shadow-blue-600/30 uppercase disabled:opacity-50">UPDATE PASSWORD</button>
+        </div>
+      </form>
     </div>
-  </div>
-
-  <!-- =========================================================
-       CHANGE PASSWORD MODAL
-  ========================================================== -->
-  <div id="passwordModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center hidden backdrop-blur-sm p-4">
-    <form onsubmit="changePassword(event)" autocomplete="off" class="bg-[#181922] p-6 rounded-2xl w-96 max-w-full border border-gray-800 shadow-2xl view-transition">
-      <h3 class="text-lg font-bold mb-1 text-white uppercase">CHANGE PASSWORD</h3>
-      <p class="text-xs text-gray-400 mb-5 font-medium normal-case">Enter your current password, then choose a new one (at least 6 characters).</p>
-
-      <label class="block text-xs text-gray-400 mb-1 font-semibold uppercase">CURRENT PASSWORD</label>
-      <div class="mb-4"><input type="password" id="pwCurrent" autocomplete="current-password" required class="w-full bg-[#222331] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition normal-case"></div>
-
-      <label class="block text-xs text-gray-400 mb-1 font-semibold uppercase">NEW PASSWORD</label>
-      <div class="mb-4"><input type="password" id="pwNew" autocomplete="new-password" required minlength="6" class="w-full bg-[#222331] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition normal-case"></div>
-
-      <label class="block text-xs text-gray-400 mb-1 font-semibold uppercase">CONFIRM NEW PASSWORD</label>
-      <div class="mb-2"><input type="password" id="pwConfirm" autocomplete="new-password" required minlength="6" class="w-full bg-[#222331] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition normal-case"></div>
-
-      <p id="pwStatus" class="feedback-status" aria-live="polite"></p>
-
-      <div class="flex justify-end gap-3 mt-3">
-        <button type="button" onclick="closeModal('passwordModal')" class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-xs rounded-xl font-medium transition text-gray-300 uppercase">CANCEL</button>
-        <button type="submit" id="pwSaveBtn" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-xs rounded-xl font-bold transition shadow-md shadow-blue-600/30 uppercase disabled:opacity-50">UPDATE PASSWORD</button>
-      </div>
-    </form>
   </div>
 
   <!-- =========================================================
@@ -1133,9 +1120,6 @@ html[data-theme="light"] .notif-btn.has-unread i { color: #2563eb; }
 
         <button type="button" role="menuitem" onclick="openCoverModal()" class="menu-item">
           <i class="fa-solid fa-user-gear"></i><span>ACCOUNT</span>
-        </button>
-        <button type="button" role="menuitem" onclick="openPasswordModal()" class="menu-item">
-          <i class="fa-solid fa-key"></i><span>CHANGE PASSWORD</span>
         </button>
 
         <div class="menu-item menu-item-static">
@@ -1230,7 +1214,7 @@ html[data-theme="light"] .notif-btn.has-unread i { color: #2563eb; }
          MAIN CONTENT AREA
     ======================================================== -->
     <main
-      class="flex-1 bg-gradient-to-b from-[#161722] to-[#0f1016] overflow-y-auto px-8 lg:px-10 pt-4 lg:pt-5 pb-8 lg:pb-10 transition-all duration-300"
+      class="flex-1 bg-gradient-to-b from-[#161722] to-[#0f1016] overflow-y-auto p-8 lg:p-10 transition-all duration-300"
     >
 
 
@@ -6122,12 +6106,39 @@ function togglePlay() {
     function toggleSidebar() {
       // Phones: the same button opens / closes the slide-out drawer.
       if (window.innerWidth < 1024) { toggleMobileDrawer(); return; }
-      const collapsed = document.body.classList.toggle('sidebar-collapsed');
-      try { localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? '1' : '0'); } catch (e) {}
-      document.getElementById('sidebarToggleBtn')?.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      const body = document.body;
+      const sidebar = document.getElementById('mainSidebar');
+      const collapse = !body.classList.contains('sidebar-collapsed');
+      try { localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapse ? '1' : '0'); } catch (e) {}
+      document.getElementById('sidebarToggleBtn')?.setAttribute('aria-expanded', collapse ? 'false' : 'true');
+      if (!sidebar || !sidebar.animate) {            // very old browsers: just switch
+        body.classList.toggle('sidebar-collapsed', collapse);
+        body.classList.toggle('sidebar-hidden', collapse);
+        return;
+      }
+
+      const kids = [...sidebar.children];
+      const startWidth = sidebar.getBoundingClientRect().width;       // works even if clicked mid-animation
+      [sidebar, ...kids].forEach(el => el.getAnimations().forEach(a => a.cancel()));
+
+      body.classList.remove('sidebar-hidden');                        // must be visible while it moves
+      body.classList.toggle('sidebar-collapsed', collapse);
+      const endWidth = collapse ? 0 : parseFloat(getComputedStyle(document.documentElement).fontSize) * 16;
+
+      const timing = { duration: 380, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' };
+      const slide = sidebar.animate([{ width: startWidth + 'px' }, { width: endWidth + 'px' }], timing);
+      kids.forEach(el => el.animate(
+        collapse
+          ? [{ opacity: 1, transform: 'translateX(0)' }, { opacity: 0, transform: 'translateX(-1.5rem)' }]
+          : [{ opacity: 0, transform: 'translateX(-1.5rem)' }, { opacity: 1, transform: 'translateX(0)' }],
+        { ...timing, duration: collapse ? 260 : 380 }
+      ));
+      slide.finished.then(() => {
+        if (body.classList.contains('sidebar-collapsed')) body.classList.add('sidebar-hidden');   // out of tab order once closed
+      }).catch(() => {});
     }
     try {
-      if (localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1') document.body.classList.add('sidebar-collapsed');
+      if (localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1') document.body.classList.add('sidebar-collapsed', 'sidebar-hidden');
     } catch (e) {}
 
     /* ---------- Settings dropdown: close on outside click / Escape ---------- */
@@ -6207,14 +6218,32 @@ function togglePlay() {
       const removeBtn = document.getElementById('coverRemoveBtn');
       if (removeBtn) { removeBtn.disabled = !url; removeBtn.classList.toggle('opacity-40', !url); }
     }
-    function openCoverModal() {
+    function switchAccountTab(tab) {
+      const pw = tab === 'password';
+      document.getElementById('acctPanelAvatar')?.classList.toggle('hidden', pw);
+      document.getElementById('acctPanelPassword')?.classList.toggle('hidden', !pw);
+      document.querySelectorAll('[data-acct-tab]').forEach(btn => {
+        const on = btn.dataset.acctTab === tab;
+        btn.classList.toggle('is-active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      if (pw) setTimeout(() => document.getElementById('pwCurrent')?.focus(), 60);
+    }
+    function openCoverModal(tab) {
       closeSettingsMenu();
+      if (window.innerWidth < 1024) closeMobileDrawer();
       pendingCover = undefined;
       setCoverStatus('', '');
       document.getElementById('coverSaveBtn').disabled = false;
       const who = document.getElementById('coverUsername');
       if (who) who.textContent = currentUsername ? '@' + currentUsername : '';
       paintCoverPreview();
+      // password part starts clean every time
+      ['pwCurrent', 'pwNew', 'pwConfirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      if (typeof resetPasswordVisibility === 'function') resetPasswordVisibility();
+      if (typeof setPwStatus === 'function') setPwStatus('', '');
+      const pwBtn = document.getElementById('pwSaveBtn'); if (pwBtn) pwBtn.disabled = false;
+      switchAccountTab(tab === 'password' ? 'password' : 'avatar');
       openModal('coverModal');
     }
     // Centre-crop to a square and shrink to 256×256 so it stays tiny (~20 KB).
@@ -6400,16 +6429,7 @@ function togglePlay() {
       el.className = 'feedback-status' + (type ? ' ' + type : '');
       el.textContent = message || '';
     }
-    function openPasswordModal() {
-      closeSettingsMenu();
-      if (window.innerWidth < 1024) closeMobileDrawer();
-      ['pwCurrent', 'pwNew', 'pwConfirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-      resetPasswordVisibility();
-      setPwStatus('', '');
-      document.getElementById('pwSaveBtn').disabled = false;
-      openModal('passwordModal');
-      setTimeout(() => document.getElementById('pwCurrent')?.focus(), 60);
-    }
+    function openPasswordModal() { openCoverModal('password'); }
     async function changePassword(event) {
       event.preventDefault();
       if (!currentUser) return;
@@ -6435,7 +6455,7 @@ function togglePlay() {
         ['pwCurrent', 'pwNew', 'pwConfirm'].forEach(id => { document.getElementById(id).value = ''; });
         resetPasswordVisibility();
         setPwStatus('ok', 'PASSWORD UPDATED!');
-        setTimeout(() => closeModal('passwordModal'), 1200);
+        setTimeout(() => closeModal('coverModal'), 1200);
       } catch (e) {
         console.warn('Change password failed:', e);
         setPwStatus('err', 'SOMETHING WENT WRONG. PLEASE TRY AGAIN.');
@@ -6446,40 +6466,27 @@ function togglePlay() {
     /* ---------- Notifications (bell): new songs, albums and artists ----------
        Songs are listed oldest -> newest in the song list, so "new" = songs added at the END
        since the last time this account looked. Add new songs at the bottom of the list.   */
-    const NOTIF_WINDOW = 40;   // look at the last 40 songs added
-    const NOTIF_MAX = 25;      // show at most 25 entries
+    const NOTIF_PAGE = 20;     // releases shown at first, +20 each time SHOW MORE is pressed
     const NOTIF_SEEN_KEY = 'howies-music-server-notif-seen';
     let notifSeenCount = null; // songs before this position have been seen
     let notifOpen = false;
     let notifEntries = [];
+    let notifShown = NOTIF_PAGE;
 
+    // Every release (album / EP / single / mixtape), newest posted first.
     function buildNotifications() {
-      const n = songs.length;
-      const start = Math.max(0, n - NOTIF_WINDOW);
-      const firstAlbum = new Map(), lastAlbum = new Map(), firstArtist = new Map();
-      songs.forEach((song, i) => {
-        if (!firstAlbum.has(song.album)) firstAlbum.set(song.album, i);
-        lastAlbum.set(song.album, i);
-        (song.artists || []).forEach(a => { if (!firstArtist.has(a)) firstArtist.set(a, i); });
-      });
+      const lastAlbum = new Map();
+      songs.forEach((song, i) => lastAlbum.set(song.album, i));
       const entries = [];
-      firstAlbum.forEach((first, name) => {
-        if (first < start) return;
+      lastAlbum.forEach((idx, name) => {
         const info = getAlbumInfo(name);
-        entries.push({ type: 'album', prio: 0, idx: lastAlbum.get(name), name, title: name, cover: info.cover,
-          sub: `${formatCount(info.count, 'SONG')}${info.artist ? ' • ' + info.artist : ''}` });
+        const type = String(info.type || 'Album').toUpperCase();
+        entries.push({
+          idx, name, title: name, cover: info.cover, type,
+          sub: `${formatCount(info.count, 'SONG').toUpperCase()}${info.artist ? ' • ' + info.artist : ''}`
+        });
       });
-      firstArtist.forEach((first, name) => {
-        if (first < start) return;
-        entries.push({ type: 'artist', prio: 1, idx: first, name, title: name, sub: `${formatCount((artistIndex.get(name) || []).length, 'SONG')}` });
-      });
-      for (let i = start; i < n; i++) {
-        const song = songs[i];
-        if (firstAlbum.get(song.album) >= start) continue;   // already covered by its NEW ALBUM entry
-        entries.push({ type: 'song', prio: 2, idx: i, name: song.album, title: song.title, cover: song.cover, sub: song.artistLine || song.mainartist || '' });
-      }
-      entries.sort((a, b) => (b.idx - a.idx) || (a.prio - b.prio));
-      return entries.slice(0, NOTIF_MAX);
+      return entries.sort((a, b) => b.idx - a.idx);
     }
     const notifIsUnread = e => notifSeenCount != null && e.idx >= notifSeenCount;
 
@@ -6496,18 +6503,24 @@ function togglePlay() {
       const list = document.getElementById('notifList');
       if (!list) return;
       if (!notifEntries.length) { list.innerHTML = '<div class="notif-empty uppercase">NOTHING NEW YET</div>'; return; }
-      const kind = { album: 'NEW ALBUM', artist: 'NEW ARTIST', song: 'NEW SONG' };
-      list.innerHTML = notifEntries.map((e, i) => {
-        const thumb = e.type === 'artist'
-          ? `<span class="notif-thumb round">${artistAvatarHTML('w-full h-full', 'text-lg')}</span>`
-          : `<span class="notif-thumb"><img src="${e.cover}" alt=""></span>`;
-        return `<button type="button" class="notif-item${notifIsUnread(e) ? ' unread' : ''}" onclick="openNotification(${i})">
-          ${thumb}
-          <span class="min-w-0 flex-1"><span class="notif-kind block">${kind[e.type]}</span>
+      const visible = notifEntries.slice(0, notifShown);
+      list.innerHTML = visible.map((e, i) => `
+        <button type="button" class="notif-item${notifIsUnread(e) ? ' unread' : ''}" onclick="openNotification(${i})">
+          <span class="notif-thumb"><img src="${e.cover}" alt=""></span>
+          <span class="min-w-0 flex-1"><span class="notif-kind block">NEW ${escapeHTML(e.type)}</span>
             <span class="notif-title block keep-case">${escapeHTML(e.title)}</span>
             <span class="notif-sub block keep-case">${escapeHTML(e.sub)}</span></span>
-          <span class="notif-dot"></span></button>`;
-      }).join('');
+          <span class="notif-dot"></span></button>`).join('')
+        + (notifEntries.length > notifShown
+            ? `<button type="button" class="notif-more" onclick="showMoreNotifications(event)">SHOW MORE (${notifEntries.length - notifShown})</button>` : '');
+    }
+    function showMoreNotifications(event) {
+      event?.stopPropagation();
+      const list = document.getElementById('notifList');
+      const top = list ? list.scrollTop : 0;
+      notifShown += NOTIF_PAGE;
+      renderNotifList();
+      if (list) list.scrollTop = top;
     }
     function refreshNotifications() {
       notifEntries = currentUser ? buildNotifications() : [];
@@ -6519,6 +6532,7 @@ function togglePlay() {
       if (!currentUser) { document.getElementById('authModal')?.classList.remove('hidden'); return; }
       if (notifOpen) { closeNotifMenu(); return; }
       closeSettingsMenu();
+      notifShown = NOTIF_PAGE;
       refreshNotifications();
       notifOpen = true;
       renderNotifList();
@@ -6543,8 +6557,12 @@ function togglePlay() {
       if (!e) return;
       closeNotifMenu();
       if (window.innerWidth < 1024) closeMobileDrawer();
-      if (e.type === 'artist') openGroupDetail('artist', e.name);
-      else openGroupDetail('album', e.name);   // album, or the album of a new song
+      openGroupDetail('album', e.name);
+      // Always land on the top (first part) of that release's page.
+      const main = document.querySelector('main');
+      const top = () => { if (main) main.scrollTop = 0; };
+      top();
+      requestAnimationFrame(() => { top(); requestAnimationFrame(top); });
     }
 
     async function saveNotifSeen() {
