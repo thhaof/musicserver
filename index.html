@@ -775,6 +775,10 @@ html[data-theme="light"] .theme-seg button.is-active { color: #ffffff; }
 .notif-sub { font-size: 0.65rem; font-weight: 600; color: var(--tx-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .notif-dot { width: 0.55rem; height: 0.55rem; border-radius: 9999px; background: #3b82f6; flex-shrink: 0; margin-left: auto; }
 .notif-item:not(.unread) .notif-dot { display: none; }
+.acct-tabs button { white-space: nowrap; }
+@media (max-width: 480px) {
+  .acct-tabs button { font-size: 0.6rem; letter-spacing: 0.02em; gap: 0.3rem; padding: 0.5rem 0.2rem; }
+}
 .notif-more { width: 100%; margin-top: 0.3rem; padding: 0.7rem; border-radius: 0.75rem; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.08em; color: #60a5fa; transition: background-color .15s ease; }
 .notif-more:hover { background: var(--menu-hover); }
 html[data-theme="light"] .notif-more { color: #2563eb; }
@@ -1006,7 +1010,7 @@ html[data-theme="light"] .notif-btn.has-unread i { color: #2563eb; }
        ACCOUNT MODAL  (Change avatar | Change password)
   ========================================================== -->
   <div id="coverModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center hidden backdrop-blur-sm p-4">
-    <div class="bg-[#181922] p-6 rounded-2xl w-96 max-w-full max-h-[92vh] overflow-y-auto border border-gray-800 shadow-2xl view-transition">
+    <div class="bg-[#181922] p-6 rounded-2xl w-[34rem] max-w-full max-h-[92vh] overflow-y-auto border border-gray-800 shadow-2xl view-transition">
       <h3 class="text-lg font-bold mb-1 text-white uppercase">ACCOUNT</h3>
       <p id="coverUsername" class="text-xs text-blue-400 font-bold mb-4 normal-case keep-case"></p>
 
@@ -6507,7 +6511,7 @@ function togglePlay() {
       list.innerHTML = visible.map((e, i) => `
         <button type="button" class="notif-item${notifIsUnread(e) ? ' unread' : ''}" onclick="openNotification(${i})">
           <span class="notif-thumb"><img src="${e.cover}" alt=""></span>
-          <span class="min-w-0 flex-1"><span class="notif-kind block">NEW ${escapeHTML(e.type)}</span>
+          <span class="min-w-0 flex-1"><span class="notif-kind block">NEW POSTED ${escapeHTML(e.type)}</span>
             <span class="notif-title block keep-case">${escapeHTML(e.title)}</span>
             <span class="notif-sub block keep-case">${escapeHTML(e.sub)}</span></span>
           <span class="notif-dot"></span></button>`).join('')
@@ -6552,17 +6556,26 @@ function togglePlay() {
       document.getElementById('notifBtn')?.setAttribute('aria-expanded', 'false');
       markNotificationsRead(false);   // closing the panel counts as "seen"
     }
+    // The page uses "scroll-behavior: smooth", which makes a plain scrollTop = 0 a slow glide that
+    // gets interrupted while the new page is still rendering. This jumps instantly and re-checks.
+    function jumpMainToTop() {
+      const main = document.querySelector('main');
+      if (!main) return;
+      if (main._scrollAnimation) { cancelAnimationFrame(main._scrollAnimation); main._scrollAnimation = null; }
+      clearTimeout(playingPlaceTimer);                 // a pending "glide to playing song" must not pull the page down
+      const snap = () => { main.style.scrollBehavior = 'auto'; main.scrollTop = 0; void main.offsetHeight; main.style.scrollBehavior = ''; };
+      snap();
+      requestAnimationFrame(() => { snap(); requestAnimationFrame(snap); });
+      setTimeout(snap, 150);
+      setTimeout(snap, 450);                           // after images / reveal animations settle
+    }
     function openNotification(i) {
       const e = notifEntries[i];
       if (!e) return;
       closeNotifMenu();
       if (window.innerWidth < 1024) closeMobileDrawer();
       openGroupDetail('album', e.name);
-      // Always land on the top (first part) of that release's page.
-      const main = document.querySelector('main');
-      const top = () => { if (main) main.scrollTop = 0; };
-      top();
-      requestAnimationFrame(() => { top(); requestAnimationFrame(top); });
+      jumpMainToTop();                                 // always the first part of that page, every time
     }
 
     async function saveNotifSeen() {
