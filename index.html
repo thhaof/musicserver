@@ -118,6 +118,25 @@
       transform: scale(1.2);
     }
 
+    /* Visible list position: recalculated on every render, NOT the stable Supabase song id. */
+    .song-visible-position {
+      flex: 0 0 2.2rem;
+      width: 2.2rem;
+      text-align: center;
+      font-size: 0.72rem;
+      line-height: 1;
+      font-weight: 700;
+      color: #9ca3af;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      user-select: none;
+    }
+    @media (max-width: 480px) {
+      .song-visible-position { flex-basis: 1.65rem; width: 1.65rem; font-size: 0.65rem; }
+      .song-item-card > .song-content-left { gap: 0.55rem; }
+    }
+    html[data-theme="light"] .song-visible-position { color: var(--tx-3, #566075); }
+
     /* Highlight style for currently playing song item in any list */
     .playing-item {
       background: rgba(59, 130, 246, 0.18) !important;
@@ -2924,13 +2943,17 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
     window.addEventListener('resize', closeSongMenu);
     window.addEventListener('scroll', e => { if (e.target !== document && !e.target.closest?.('#songMenu')) closeSongMenu(); }, true);
 
+    // index is the zero-based index of the *currently displayed* array.
+    // Never mutate song.id: playlists, playback history and Supabase depend on it.
     function generateSongRowHTML(song, index, queueSource) {
       const currentPlayingSong = currentQueue[currentSongIndex];
       const isThisPlaying = currentPlayingSong && currentPlayingSong.id === song.id;
 
       return `
         <div data-song-id="${song.id}" onclick="if ('${queueSource}' === 'queue') event.stopPropagation(); playSongFromList(${song.id}, '${queueSource}')" class="song-item-card scroll-reveal flex items-center justify-between p-3 rounded-xl hover:bg-gray-800/50 border border-transparent transition duration-200 group ${isThisPlaying ? 'playing-item' : ''}">
-          <div class="flex items-center gap-4 overflow-hidden">
+          <div class="song-content-left flex items-center gap-4 overflow-hidden min-w-0">
+            <!-- This is 1-based list position after the CURRENT filter/sort, never song.id. -->
+            <span class="song-visible-position" aria-label="Vị trí ${index + 1}">${index + 1}</span>
             <!-- Avatar Cover with Overlay Play/Pause Button -->
             <div class="relative w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 shadow-md">
               <img src="${song.cover}" class="w-full h-full object-cover" alt="cover">
