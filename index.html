@@ -1562,7 +1562,7 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
         <i class="fa-solid fa-music text-2xl"></i>
       </div>
 
-      <div class="overflow-hidden cursor-pointer" onclick="goToPlayingSongPlace()" title="GO TO PLAYING LIST">
+      <div class="overflow-hidden">
         <h4
           id="currentTitle"
           class="text-sm font-bold truncate text-white hover:text-blue-400 transition normal-case"
@@ -3846,12 +3846,11 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
       if (window.innerWidth < 1024) closeMobileDrawer();
     }
 
-    function songMenuGoToArtist(i) {
+    function songMenuGoToArtist() {
       const song = songMenuState?.song;
-      if (!song || !song.artists.length) return;
-      if (i === undefined && song.artists.length > 1) { renderSongMenu('artists'); positionSongMenu(); return; }
-      const name = song.artists[i === undefined ? 0 : i];
+      const name = song && (song.mainartist || song.artists[0]);
       closeSongMenu();
+      if (!name) return;
       leaveToMainPage();
       openGroupDetail('artist', name);
       jumpMainToTop();
@@ -5557,6 +5556,8 @@ function togglePlay() {
       if (!view) return;
       if (open && !currentQueue[currentSongIndex]) open = false;
       view.classList.toggle('hidden', !open);
+      const fab = document.getElementById('floatingNavControls');
+      if (fab) fab.style.display = open ? 'none' : '';
       const btn = document.getElementById('npToggleBtn');
       btn?.classList.toggle('open', open);
       btn?.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -5571,6 +5572,13 @@ function togglePlay() {
     }
 
     function toggleQueueSidebar() { setNowPlayingOpen(!isNowPlayingOpen()); }
+    // Pressing anywhere on the player bar (except real controls) does the same as the ▲/▼ button.
+    document.getElementById('playerFooter')?.addEventListener('click', e => {
+      if (e.target.closest('button, input, a, select, .vol-group')) return;
+      toggleQueueSidebar();
+    });
+    document.getElementById('playerFooter')?.classList.add('cursor-pointer');
+
     function closeNowPlaying() { if (isNowPlayingOpen()) setNowPlayingOpen(false); }
 
     // Cover, title and the ▲/▼ button follow whatever is playing.
