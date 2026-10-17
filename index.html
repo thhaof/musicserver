@@ -1836,6 +1836,11 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
       for (const original of loaded) {
         if (!original.title || !original.src) continue;
         const song = { ...original };
+        // Normalize decomposed Vietnamese accents (NFD) so the existing font renders
+        // consistently. Never normalize src or cover: R2 URLs must remain unchanged.
+        for (const key of ['title', 'mainartist', 'featuringartist', 'producer', 'album', 'releaseDate', 'genres', 'country', 'releaseType']) {
+          if (typeof song[key] === 'string') song[key] = song[key].normalize('NFC');
+        }
         song.id = Number(song.id);
         song.genres = normalizeGenres(song.genres);
         song.country = String(song.country || '');
@@ -6072,7 +6077,7 @@ let musicSelectedTracks = [];
 let musicTrackDrafts = [];
 
 function musicTitleFromFilename(filename) {
-  return filename.replace(/\.mp3$/i, '')
+  return filename.normalize('NFC').replace(/\.mp3$/i, '')
     .replace(/^\s*\d{1,3}[\s._-]+/, '').trim();
 }
 function musicCreditsFromFilename(filename) {
@@ -6184,7 +6189,7 @@ async function submitMusicUpload(event) {
     musicUploadStatus('Choose a cover and at least one MP3.', true);
     return;
   }
-  const read = id => document.getElementById(id).value.trim();
+  const read = id => document.getElementById(id).value.trim().normalize('NFC');
   const album = {
     album: read('musicAlbumName'), mainartist: read('musicMainArtist'),
     releaseDate: read('musicReleaseDate'), genres: read('musicGenres'),
@@ -6193,9 +6198,9 @@ async function submitMusicUpload(event) {
   const rows = [...document.querySelectorAll('#musicUploadTracks .track-fields')];
   const tracks = musicSelectedTracks.map((file, index) => ({
     filename: file.name, size: file.size, track_number: index + 1,
-    title: rows[index].querySelector('.music-track-title').value.trim(),
-    featuringartist: rows[index].querySelector('.music-track-feat').value.trim(),
-    producer: rows[index].querySelector('.music-track-producer').value.trim()
+    title: rows[index].querySelector('.music-track-title').value.trim().normalize('NFC'),
+    featuringartist: rows[index].querySelector('.music-track-feat').value.trim().normalize('NFC'),
+    producer: rows[index].querySelector('.music-track-producer').value.trim().normalize('NFC')
   }));
   if (tracks.some(t => !t.title)) { musicUploadStatus('Every song needs a title.', true); return; }
   musicUploadBusy = true;
