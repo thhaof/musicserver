@@ -312,7 +312,7 @@
       #playerFooter .player-info { width: 100% !important; order: 1; gap: 0.75rem !important; }
       #playerFooter .player-info > div:last-of-type, #playerFooter .player-info h4 { min-width: 0; }
       #playerFooter .player-info > .overflow-hidden { flex: 1; min-width: 0; }
-      #playerFooter .player-info button[title="ADD TO PLAYLIST"] { margin-left: auto !important; }
+      #playerFooter .player-info #playerMoreBtn { margin-left: auto !important; }
       #playerFooter .player-controls {
         position: static !important; transform: none !important;
         width: 100% !important; order: 2; gap: 0.35rem !important;
@@ -1045,9 +1045,7 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
   ========================================================== -->
   <div id="adminMsgModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center hidden backdrop-blur-sm p-4" onclick="if (event.target === this) closeModal('adminMsgModal')">
     <div class="bg-[#181922] p-6 rounded-2xl w-[26rem] max-w-full max-h-[92vh] overflow-y-auto border border-gray-800 shadow-2xl view-transition">
-      <h3 class="text-lg font-bold mb-1 text-white uppercase flex items-center gap-2"><i class="fa-solid fa-paper-plane text-blue-400"></i> SEND MESSAGE</h3>
-      <p class="text-xs text-gray-400 mb-4 font-medium normal-case">The message appears in the NOTIFICATIONS bell of the account you choose.</p>
-
+      <h3 class="text-lg font-bold mb-1 text-white uppercase flex items-center gap-2"><i class="fa-solid fa-paper-plane text-blue-400"></i> SEND MESSAGE (ADMIN)</h3>
       <label class="block text-xs text-gray-400 mb-1 font-semibold uppercase">TO</label>
       <select id="adminMsgTo" class="w-full bg-[#222331] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 mb-4 transition normal-case">
         <option value="">EVERYONE</option>
@@ -1075,7 +1073,7 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
   <!-- A message from the admin, opened from the bell -->
   <div id="msgViewModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center hidden backdrop-blur-sm p-4" onclick="if (event.target === this) closeModal('msgViewModal')">
     <div class="bg-[#181922] p-6 rounded-2xl w-[26rem] max-w-full max-h-[90vh] overflow-y-auto border border-gray-800 shadow-2xl view-transition">
-      <p class="text-[10px] font-extrabold tracking-widest text-amber-400 uppercase mb-1" id="msgViewKind">MESSAGE FROM ADMIN</p>
+      <p class="text-[10px] font-extrabold tracking-widest text-amber-400 uppercase mb-1" id="msgViewKind">MESSAGE FROM HOWIE (ADMIN)</p>
       <h3 id="msgViewTitle" class="text-lg font-bold text-white normal-case break-words"></h3>
       <p id="msgViewDate" class="text-[11px] text-gray-500 font-semibold mb-4 normal-case"></p>
       <div id="msgViewBody" class="text-sm text-gray-300 normal-case"></div>
@@ -1578,11 +1576,15 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
       </div>
 
       <button
-        onclick="openAddToPlaylistCurrent()"
-        title="ADD TO PLAYLIST"
-        class="text-gray-400 hover:text-blue-400 text-sm ml-2 w-8 h-8 rounded-lg hover:bg-gray-800/80 flex items-center justify-center transition flex-shrink-0"
+        type="button"
+        id="playerMoreBtn"
+        onclick="openPlayerSongMenu(event)"
+        title="MORE"
+        aria-haspopup="menu"
+        aria-label="More options"
+        class="song-more-btn ml-2 hidden"
       >
-        <i class="fa-solid fa-plus"></i>
+        <i class="fa-solid fa-ellipsis-vertical"></i>
       </button>
     </div>
 
@@ -3767,6 +3769,12 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
       toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
     }
 
+    function openPlayerSongMenu(event) {
+      const song = currentQueue[currentSongIndex];
+      if (!song) return;
+      openSongMenu(event, song.id, 'queue', currentSongIndex);   // the playing song is already in the queue
+    }
+
     function openSongMenu(event, songId, source, index) {
       event.stopPropagation();
       const btn = event.currentTarget;
@@ -5587,10 +5595,12 @@ function togglePlay() {
       const btn = document.getElementById('npToggleBtn');
       if (!song) {
         btn?.classList.add('hidden');
+        document.getElementById('playerMoreBtn')?.classList.add('hidden');
         if (isNowPlayingOpen()) setNowPlayingOpen(false);
         return;
       }
       btn?.classList.remove('hidden');
+      document.getElementById('playerMoreBtn')?.classList.remove('hidden');
       const cover = document.getElementById('npCover');
       if (cover && cover.getAttribute('src') !== song.cover) cover.src = song.cover;
       const t = document.getElementById('npTitle'); if (t) t.textContent = song.title;
