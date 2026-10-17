@@ -852,6 +852,16 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
     .music-input:focus { outline:none; border-color:#3b82f6; }
     .music-file { display:block; max-width:100%; width:100%; margin-top:.5rem; font-size:.72rem; color:var(--tx-2); text-transform:none; }
     #musicUploadTracks .track-fields { display:grid; grid-template-columns:minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); gap:.4rem; }
+    #musicUploadTracks .music-upload-track { transition: border-color .12s ease, box-shadow .12s ease; }
+    #musicUploadTracks .music-drag-handle { display:inline-flex; align-items:center; justify-content:center; width:2rem; height:2rem; border-radius:.5rem; cursor:grab; color:var(--tx-3); background:var(--input); touch-action:pan-y; }
+    #musicUploadTracks .music-drag-handle:hover { color:#60a5fa; background:rgba(59,130,246,.16); }
+    #musicUploadTracks .music-drag-handle:active { cursor:grabbing; }
+    #musicUploadTracks .music-dragging { opacity:.45; }
+    #musicUploadTracks .music-drop-before { box-shadow:inset 0 3px 0 #60a5fa; border-top-color:#60a5fa; }
+    #musicUploadTracks .music-drop-after { box-shadow:inset 0 -3px 0 #60a5fa; border-bottom-color:#60a5fa; }
+    #musicUploadTracks .music-order-number { width:3.2rem; height:2rem; border-radius:.5rem; background:var(--input); color:var(--tx); border:1px solid var(--line); text-align:center; font-size:.8rem; font-weight:700; font-variant-numeric:tabular-nums; text-transform:none; }
+    #musicUploadTracks .music-order-number:focus { outline:2px solid #60a5fa; outline-offset:1px; }
+    #musicUploadTracks .music-order-number::-webkit-inner-spin-button, #musicUploadTracks .music-order-number::-webkit-outer-spin-button { opacity:1; }
     @media(max-width:600px) { #musicUploadTracks .track-fields {grid-template-columns:1fr} }
     #musicUploadModal { z-index:95 !important; }
     #musicUploadModal > div {background:var(--surface-2);color:var(--tx)}
@@ -1744,8 +1754,8 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
         </div>
         <div>
           <div class="flex items-center justify-between mb-2"><span class="text-xs font-bold text-gray-300 uppercase">TRACK INFORMATION</span><span id="musicTrackCount" class="text-xs text-gray-400">0 SONGS</span></div>
-          <div id="musicUploadTracks" class="space-y-2 max-h-56 overflow-y-auto rounded-xl"></div>
-          <p class="text-[11px] text-gray-500 mt-2">No need to rename MP3 files to 01, 02, 03. Titles come from the original filenames. Use ↑ / ↓ to set the album track order before publishing; credits follow each track when it moves.</p>
+          <div id="musicUploadTracks" class="space-y-2 max-h-[48vh] overflow-y-auto rounded-xl" aria-label="Reorder album tracks"></div>
+          <p class="text-[11px] text-gray-500 mt-2">No MP3 renaming needed. Drag the <i class="fa-solid fa-grip-vertical" aria-hidden="true"></i> handle to reorder on desktop, or enter a track position (1, 2, 3...) on any device. Title, featuring and producer move together.</p>
         </div>
         <p id="musicUploadStatus" role="status" aria-live="polite" class="text-xs text-blue-400 normal-case"></p>
         <div class="flex flex-wrap justify-end gap-2 pt-2">
@@ -6127,15 +6137,16 @@ function paintMusicUploadTracks() {
   box.innerHTML = musicSelectedTracks.map((file, i) => {
     const draft = musicTrackDrafts[i];
     return `
-      <div class="p-2 rounded-xl border border-gray-700 bg-[#12131b] normal-case">
+      <div class="music-upload-track p-2 rounded-xl border border-gray-700 bg-[#12131b] normal-case" data-track-index="${i}">
         <div class="flex items-center justify-between gap-2 mb-1">
-          <span class="text-[11px] text-gray-400 min-w-0 truncate" title="${escapeHTML(file.name)}">${i + 1}. ${escapeHTML(file.name)}</span>
-          <div class="flex items-center gap-1 shrink-0" aria-label="Track order controls">
-            <button type="button" onclick="moveMusicUploadTrack(${i}, -1)" ${i === 0 ? 'disabled' : ''}
-              class="px-2 py-1 text-xs rounded-lg bg-gray-800 hover:bg-blue-600 text-gray-200 disabled:opacity-30 disabled:cursor-not-allowed" title="Move track up" aria-label="Move ${i + 1} up">↑</button>
-            <button type="button" onclick="moveMusicUploadTrack(${i}, 1)" ${i === count - 1 ? 'disabled' : ''}
-              class="px-2 py-1 text-xs rounded-lg bg-gray-800 hover:bg-blue-600 text-gray-200 disabled:opacity-30 disabled:cursor-not-allowed" title="Move track down" aria-label="Move ${i + 1} down">↓</button>
+          <div class="flex items-center gap-2 min-w-0 flex-1">
+            <button type="button" draggable="true" class="music-drag-handle shrink-0" title="Drag to reorder" aria-label="Drag track ${i + 1} to a new position"><i class="fa-solid fa-grip-vertical pointer-events-none" aria-hidden="true"></i></button>
+            <span class="text-[11px] text-gray-400 min-w-0 truncate" title="${escapeHTML(file.name)}">${escapeHTML(file.name)}</span>
           </div>
+          <label class="flex items-center gap-1 shrink-0 text-[10px] text-gray-400" title="Enter a new track position">
+            <span>NO.</span>
+            <input class="music-order-number" type="number" inputmode="numeric" min="1" max="${count}" step="1" value="${i + 1}" aria-label="New position for track ${i + 1}" onchange="setMusicUploadTrackPosition(${i}, this.value)">
+          </label>
         </div>
         <div class="track-fields">
           <input required maxlength="200" class="music-input !mt-0 music-track-title" aria-label="Track title" placeholder="Title" value="${escapeHTML(draft.title)}">
@@ -6146,16 +6157,95 @@ function paintMusicUploadTracks() {
   }).join('');
 }
 
-function moveMusicUploadTrack(index, direction) {
-  if (musicUploadBusy) return;
-  const next = index + direction;
-  if (!Number.isInteger(index) || ![-1, 1].includes(direction) || next < 0 || next >= musicSelectedTracks.length) return;
-  // Preserve edits (including featuring/producer) when the user reorders a song.
+// Both the position field and drag/drop use the SAME array reorder operation.
+// File objects stay paired with the correct title, featuring and producer.
+function moveMusicUploadTrackTo(fromIndex, toIndex) {
+  const count = musicSelectedTracks.length;
+  if (musicUploadBusy || !Number.isInteger(fromIndex) || !Number.isInteger(toIndex)
+      || fromIndex < 0 || fromIndex >= count || toIndex < 0 || toIndex >= count) return false;
+  if (fromIndex === toIndex) return true;
   saveMusicUploadTrackEdits();
-  [musicSelectedTracks[index], musicSelectedTracks[next]] = [musicSelectedTracks[next], musicSelectedTracks[index]];
-  [musicTrackDrafts[index], musicTrackDrafts[next]] = [musicTrackDrafts[next], musicTrackDrafts[index]];
+  const [file] = musicSelectedTracks.splice(fromIndex, 1);
+  const [draft] = musicTrackDrafts.splice(fromIndex, 1);
+  musicSelectedTracks.splice(toIndex, 0, file);
+  musicTrackDrafts.splice(toIndex, 0, draft);
   paintMusicUploadTracks();
+  return true;
 }
+
+// A new position is 1-based, e.g. enter 2 to move a track straight to #2.
+function setMusicUploadTrackPosition(fromIndex, rawPosition) {
+  const newPosition = Number(rawPosition);
+  if (!Number.isInteger(newPosition) || newPosition < 1 || newPosition > musicSelectedTracks.length) {
+    const field = document.querySelectorAll('#musicUploadTracks .music-order-number')[fromIndex];
+    if (field) field.value = String(fromIndex + 1);
+    return;
+  }
+  if (moveMusicUploadTrackTo(fromIndex, newPosition - 1)) {
+    const field = document.querySelectorAll('#musicUploadTracks .music-order-number')[newPosition - 1];
+    if (field) { field.focus({ preventScroll: true }); field.select(); }
+  }
+}
+
+let musicDragFrom = null;
+function clearMusicUploadDropMarks() {
+  document.querySelectorAll('#musicUploadTracks .music-upload-track').forEach(row => {
+    row.classList.remove('music-dragging', 'music-drop-before', 'music-drop-after');
+  });
+}
+
+const musicUploadTracksBox = document.getElementById('musicUploadTracks');
+musicUploadTracksBox.addEventListener('dragstart', event => {
+  const grip = event.target.closest?.('.music-drag-handle');
+  if (!grip || musicUploadBusy) { event.preventDefault(); return; }
+  const row = grip.closest('.music-upload-track');
+  const index = Number(row?.dataset.trackIndex);
+  if (!Number.isInteger(index)) { event.preventDefault(); return; }
+  // Any unsaved typed edits must travel with their respective audio files.
+  saveMusicUploadTrackEdits();
+  musicDragFrom = index;
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('text/plain', String(index));
+  row.classList.add('music-dragging');
+});
+musicUploadTracksBox.addEventListener('dragover', event => {
+  if (musicDragFrom === null || musicUploadBusy) return;
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+  // Auto-scroll long album tracklists while dragging near either edge.
+  const bounds = musicUploadTracksBox.getBoundingClientRect();
+  if (event.clientY < bounds.top + 32) musicUploadTracksBox.scrollTop -= 13;
+  else if (event.clientY > bounds.bottom - 32) musicUploadTracksBox.scrollTop += 13;
+  const row = event.target.closest?.('.music-upload-track');
+  clearMusicUploadDropMarks();
+  if (row) {
+    const after = event.clientY >= row.getBoundingClientRect().top + row.getBoundingClientRect().height / 2;
+    row.classList.add(after ? 'music-drop-after' : 'music-drop-before');
+    document.querySelectorAll('#musicUploadTracks .music-upload-track')[musicDragFrom]?.classList.add('music-dragging');
+  }
+});
+musicUploadTracksBox.addEventListener('drop', event => {
+  if (musicDragFrom === null || musicUploadBusy) return;
+  event.preventDefault();
+  const row = event.target.closest?.('.music-upload-track');
+  const from = musicDragFrom;
+  musicDragFrom = null;
+  clearMusicUploadDropMarks();
+  if (!row) return;
+  const target = Number(row.dataset.trackIndex);
+  if (!Number.isInteger(target)) return;
+  const after = event.clientY >= row.getBoundingClientRect().top + row.getBoundingClientRect().height / 2;
+  const insertion = target + (after ? 1 : 0);
+  const finalIndex = insertion > from ? insertion - 1 : insertion;
+  moveMusicUploadTrackTo(from, finalIndex);
+});
+musicUploadTracksBox.addEventListener('dragend', () => {
+  musicDragFrom = null;
+  clearMusicUploadDropMarks();
+});
+musicUploadTracksBox.addEventListener('dragleave', event => {
+  if (!musicUploadTracksBox.contains(event.relatedTarget)) clearMusicUploadDropMarks();
+});
 
 function musicUploadStatus(message, error = false) {
   const el = document.getElementById('musicUploadStatus');
