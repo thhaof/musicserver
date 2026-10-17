@@ -1745,7 +1745,7 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
         <div>
           <div class="flex items-center justify-between mb-2"><span class="text-xs font-bold text-gray-300 uppercase">TRACK INFORMATION</span><span id="musicTrackCount" class="text-xs text-gray-400">0 SONGS</span></div>
           <div id="musicUploadTracks" class="space-y-2 max-h-56 overflow-y-auto rounded-xl"></div>
-          <p class="text-[11px] text-gray-500 mt-2">Titles come from filenames by default. Featuring and producer are optional per song.</p>
+          <p class="text-[11px] text-gray-500 mt-2">No need to rename MP3 files to 01, 02, 03. Titles come from the original filenames. Use ↑ / ↓ to set the album track order before publishing; credits follow each track when it moves.</p>
         </div>
         <p id="musicUploadStatus" role="status" aria-live="polite" class="text-xs text-blue-400 normal-case"></p>
         <div class="flex flex-wrap justify-end gap-2 pt-2">
@@ -6069,6 +6069,7 @@ function togglePlay() {
 /* Admin-only album upload. The Worker independently verifies the user's JWT and admin membership. */
 let musicUploadBusy = false;
 let musicSelectedTracks = [];
+let musicTrackDrafts = [];
 
 function musicTitleFromFilename(filename) {
   return filename.replace(/\.mp3$/i, '')
@@ -6090,21 +6091,65 @@ function openMusicUploadModal() {
 
 function renderMusicUploadTracks() {
   const fileEl = document.getElementById('musicTrackFiles');
-  const files = Array.from(fileEl.files || [])
+  // Filenames can remain unchanged. Natural alphabetical order is only the starting order;
+  // the admin can adjust the final album tracklist using the arrow buttons below.
+  musicSelectedTracks = Array.from(fileEl.files || [])
     .filter(file => /\.mp3$/i.test(file.name))
     .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
-  musicSelectedTracks = files;
+  musicTrackDrafts = musicSelectedTracks.map(file => {
+    const credits = musicCreditsFromFilename(file.name);
+    return { title: credits.title, featuringartist: credits.featuring, producer: '' };
+  });
+  paintMusicUploadTracks();
+}
+
+function saveMusicUploadTrackEdits() {
+  const fields = document.querySelectorAll('#musicUploadTracks .track-fields');
+  fields.forEach((field, i) => {
+    if (!musicTrackDrafts[i]) return;
+    musicTrackDrafts[i] = {
+      title: field.querySelector('.music-track-title').value,
+      featuringartist: field.querySelector('.music-track-feat').value,
+      producer: field.querySelector('.music-track-producer').value
+    };
+  });
+}
+
+function paintMusicUploadTracks() {
   const box = document.getElementById('musicUploadTracks');
-  document.getElementById('musicTrackCount').textContent = `${files.length} SONG${files.length === 1 ? '' : 'S'}`;
-  box.innerHTML = files.map((file, i) => `
-    <div class="p-2 rounded-xl border border-gray-700 bg-[#12131b] normal-case">
-      <div class="text-[11px] text-gray-400 truncate mb-1">${i + 1}. ${escapeHTML(file.name)}</div>
-      <div class="track-fields">
-        <input required maxlength="200" class="music-input !mt-0 music-track-title" aria-label="Track title" placeholder="Title" value="${escapeHTML(musicCreditsFromFilename(file.name).title)}">
-        <input maxlength="200" class="music-input !mt-0 music-track-feat" aria-label="Featuring artists" placeholder="Featuring (optional)" value="${escapeHTML(musicCreditsFromFilename(file.name).featuring)}">
-        <input maxlength="200" class="music-input !mt-0 music-track-producer" aria-label="Producer" placeholder="Producer (optional)">
-      </div>
-    </div>`).join('');
+  const count = musicSelectedTracks.length;
+  document.getElementById('musicTrackCount').textContent = `${count} SONG${count === 1 ? '' : 'S'}`;
+  box.innerHTML = musicSelectedTracks.map((file, i) => {
+    const draft = musicTrackDrafts[i];
+    return `
+      <div class="p-2 rounded-xl border border-gray-700 bg-[#12131b] normal-case">
+        <div class="flex items-center justify-between gap-2 mb-1">
+          <span class="text-[11px] text-gray-400 min-w-0 truncate" title="${escapeHTML(file.name)}">${i + 1}. ${escapeHTML(file.name)}</span>
+          <div class="flex items-center gap-1 shrink-0" aria-label="Track order controls">
+            <button type="button" onclick="moveMusicUploadTrack(${i}, -1)" ${i === 0 ? 'disabled' : ''}
+              class="px-2 py-1 text-xs rounded-lg bg-gray-800 hover:bg-blue-600 text-gray-200 disabled:opacity-30 disabled:cursor-not-allowed" title="Move track up" aria-label="Move ${i + 1} up">↑</button>
+            <button type="button" onclick="moveMusicUploadTrack(${i}, 1)" ${i === count - 1 ? 'disabled' : ''}
+              class="px-2 py-1 text-xs rounded-lg bg-gray-800 hover:bg-blue-600 text-gray-200 disabled:opacity-30 disabled:cursor-not-allowed" title="Move track down" aria-label="Move ${i + 1} down">↓</button>
+          </div>
+        </div>
+        <div class="track-fields">
+          <input required maxlength="200" class="music-input !mt-0 music-track-title" aria-label="Track title" placeholder="Title" value="${escapeHTML(draft.title)}">
+          <input maxlength="200" class="music-input !mt-0 music-track-feat" aria-label="Featuring artists" placeholder="Featuring (optional)" value="${escapeHTML(draft.featuringartist)}">
+          <input maxlength="200" class="music-input !mt-0 music-track-producer" aria-label="Producer" placeholder="Producer (optional)" value="${escapeHTML(draft.producer)}">
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function moveMusicUploadTrack(index, direction) {
+  if (musicUploadBusy) return;
+  const next = index + direction;
+  if (!Number.isInteger(index) || ![-1, 1].includes(direction) || next < 0 || next >= musicSelectedTracks.length) return;
+  // Preserve edits (including featuring/producer) when the user reorders a song.
+  saveMusicUploadTrackEdits();
+  [musicSelectedTracks[index], musicSelectedTracks[next]] = [musicSelectedTracks[next], musicSelectedTracks[index]];
+  [musicTrackDrafts[index], musicTrackDrafts[next]] = [musicTrackDrafts[next], musicTrackDrafts[index]];
+  paintMusicUploadTracks();
 }
 
 function musicUploadStatus(message, error = false) {
