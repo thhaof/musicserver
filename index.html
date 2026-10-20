@@ -1034,6 +1034,7 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
 /* Management V4 — avatar images in chat list. */
 .hm-chat-avatar{overflow:hidden}
 .hm-chat-avatar img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
+.hm-chat-avatar img[hidden],.hm-chat-avatar-initial[hidden]{display:none!important}
 .hm-chat-header-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
 .hm-chat-danger{border-color:rgba(245,90,100,.4);color:#ffc8cf}
 .hm-chat-danger:hover{background:rgba(235,80,95,.15)}
@@ -1088,7 +1089,14 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
 .hm-chat-search:focus{border-color:#9387ff}
 .hm-chat-search::placeholder{color:var(--tx-4,#777)}
 .hm-chat-conversations{min-height:0;overflow-y:auto;flex:1}
-.hm-chat-room{display:flex;gap:10px;align-items:center;text-align:left;width:100%;padding:13px 12px;border:0;border-bottom:1px solid var(--line,#303343);background:transparent;color:var(--tx,#fff);cursor:pointer}
+.hm-chat-room{display:flex;gap:5px;align-items:center;text-align:left;width:100%;padding:0 8px 0 0;border:0;border-bottom:1px solid var(--line,#303343);background:transparent;color:var(--tx,#fff)}
+.hm-chat-room-open{display:flex;flex:1;min-width:0;gap:10px;align-items:center;text-align:left;border:0;background:transparent;color:inherit;padding:13px 0 13px 12px;cursor:pointer}
+.hm-chat-room-trash{border:0;background:transparent;color:var(--tx-3,#9296aa);padding:8px 6px;min-width:30px;min-height:32px;border-radius:8px;cursor:pointer;opacity:.8;flex-shrink:0}
+.hm-chat-room-trash:hover,.hm-chat-room-trash:focus-visible{color:#ff909a;background:rgba(235,80,95,.12);opacity:1}
+.hm-chat-delete-icon{width:39px;min-height:36px;padding:9px;display:inline-flex;justify-content:center;align-items:center}
+.topbar-btn.chat-top-active{background:rgba(104,83,228,.25)!important;color:#a99cff!important;box-shadow:inset 0 0 0 1px rgba(154,135,255,.6)}
+.hm-chat-avatar-initial{font-size:16px;font-weight:850;text-transform:uppercase!important}
+.hm-chat-room-open:focus-visible,.hm-chat-room-trash:focus-visible{outline:2px solid #a599fb;outline-offset:1px}
 .hm-chat-room:hover,.hm-chat-room.active{background:rgba(100,91,202,.16)}
 .hm-chat-avatar{width:38px;height:38px;border-radius:12px;background:linear-gradient(130deg,#5b4ac7,#292f4f);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#e1dcff;font-size:15px}
 .hm-chat-room-main{min-width:0;flex:1;display:flex;flex-direction:column;gap:4px}
@@ -1492,7 +1500,7 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
     </div>
 
     <!-- Chat shortcut — available to all signed-in accounts -->
-    <div style="position:relative;flex-shrink:0"><button id="chatTopBtn" class="topbar-btn hidden" type="button" title="CHATS" aria-label="Open chats" onclick="switchView('chat')"><i class="fa-solid fa-comments"></i></button><span id="chatTopBadge" class="hidden" style="position:absolute;top:-5px;right:-5px;min-width:17px;border-radius:11px;padding:2px 4px;font-size:9px;font-weight:800;line-height:14px;text-align:center;background:#7563e8;color:white;pointer-events:none">0</span></div>
+    <div style="position:relative;flex-shrink:0"><button id="chatTopBtn" class="topbar-btn hidden" type="button" title="CHATS" aria-label="Open chats" aria-pressed="false" onclick="switchView('chat')"><i class="fa-solid fa-comments"></i></button><span id="chatTopBadge" class="hidden" style="position:absolute;top:-5px;right:-5px;min-width:17px;border-radius:11px;padding:2px 4px;font-size:9px;font-weight:800;line-height:14px;text-align:center;background:#7563e8;color:white;pointer-events:none">0</span></div>
     <!-- Notifications: new songs, albums and artists -->
     <div id="notifWrap" class="relative flex-shrink-0">
       <button id="notifBtn" type="button" onclick="toggleNotifMenu()" aria-haspopup="true" aria-expanded="false" aria-label="Notifications" title="NOTIFICATIONS" class="topbar-btn notif-btn">
@@ -1591,9 +1599,6 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
           </div>
         </nav>
 
-        <a href="#" onclick="switchView('chat'); return false;" id="nav-chat" class="nav-item hidden flex items-center gap-4 px-4 py-3 text-sm text-gray-300 hover:text-white rounded-xl transition duration-200 uppercase mx-3 mt-2">
-          <i class="fa-solid fa-comments text-lg w-5 text-center text-violet-400"></i><span>CHATS</span><span id="chatSidebarBadge" class="hm-chat-unread hidden" style="margin-left:auto">0</span>
-        </a>
         <hr class="border-gray-800/80 my-5 mx-4">
 
         <!-- Playlists Header -->
@@ -1833,7 +1838,7 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
           <div style="min-width:0"><div id="chatRoomTitle" class="hm-chat-panel-heading">SELECT A CONVERSATION</div><div id="chatRoomSubtitle" class="hm-chat-small">Messages are visible only to members.</div></div>
         </div>
         <div class="hm-chat-header-actions">
-          <button id="chatDeleteConversationBtn" type="button" class="hm-chat-btn hm-chat-danger hidden" onclick="chatDeleteConversation()" title="Hide this conversation only for your account"><i class="fa-solid fa-trash-can"></i> DELETE CONVERSATION</button>
+          <button id="chatDeleteConversationBtn" type="button" class="hm-chat-btn hm-chat-danger hm-chat-delete-icon hidden" onclick="chatDeleteConversation()" title="Delete conversation for you only" aria-label="Delete conversation for you only"><i class="fa-solid fa-trash-can" aria-hidden="true"></i></button>
           <button id="chatGroupSettings" type="button" class="hm-chat-btn hidden" onclick="chatManageGroup()" title="Group settings"><i class="fa-solid fa-gear"></i> GROUP</button>
         </div>
       </div>
@@ -2266,6 +2271,7 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
         song.artists = [...new Set([song.mainartist, ...splitNames(song.featuringartist), ...splitNames(song.producer)]
           .filter(Boolean).map(canonicalArtist))];
         song.artistLine = song.artists.join(', ');
+        song._search = normalizeSearchText(`${song.title} ${song.artistLine} ${song.album}`);
         songs.push(song);
         song.artists.forEach(name => {
           if (!artistIndex.has(name)) artistIndex.set(name, []);
@@ -3131,6 +3137,13 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
         viewHistory.push(current);
       }
       currentViewName = viewName;
+      // Keep the top-bar chat shortcut visibly selected while CHATS is open.
+      const chatShortcut=document.getElementById('chatTopBtn');
+      if(chatShortcut){
+        const chatSelected=viewName==='chat';
+        chatShortcut.classList.toggle('chat-top-active',chatSelected);
+        chatShortcut.setAttribute('aria-pressed',String(chatSelected));
+      }
       currentActivePlaylistId = null;
       nestedAlbumReturn = null;   // a normal page change always ends the "album opened from artist/category" trail
       if (viewName !== 'playlist') {
@@ -4328,12 +4341,8 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
     }
     const escapeHTML = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-    // Search text is prepared once.
-    songs.forEach(song => { song._search = normalizeSearchText(`${song.title} ${song.artistLine} ${song.album}`); });
-    const albumSearchText = new Map([...albumIndex.entries()].map(([name, list]) => [
-      name, normalizeSearchText(`${name} ${list[0]?.mainartist || ''} ${list[0]?.producer || ''}`)
-    ]));
-    const artistSearchText = new Map([...artistIndex.keys()].map(name => [name, normalizeSearchText(name)]));
+    // Search indices must be generated AFTER the asynchronous Supabase catalog load.
+    // Never capture an empty albumIndex/artistIndex at initial script evaluation.
 
     function searchSection(title, count, inner) {
       return `<section class="bg-[#151620]/70 rounded-2xl p-5 border border-gray-800/60 backdrop-blur-md">
@@ -4347,7 +4356,12 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
       const raw = input ? input.value : '';
       const tokens = normalizeSearchText(raw).split(' ').filter(Boolean);
       const hasQuery = tokens.length > 0;
-      const matches = hay => tokens.every(t => hay.includes(t));
+      const matches = hay => tokens.every(t => String(hay||'').includes(t));
+      // Build current indexes from the latest catalog, including newly uploaded songs.
+      const albumSearchText = new Map([...albumIndex.entries()].map(([name,list]) => [
+        name, normalizeSearchText(`${name} ${list[0]?.mainartist||''} ${list[0]?.producer||''}`)
+      ]));
+      const artistSearchText = new Map([...artistIndex.keys()].map(name => [name,normalizeSearchText(name)]));
 
       document.getElementById('searchClearBtn')?.classList.toggle('show', raw.length > 0);
 
@@ -4358,7 +4372,7 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
 
       // Everything is listed Release Date: newest -> oldest (the website-wide default).
       const newestFirst = { field: 'release', direction: 'desc' };
-      const songResults = hasQuery ? sortSongsArray(songs.filter(s => matches(s._search)), newestFirst) : [];
+      const songResults = hasQuery ? sortSongsArray(songs.filter(s => matches(s._search||normalizeSearchText(`${s.title} ${s.artistLine} ${s.album}`))), newestFirst) : [];
       const albumResults = hasQuery
         ? sortAlbumCollection([...albumIndex.keys()].filter(n => matches(albumSearchText.get(n))).map(getAlbumInfo), newestFirst)
         : [];
@@ -7009,9 +7023,11 @@ function adminStudioStatus(message, error=false) {
 }
 function adminFilterChanged() { haPage=0; haSelected.clear(); adminRenderStudio(); }
 function adminSortOptionText(field){
-  const current=haSortState.field===field;
-  const direction=current?haSortState.direction:(field==='id'?'desc':'asc');
-  const label=field==='id'?(direction==='desc'?'NEWEST':'OLDEST'):(direction==='asc'?'A–Z':'Z–A');
+  // Only the selected option shows its direction, matching Library's Sort By.
+  if(haSortState.field!==field) return field.toUpperCase();
+  const label=field==='id'
+    ?(haSortState.direction==='desc'?'NEWEST':'OLDEST')
+    :(haSortState.direction==='asc'?'A–Z':'Z–A');
   return `${field.toUpperCase()} (${label})`;
 }
 function adminRefreshSortOptions(){
@@ -7616,7 +7632,7 @@ let chatReady=false;
 const chatEsc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const chatIsVisible=()=>currentViewName==='chat'&&!document.getElementById('chatView')?.classList.contains('hidden');
 function chatStatus(message){const el=document.getElementById('chatStatus');if(el)el.textContent=message||'';}
-function chatDate(value){if(!value)return '';try{return new Date(value).toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}catch(_){return '';}}
+function chatDate(value){if(!value)return '';try{const date=new Date(value);if(!Number.isFinite(date.getTime()))return '';return date.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true});}catch(_){return '';}}
 function chatOnlineName(id){return typeof howieLiveMap!=='undefined'&&howieLiveMap.has(String(id))?' · ONLINE':'';}
 function chatIsUserOnline(id){return typeof howieIsOnline==='function' && howieIsOnline(id);}
 function chatPresenceText(id){return chatIsUserOnline(id)?'ONLINE':'OFFLINE';}
@@ -7628,8 +7644,9 @@ function chatAvatarUrl(member){
 function chatRoomAvatar(room){
   const peer=room.kind==='direct'?(room.members||[]).find(m=>String(m.id)!==String(currentUser?.id)):null;
   const img=chatAvatarUrl(peer);
-  return img?`<img src="${chatEsc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer">`
-    :`<i class="fa-solid ${room.kind==='group'?'fa-users':'fa-user'}"></i>`;
+  if(img) return `<img src="${chatEsc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="hm-chat-avatar-initial" hidden>${chatEsc(String(peer?.username||'?').slice(0,1).toUpperCase())}</span>`;
+  return room.kind==='group'?`<i class="fa-solid fa-users"></i>`:
+    `<span class="hm-chat-avatar-initial">${chatEsc(String(peer?.username||'?').slice(0,1).toUpperCase())}</span>`;
 }
 function chatRoomPreview(room){
   const base=String(room?.last_message||'Start the conversation');
@@ -7661,14 +7678,18 @@ function chatRenderRooms(){
   holder.innerHTML=matches.length?matches.map(room=>{
     const selected=String(room.id)===String(chatActiveId);
     const cnt=Number(room.unread_count||0);
-    return `<button type="button" class="hm-chat-room ${selected?'active':''}" onclick="chatOpenRoom('${chatEsc(room.id)}')">
-      <span class="hm-chat-avatar">${chatRoomAvatar(room)}</span>
-      <span class="hm-chat-room-main"><span class="hm-chat-room-title">${chatEsc(chatDisplayName(room))}</span><span class="hm-chat-room-preview">${chatEsc(chatRoomPreview(room))}</span></span>
+    const id=chatEsc(room.id);
+    const name=chatEsc(chatDisplayName(room));
+    return `<div class="hm-chat-room ${selected?'active':''}">
+      <button type="button" class="hm-chat-room-open" onclick="chatOpenRoom('${id}')" aria-label="Open conversation with ${name}">
+        <span class="hm-chat-avatar">${chatRoomAvatar(room)}</span>
+        <span class="hm-chat-room-main"><span class="hm-chat-room-title">${name}</span><span class="hm-chat-room-preview">${chatEsc(chatRoomPreview(room))}</span></span>
+      </button>
       ${cnt?`<span class="hm-chat-unread">${cnt>99?'99+':cnt}</span>`:''}
-    </button>`;
+      <button type="button" class="hm-chat-room-trash" title="Delete conversation for you only" aria-label="Delete conversation with ${name} for you only" onclick="chatDeleteConversationById('${id}',event)"><i class="fa-solid fa-trash-can" aria-hidden="true"></i></button>
+    </div>`;
   }).join(''):'<p class="hm-chat-empty">No conversations found. Select NEW CHAT or NEW GROUP.</p>';
 }
-
 async function chatLoadRooms(showError=false){
   if(!currentUser)return;
   const uid=currentUser.id;
@@ -7827,22 +7848,27 @@ async function chatDelete(id){
   else {await chatLoadMessages(false);await chatLoadRooms();}
 }
 async function chatDeleteConversation(){
-  if(!currentUser||!chatActiveId)return;
-  const roomId=chatActiveId;
+  return chatDeleteConversationById(chatActiveId);
+}
+async function chatDeleteConversationById(roomId,event){
+  if(event){event.preventDefault();event.stopPropagation();}
+  if(!currentUser||!roomId)return;
   const room=chatFindRoom(roomId);
   if(!room)return;
   if(!window.confirm(`Delete the conversation with ${chatDisplayName(room)} for your account only? The other participants will keep their messages.`))return;
-  const button=document.getElementById('chatDeleteConversationBtn');
+  const button=event?.currentTarget||document.getElementById('chatDeleteConversationBtn');
   if(button)button.disabled=true;
   try{
     const {error}=await supabaseClient.rpc('chat_hide_conversation',{p_room:roomId});
     if(error)throw error;
-    chatActiveId=null;
-    chatActiveMessages=[];
-    document.getElementById('chatView')?.classList.remove('mobile-room');
+    if(String(chatActiveId)===String(roomId)){
+      chatActiveId=null;
+      chatActiveMessages=[];
+      document.getElementById('chatView')?.classList.remove('mobile-room');
+    }
     await chatLoadRooms(true);
     chatRenderActiveHeader();
-    chatStatus('Conversation deleted for you. Other participants can still see their copy.');
+    chatStatus('Conversation removed for your account only. Other participants retain their messages.');
   }catch(e){chatStatus('Could not delete conversation: '+String(e.message||e));}
   finally{if(button)button.disabled=false;}
 }
