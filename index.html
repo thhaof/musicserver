@@ -1026,6 +1026,18 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
 .ha-monitor-public{color:#83dabc;font-size:10px}
 @media(max-width:780px){.ha-monitor-layout{grid-template-columns:1fr}.ha-monitor-accounts{max-height:230px}.ha-wrap .ha-management-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:500px){.ha-wrap .ha-management-tile span{font-size:10px}.ha-wrap .ha-message-tile{grid-column:1/-1}.ha-wrap .ha-message-tile span{font-size:12px}}
+
+/* Management V4 — album action buttons remain side-by-side. */
+.ha-wrap .ha-albumgrid{grid-template-columns:repeat(auto-fill,minmax(min(100%,355px),1fr))}
+.ha-wrap .ha-albumgrid .ha-toolbar{display:flex;flex-wrap:nowrap;align-items:center;gap:9px;overflow-x:auto}
+.ha-wrap .ha-albumgrid .ha-toolbar .ha-btn{flex-shrink:0;white-space:nowrap}
+/* Management V4 — avatar images in chat list. */
+.hm-chat-avatar{overflow:hidden}
+.hm-chat-avatar img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
+.hm-chat-header-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.hm-chat-danger{border-color:rgba(245,90,100,.4);color:#ffc8cf}
+.hm-chat-danger:hover{background:rgba(235,80,95,.15)}
+@media(max-width:620px){.hm-chat-header-actions .hm-chat-danger{font-size:9px;padding:8px}}
 </style>
 <style id="howie-live-phase1-style">
 /* Phase 1: intentionally scoped; leaves original layout and player unchanged. */
@@ -1820,7 +1832,10 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
           <button type="button" class="hm-chat-btn hm-chat-back" onclick="chatBackToList()" title="Back to chats"><i class="fa-solid fa-arrow-left"></i></button>
           <div style="min-width:0"><div id="chatRoomTitle" class="hm-chat-panel-heading">SELECT A CONVERSATION</div><div id="chatRoomSubtitle" class="hm-chat-small">Messages are visible only to members.</div></div>
         </div>
-        <button id="chatGroupSettings" type="button" class="hm-chat-btn hidden" onclick="chatManageGroup()" title="Group settings"><i class="fa-solid fa-gear"></i> GROUP</button>
+        <div class="hm-chat-header-actions">
+          <button id="chatDeleteConversationBtn" type="button" class="hm-chat-btn hm-chat-danger hidden" onclick="chatDeleteConversation()" title="Hide this conversation only for your account"><i class="fa-solid fa-trash-can"></i> DELETE CONVERSATION</button>
+          <button id="chatGroupSettings" type="button" class="hm-chat-btn hidden" onclick="chatManageGroup()" title="Group settings"><i class="fa-solid fa-gear"></i> GROUP</button>
+        </div>
       </div>
       <div id="chatMessages" class="hm-chat-messages"><div class="hm-chat-empty"><i class="fa-regular fa-comments"></i>Choose a chat or start a new one.</div></div>
       <div id="chatComposer" class="hm-chat-compose hidden"><button class="hm-chat-btn" type="button" onclick="chatOpenSongPicker()" title="Share a song"><i class="fa-solid fa-music"></i></button><textarea id="chatText" rows="2" maxlength="4000" placeholder="Write a message... (Enter to send)" aria-label="Message" onkeydown="chatComposerKey(event)"></textarea><button class="hm-chat-btn hm-chat-btn-primary" type="button" id="chatSendBtn" onclick="chatSend()" title="Send message"><i class="fa-solid fa-paper-plane"></i></button></div>
@@ -1860,7 +1875,7 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
   <div class="ha-tabs"><button type="button" id="haSongTab" class="ha-tab active" onclick="adminSwitchTab('songs')">SONGS</button><button type="button" id="haAlbumTab" class="ha-tab" onclick="adminSwitchTab('albums')">ALBUMS</button></div>
   <div class="ha-filters"><input id="haSearch" type="search" class="ha-input" placeholder="Search title, artist, album, or ID..." oninput="adminFilterChanged()" aria-label="Search admin library">
     <select id="haAlbumFilter" class="ha-input" onchange="adminFilterChanged()" aria-label="Filter by album"><option value="">ALL ALBUMS</option></select>
-    <div class="ha-custom-sort" id="haSortWrap"><button id="haSortTrigger" type="button" class="ha-input ha-sort-trigger" aria-haspopup="true" aria-expanded="false" onclick="adminToggleSortMenu()"><span id="haSortLabel">ID (NEWEST)</span><i class="fa-solid fa-chevron-down"></i></button><div id="haSortMenu" class="ha-sort-menu hidden" role="menu"><button type="button" onclick="adminChooseSort('id')">ID</button><button type="button" onclick="adminChooseSort('title')">TITLE</button><button type="button" onclick="adminChooseSort('album')">ALBUM</button><button type="button" onclick="adminChooseSort('artist')">ARTIST</button></div></div></div>
+    <div class="ha-custom-sort" id="haSortWrap"><button id="haSortTrigger" type="button" class="ha-input ha-sort-trigger" aria-haspopup="true" aria-expanded="false" onclick="adminToggleSortMenu()"><span id="haSortLabel">ID (NEWEST)</span><i class="fa-solid fa-chevron-down"></i></button><div id="haSortMenu" class="ha-sort-menu hidden" role="menu"><button type="button" data-ha-sort="id" onclick="adminChooseSort('id')">ID</button><button type="button" data-ha-sort="title" onclick="adminChooseSort('title')">TITLE</button><button type="button" data-ha-sort="album" onclick="adminChooseSort('album')">ALBUM</button><button type="button" data-ha-sort="artist" onclick="adminChooseSort('artist')">ARTIST</button></div></div></div>
   <div id="haSongManager"><div class="ha-flex" style="margin-bottom:10px"><p id="haResultCount" class="ha-desc" aria-live="polite"></p><div class="ha-toolbar"><span id="haSelectedCount" class="ha-desc">0 SELECTED</span><button type="button" id="haBulkBtn" class="ha-btn" onclick="adminOpenBulkEdit()" disabled>BULK EDIT</button><button type="button" class="ha-btn" onclick="adminClearSelection()">CLEAR SELECTION</button></div></div>
     <div class="ha-table-scroll"><table class="ha-song-table"><colgroup><col class="ha-col-check"><col class="ha-col-song"><col class="ha-col-album"><col class="ha-col-id"><col class="ha-col-action"></colgroup><thead><tr><th><input type="checkbox" id="haSelectPage" class="ha-check" aria-label="Select visible page" onchange="adminSelectPage(this.checked)"></th><th>SONG / ARTISTS</th><th>ALBUM</th><th>ID</th><th>ACTION</th></tr></thead><tbody id="haSongRows"></tbody></table></div>
     <div class="ha-pager"><span id="haPageInfo"></span><div class="ha-toolbar"><button type="button" class="ha-btn" onclick="adminChangePage(-1)">← PREVIOUS</button><button type="button" class="ha-btn" onclick="adminChangePage(1)">NEXT →</button></div></div>
@@ -2085,10 +2100,9 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
 <div id="howiePrivacyModal" class="howie-live-modal hidden" role="dialog" aria-modal="true" aria-labelledby="howiePrivacyTitle">
   <div class="howie-live-dialog">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h2 id="howiePrivacyTitle">PRIVACY &amp; ACTIVITY</h2><button type="button" class="howie-live-button" onclick="howieClosePrivacy()" aria-label="Close privacy settings">✕</button></div>
-    <p>Control what <strong>other listeners</strong> can see. Howie (Admin) can review the most recently reported song and playing/paused state for all signed-in accounts regardless of these selections. Activity reporting is part of using this service. Details are provided below in these Privacy &amp; Activity settings.</p>
-    <div class="howie-live-field"><label><span>SHOW ME AS ONLINE</span><input type="checkbox" id="howiePrivacyOnline" checked></label><small>When enabled, other signed-in users may see that you're connected. Turning it off hides your public online indicator. It does not prevent the administrator from receiving music activity reported by your player. A connection is not proof of active use.</small></div>
-    <div class="howie-live-field"><label for="howiePrivacyAudience"><span>WHO CAN SEE MY CURRENT SONG?</span><select id="howiePrivacyAudience"><option value="nobody">NOBODY</option><option value="everyone">EVERYONE</option><option value="friends">FRIENDS ONLY</option></select></label><small>Everyone: other signed-in users may see your current song while your online indicator is visible. Friends only: hidden from other users until verified friendships are implemented. Nobody: hidden from other users. All three choices remain visible to Howie (Admin) through Management &gt; Monitor.</small></div>
-    <div class="howie-live-note" role="note"><strong>ADMIN OVERSIGHT — ALWAYS ACTIVE WHILE SIGNED IN:</strong> Howie may view your last reported song ID/title, playing/paused state, timestamp, profile and playlist names (including private playlists) in Management &gt; Monitor. Choosing Nobody, Friends Only, or hiding your Online indicator does not disable admin visibility. Only one latest playback snapshot per account is stored; it is not a full listening history. If you do not want your listening activity reported to the administrator, do not use the service while signed in. Your audio itself is never recorded.</div>
+    <p>Choose what other listeners can see. Listening activity is also available to the site administrator.</p>
+    <div class="howie-live-field"><label><span>SHOW ME AS ONLINE</span><input type="checkbox" id="howiePrivacyOnline" checked></label><small>Show or hide your online indicator from other listeners.</small></div>
+    <div class="howie-live-field"><label for="howiePrivacyAudience"><span>WHO CAN SEE MY CURRENT SONG?</span><select id="howiePrivacyAudience"><option value="nobody">NOBODY</option><option value="everyone">EVERYONE</option><option value="friends">FRIENDS ONLY</option></select></label><small>Friends Only is not available until the friends feature is implemented.</small></div>
     <p id="howiePrivacyStatus" aria-live="polite" style="margin-top:12px"></p>
     <div class="howie-live-buttons"><button type="button" class="howie-live-button" onclick="howieClosePrivacy()">CANCEL</button><button type="button" class="howie-live-button main" onclick="howieSavePrivacy()">SAVE PREFERENCES</button></div>
   </div>
@@ -2096,7 +2110,7 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
 <div id="howieOnlineModal" class="howie-live-modal hidden" role="dialog" aria-modal="true" aria-labelledby="howieOnlineTitle">
   <div class="howie-live-dialog">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h2 id="howieOnlineTitle">WHO'S ONLINE</h2><button type="button" class="howie-live-button" onclick="howieCloseOnline()" aria-label="Close online accounts">✕</button></div>
-    <p>Signed-in accounts currently sharing online status. Songs appear here only when the listener selected Everyone. Howie's private Monitor separately receives disclosed account playback reports. Online status is best-effort, not a verified identity or activity record.</p>
+    <p>Accounts currently sharing their online status.</p>
     <div id="howieOnlineRows" aria-live="polite"></div>
     <div class="howie-live-buttons"><button class="howie-live-button" type="button" onclick="howieRefreshOnline(true)">REFRESH</button><button class="howie-live-button main" type="button" onclick="howieCloseOnline()">CLOSE</button></div>
   </div>
@@ -6994,7 +7008,24 @@ function adminStudioStatus(message, error=false) {
   e.style.color=error?'#ef7474':'#9a8cff';
 }
 function adminFilterChanged() { haPage=0; haSelected.clear(); adminRenderStudio(); }
+function adminSortOptionText(field){
+  const current=haSortState.field===field;
+  const direction=current?haSortState.direction:(field==='id'?'desc':'asc');
+  const label=field==='id'?(direction==='desc'?'NEWEST':'OLDEST'):(direction==='asc'?'A–Z':'Z–A');
+  return `${field.toUpperCase()} (${label})`;
+}
+function adminRefreshSortOptions(){
+  const labels=document.querySelectorAll('#haSortMenu button[data-ha-sort]');
+  labels.forEach(button=>{
+    const field=button.dataset.haSort;
+    button.textContent=adminSortOptionText(field);
+    button.setAttribute('aria-current',String(field===haSortState.field));
+  });
+  const current=document.getElementById('haSortLabel');
+  if(current)current.textContent=adminSortOptionText(haSortState.field);
+}
 function adminToggleSortMenu(){
+  adminRefreshSortOptions();
   const menu=document.getElementById('haSortMenu');
   const show=menu.classList.contains('hidden');
   menu.classList.toggle('hidden',!show);
@@ -7006,9 +7037,7 @@ function adminChooseSort(field){
   else {haSortState.field=field;haSortState.direction=field==='id'?'desc':'asc';}
   document.getElementById('haSortMenu').classList.add('hidden');
   document.getElementById('haSortTrigger').setAttribute('aria-expanded','false');
-  const name=field.toUpperCase();
-  const label=field==='id'?(haSortState.direction==='desc'?'NEWEST':'OLDEST'):(haSortState.direction==='asc'?'A–Z':'Z–A');
-  document.getElementById('haSortLabel').textContent=`${name} (${label})`;
+  adminRefreshSortOptions();
   adminFilterChanged();
 }
 document.addEventListener('click',event=>{
@@ -7033,6 +7062,7 @@ function adminFilteredSongs() {
 }
 function adminRenderStudio() {
   if (!haRequire()) return;
+  adminRefreshSortOptions();
   adminBuildAlbums();
   const filter=document.getElementById('haAlbumFilter');
   const selectedKey=filter.value;
@@ -7157,6 +7187,7 @@ async function adminAfterChanges(){
 }
 function adminExportCatalog(){
   if(!haRequire())return;
+  if(!window.confirm('Export a JSON backup of the current music catalog?'))return;
   const data=songs.map(s=>({id:s.id,title:s.title,mainartist:s.mainartist,featuringartist:s.featuringartist,producer:s.producer,album:s.album,releaseDate:s.releaseDate,genres:Array.isArray(s.genres)?s.genres.join(', '):s.genres,country:s.country,releaseType:s.releaseType,cover:s.cover,src:s.src,track_number:s.track_number??null}));
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
   a.href=url;a.download=`howies-music-catalog-${new Date().toISOString().slice(0,10)}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);
@@ -7345,7 +7376,7 @@ function adminStartMonitorRealtime(){
   channel.subscribe(status=>{
     if(haMonitorLiveChannel!==channel)return;
     if(status==='SUBSCRIBED'){
-      adminSetMonitorRealtimeStatus('live','LIVE UPDATES CONNECTED');
+      adminSetMonitorRealtimeStatus('live','LIVE');
       // Close the race between initial snapshot and channel join.
       adminLoadMonitor();
     }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
@@ -7588,8 +7619,18 @@ function chatStatus(message){const el=document.getElementById('chatStatus');if(e
 function chatDate(value){if(!value)return '';try{return new Date(value).toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}catch(_){return '';}}
 function chatOnlineName(id){return typeof howieLiveMap!=='undefined'&&howieLiveMap.has(String(id))?' · ONLINE':'';}
 function chatIsUserOnline(id){return typeof howieIsOnline==='function' && howieIsOnline(id);}
-function chatPresenceText(id){return chatIsUserOnline(id)?'Online':'Offline';}
+function chatPresenceText(id){return chatIsUserOnline(id)?'ONLINE':'OFFLINE';}
 function chatPresenceClass(id){return chatIsUserOnline(id)?'online':'offline';}
+function chatAvatarUrl(member){
+  const url=String(member?.avatar_url||'').trim();
+  return /^https:\/\/[^\s<>]+$/i.test(url)?url:'';
+}
+function chatRoomAvatar(room){
+  const peer=room.kind==='direct'?(room.members||[]).find(m=>String(m.id)!==String(currentUser?.id)):null;
+  const img=chatAvatarUrl(peer);
+  return img?`<img src="${chatEsc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer">`
+    :`<i class="fa-solid ${room.kind==='group'?'fa-users':'fa-user'}"></i>`;
+}
 function chatRoomPreview(room){
   const base=String(room?.last_message||'Start the conversation');
   if(!room?.last_sender)return base;
@@ -7621,7 +7662,7 @@ function chatRenderRooms(){
     const selected=String(room.id)===String(chatActiveId);
     const cnt=Number(room.unread_count||0);
     return `<button type="button" class="hm-chat-room ${selected?'active':''}" onclick="chatOpenRoom('${chatEsc(room.id)}')">
-      <span class="hm-chat-avatar"><i class="fa-solid ${room.kind==='group'?'fa-users':'fa-user'}"></i></span>
+      <span class="hm-chat-avatar">${chatRoomAvatar(room)}</span>
       <span class="hm-chat-room-main"><span class="hm-chat-room-title">${chatEsc(chatDisplayName(room))}</span><span class="hm-chat-room-preview">${chatEsc(chatRoomPreview(room))}</span></span>
       ${cnt?`<span class="hm-chat-unread">${cnt>99?'99+':cnt}</span>`:''}
     </button>`;
@@ -7709,6 +7750,7 @@ function chatRenderActiveHeader(){
     else sub.textContent='';
   }
   document.getElementById('chatGroupSettings')?.classList.toggle('hidden',room?.kind!=='group');
+  document.getElementById('chatDeleteConversationBtn')?.classList.toggle('hidden',!room);
   composer?.classList.toggle('hidden',!room);
   if(!room){const holder=document.getElementById('chatMessages');if(holder)holder.innerHTML='<div class="hm-chat-empty"><i class="fa-regular fa-comments"></i>Choose a chat or start a new one.</div>'; }
 }
@@ -7737,7 +7779,7 @@ function chatRenderMessages(){
       const s=songs.find(x=>Number(x.id)===Number(m.song_id));
       content=`${m.body?`<div class="hm-chat-text">${chatEsc(m.body)}</div>`:''}<div class="hm-chat-songcard">${s?.cover?`<img src="${chatEsc(s.cover)}" alt="">`:''}<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:800">${chatEsc(s?.title||'Song ID '+m.song_id)}</div><div class="hm-chat-small">${chatEsc(s?.mainartist||'Shared from Music Server')}</div></div>${s?`<button class="hm-chat-btn" type="button" onclick="chatPlaySong(${Number(s.id)})" aria-label="Play shared song"><i class="fa-solid fa-play"></i></button>`:''}</div>`;
     }else content=`<div class="hm-chat-text">${chatEsc(m.body)}</div>`;
-    return `<div class="hm-chat-bubble ${mine?'own':''}">${room.kind==='group'&&!mine?`<div class="hm-chat-author">${chatEsc(membersById.get(String(m.sender_id))||'Member')}</div>`:''}${content}<div class="hm-chat-timestamp"><span>${chatDate(m.created_at)}${m.edited_at?' · edited':''}</span>${mine&&!deleted?`<span class="hm-chat-msg-actions">${m.kind==='text'?`<button type="button" onclick="chatEdit('${chatEsc(m.id)}')">EDIT</button>`:''}<button type="button" onclick="chatDelete('${chatEsc(m.id)}')">DELETE</button></span>`:''}</div></div>`;
+    return `<div class="hm-chat-bubble ${mine?'own':''}">${room.kind==='group'&&!mine?`<div class="hm-chat-author">${chatEsc(membersById.get(String(m.sender_id))||'Member')}</div>`:''}${content}<div class="hm-chat-timestamp"><span>${chatDate(m.created_at)}${m.edited_at?' · edited':''}</span>${mine&&!deleted?`<span class="hm-chat-msg-actions">${m.kind==='text'?`<button type="button" onclick="chatEdit('${chatEsc(m.id)}')">EDIT</button>`:''}<button type="button" onclick="chatDelete('${chatEsc(m.id)}')">UNSEND</button></span>`:''}</div></div>`;
   }).join(''):'<div class="hm-chat-empty">No messages yet. Say hello!</div>';
 }
 async function chatLoadMessages(scrollDown=true){
@@ -7778,10 +7820,31 @@ async function chatEdit(id){
 }
 async function chatDelete(id){
   const msg=chatActiveMessages.find(m=>String(m.id)===String(id));
-  if(!msg)return;
-  if(!window.confirm('Delete this message for you only?'))return;
-  const {error}=await supabaseClient.rpc('chat_hide_message',{p_message:id});
-  if(error)chatStatus('Delete failed: '+error.message);else {await chatLoadMessages(false); await chatLoadRooms();}
+  if(!msg||String(msg.sender_id)!==String(currentUser?.id)||msg.deleted_at)return;
+  if(!window.confirm('Unsend this message for everyone in this conversation?'))return;
+  const {error}=await supabaseClient.rpc('chat_delete_message',{p_message:id});
+  if(error)chatStatus('Unsend failed: '+error.message);
+  else {await chatLoadMessages(false);await chatLoadRooms();}
+}
+async function chatDeleteConversation(){
+  if(!currentUser||!chatActiveId)return;
+  const roomId=chatActiveId;
+  const room=chatFindRoom(roomId);
+  if(!room)return;
+  if(!window.confirm(`Delete the conversation with ${chatDisplayName(room)} for your account only? The other participants will keep their messages.`))return;
+  const button=document.getElementById('chatDeleteConversationBtn');
+  if(button)button.disabled=true;
+  try{
+    const {error}=await supabaseClient.rpc('chat_hide_conversation',{p_room:roomId});
+    if(error)throw error;
+    chatActiveId=null;
+    chatActiveMessages=[];
+    document.getElementById('chatView')?.classList.remove('mobile-room');
+    await chatLoadRooms(true);
+    chatRenderActiveHeader();
+    chatStatus('Conversation deleted for you. Other participants can still see their copy.');
+  }catch(e){chatStatus('Could not delete conversation: '+String(e.message||e));}
+  finally{if(button)button.disabled=false;}
 }
 
 function chatPlaySong(songId){
@@ -7840,6 +7903,10 @@ async function chatCreate(){
       const title=document.getElementById('chatGroupName')?.value.trim()||'';
       const {data,error}=await supabaseClient.rpc('chat_start',{p_user_ids:selected,p_title:title});if(error)throw error;
       id=data;
+    }
+    if(chatComposeKind==='direct' && id){
+      const {error:unhideError}=await supabaseClient.rpc('chat_unhide_conversation',{p_room:id});
+      if(unhideError)throw unhideError;
     }
     chatCloseCompose();await chatLoadRooms(true);
     if(id)await chatOpenRoom(id);
