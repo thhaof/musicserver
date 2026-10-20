@@ -758,12 +758,23 @@ html[data-theme="light"] .theme-seg button.is-active { color: #ffffff; }
 .topbar-brand { display: flex; align-items: center; gap: 0.6rem; min-width: 0; flex-shrink: 0; text-align: left; border-radius: 0.6rem; padding: 0.15rem 0.35rem; transition: background-color .2s ease; }
 .topbar-brand:hover { background: var(--menu-hover); }
 .topbar-brand-icon { width: 1.75rem; height: 1.75rem; object-fit: contain; flex-shrink: 0; }
-.topbar-brand-text { font-weight: 800; font-size: 1rem; letter-spacing: 0.06em; color: var(--tx); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar-brand-text { font-weight: 800; font-size: 1.15rem; letter-spacing: 0.06em; color: var(--tx); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 1023px) {
   .topbar-brand { flex: 1 1 0%; }
-  .topbar-brand-text { font-size: 0.94rem; }
+  .topbar-brand-text { font-size: 1.06rem; }
 }
 
+
+
+/* Howie-specific Home / Management switch; normal accounts only see Home. */
+.howie-home-nav { display:flex;align-items:center;gap:4px;min-width:0; }
+.howie-home-nav #nav-home { flex:1;min-width:0;gap:12px;padding-left:12px;padding-right:6px; }
+.howie-mode-switch { display:inline-flex;align-items:center;justify-content:center;gap:5px;flex-shrink:0;
+  background:rgba(59,130,246,.12);color:#86b8ff;border:1px solid rgba(96,165,250,.32);
+  border-radius:9px;min-height:32px;padding:0 7px;font-size:9px;font-weight:800;cursor:pointer; }
+.howie-mode-switch:hover,.howie-mode-switch:focus-visible { background:rgba(59,130,246,.27);outline:none; }
+.howie-mode-switch[aria-pressed="true"] { background:rgba(124,91,235,.19);color:#bdaeff;border-color:rgba(155,125,250,.42); }
+.howie-mode-switch.hidden { display:none!important; }
 
 /* notifications */
 .notif-btn { position: relative; }
@@ -773,6 +784,20 @@ html[data-theme="light"] .theme-seg button.is-active { color: #ffffff; }
   border: 2px solid var(--surface);
 }
 .notif-btn.has-unread i { color: #60a5fa; animation: bellRing .9s ease 1; transform-origin: 50% 0; }
+/* Keep the unread counter anchored to the bell, including at mobile widths. */
+#notifWrap { position: relative; overflow: visible; }
+#notifBtn { position: relative; overflow: visible; }
+#notifBtn .notif-badge {
+  position: absolute; top: -5px; right: -5px; z-index: 5;
+  min-width: 18px; height: 18px; padding: 0 3px;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1; font-size: 10px; border: 2px solid var(--surface);
+  box-sizing: border-box; pointer-events: none;
+}
+#notifBtn .notif-badge.hidden { display: none !important; }
+#notifBtn.notif-active { background: #2563eb !important; color: #fff !important; box-shadow: inset 0 0 0 1px #60a5fa; }
+#notifBtn.notif-active i { color: #fff !important; animation: none; }
+
 @keyframes bellRing { 0%,100%{transform:rotate(0)} 15%{transform:rotate(14deg)} 30%{transform:rotate(-12deg)} 45%{transform:rotate(8deg)} 60%{transform:rotate(-6deg)} 75%{transform:rotate(3deg)} }
 #notifDropdown {
   position: absolute; right: 0; top: calc(100% + 0.6rem); z-index: 60;
@@ -1096,6 +1121,8 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
 .hm-chat-delete-icon{width:39px;min-height:36px;padding:9px;display:inline-flex;justify-content:center;align-items:center}
 .topbar-btn.chat-top-active{background:rgba(104,83,228,.25)!important;color:#a99cff!important;box-shadow:inset 0 0 0 1px rgba(154,135,255,.6)}
 .hm-chat-avatar-initial{font-size:16px;font-weight:850;text-transform:uppercase!important}
+.hm-chat-avatar img { width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit; }
+.hm-chat-avatar img[hidden] { display:none!important; }
 .hm-chat-room-open:focus-visible,.hm-chat-room-trash:focus-visible{outline:2px solid #a599fb;outline-offset:1px}
 .hm-chat-room:hover,.hm-chat-room.active{background:rgba(100,91,202,.16)}
 .hm-chat-avatar{width:38px;height:38px;border-radius:12px;background:linear-gradient(130deg,#5b4ac7,#292f4f);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#e1dcff;font-size:15px}
@@ -1583,10 +1610,15 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
       <div class="flex-1 min-h-0 overflow-y-auto sidebar-scroll pb-4">
         <!-- Navigation Links -->
         <nav class="px-3 flex flex-col gap-1.5 font-medium">
-          <a href="#" onclick="switchView('home'); return false;" id="nav-home" class="nav-item active-nav flex items-center gap-4 px-4 py-3 text-sm text-gray-300 hover:text-white rounded-xl transition duration-200 uppercase">
-            <i id="navHomeIcon" class="fa-solid fa-house text-lg w-5 text-center text-blue-400"></i>
-            <span id="navHomeLabel">HOME</span>
-          </a>
+          <div class="howie-home-nav">
+            <a href="#" onclick="switchView('home'); return false;" id="nav-home" class="nav-item active-nav flex items-center gap-4 px-4 py-3 text-sm text-gray-300 hover:text-white rounded-xl transition duration-200 uppercase">
+              <i id="navHomeIcon" class="fa-solid fa-house text-lg w-5 text-center text-blue-400"></i>
+              <span id="navHomeLabel">HOME</span>
+            </a>
+            <button type="button" id="howieModeSwitch" class="howie-mode-switch hidden" onclick="howieToggleManagement()" aria-label="Switch to Management" title="Switch to Management" aria-pressed="false">
+              <i class="fa-solid fa-right-left" aria-hidden="true"></i><span id="howieModeSwitchText">ADMIN</span>
+            </button>
+          </div>
           <button type="button" onclick="toggleLibraryMenu()" id="nav-library" class="nav-item w-full flex items-center justify-between gap-4 px-4 py-3 text-sm text-gray-300 hover:text-white rounded-xl transition duration-200 uppercase text-left">
             <span class="flex items-center gap-4"><i class="fa-solid fa-book-open text-lg w-5 text-center text-blue-400"></i>LIBRARY</span>
             <i id="libraryChevron" class="fa-solid fa-chevron-down text-[10px] transition-transform"></i>
@@ -2509,6 +2541,7 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
 
       currentUser = data.user;
       currentUsername = username;
+      howieManagementMode = false;
       resetPlaybackStateForLogin();
 
       // Ensure the profile exists for this authenticated user.
@@ -2553,6 +2586,7 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
       if (data.session && data.session.user) {
         const user = data.session.user;
         currentUser = user;
+        howieManagementMode = false;
         resetPlaybackStateForLogin();
 
         const { data: profile } = await supabaseClient
@@ -2577,6 +2611,7 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
     }
 
     async function logout() {
+      howieManagementMode = false;
       await chatStop();
       howieLiveStop();
       audio.pause();
@@ -3127,8 +3162,8 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
     }
 
     function switchView(viewName, options = {}) {
-      // Howie's Home is Management; everybody else keeps the original Home.
-      if (viewName === 'home' && haRequire()) viewName = 'adminDashboard';
+      // Howie starts on the normal Home, until switching to Management.
+      if (viewName === 'home' && haRequire() && howieManagementMode) viewName = 'adminDashboard';
       if ((viewName === 'adminDashboard' || viewName === 'adminStudio' || viewName === 'adminMonitor') && !haRequire()) viewName = 'home';
       if (viewName !== 'adminMonitor' && typeof adminStopMonitorRealtime === 'function') adminStopMonitorRealtime();
       const current = viewFromVisibleDOM();
@@ -6332,12 +6367,14 @@ function togglePlay() {
       }
       menu.classList.remove('hidden');
       document.getElementById('notifBtn').setAttribute('aria-expanded', 'true');
+      document.getElementById('notifBtn').classList.add('notif-active');
     }
     function closeNotifMenu() {
       if (!notifOpen) return;
       notifOpen = false;
       document.getElementById('notifDropdown')?.classList.add('hidden');
       document.getElementById('notifBtn')?.setAttribute('aria-expanded', 'false');
+      document.getElementById('notifBtn')?.classList.remove('notif-active');
       markNotificationsRead(false);   // closing the panel counts as "seen"
     }
     // The page uses "scroll-behavior: smooth", which makes a plain scrollTop = 0 a slow glide that
@@ -6606,6 +6643,7 @@ function togglePlay() {
       clearInterval(adminPollTimer);
       adminApplyAccess();
       if (notifOpen) { notifOpen = false; document.getElementById('notifDropdown')?.classList.add('hidden'); }
+      document.getElementById('notifBtn')?.classList.remove('notif-active');
       renderNotifBadge();
     }
   </script>
@@ -6942,6 +6980,35 @@ const HA_FIELDS = [
   ['genres', 'GENRES'], ['country', 'COUNTRY'],
   ['releaseType', 'RELEASE TYPE'], ['cover', 'COVER IMAGE URL'], ['src', 'MP3 URL']
 ];
+let howieManagementMode = false;
+function howieRenderModeSwitch() {
+  const admin = haRequire();
+  const toggle = document.getElementById('howieModeSwitch');
+  const toggleLabel = document.getElementById('howieModeSwitchText');
+  const homeLabel = document.getElementById('navHomeLabel');
+  const homeIcon = document.getElementById('navHomeIcon');
+  const on = admin && howieManagementMode;
+  if (toggle) {
+    toggle.classList.toggle('hidden', !admin);
+    toggle.setAttribute('aria-pressed', String(on));
+    toggle.title = on ? 'Switch to Home' : 'Switch to Management';
+    toggle.setAttribute('aria-label', toggle.title);
+  }
+  if (toggleLabel) toggleLabel.textContent = on ? 'HOME' : 'ADMIN';
+  if (homeLabel) homeLabel.textContent = on ? 'MANAGEMENT' : 'HOME';
+  if (homeIcon) {
+    homeIcon.classList.toggle('fa-house', !on);
+    homeIcon.classList.toggle('fa-screwdriver-wrench', on);
+  }
+  const topBrand = document.getElementById('topBrand');
+  if (topBrand) topBrand.title = on ? 'MANAGEMENT' : 'HOME';
+}
+function howieToggleManagement() {
+  if (!haRequire()) return;
+  howieManagementMode = !howieManagementMode;
+  howieRenderModeSwitch();
+  switchView('home', { replaceHistory: true });
+}
 const HA_ALBUM_FIELDS = ['mainartist', 'album', 'releaseDate', 'genres', 'country', 'releaseType', 'cover'];
 const HA_REQUIRED = new Set(['title', 'mainartist', 'album', 'releaseDate', 'genres', 'country', 'releaseType', 'cover', 'src']);
 function haEscape(value) { return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[ch])); }
@@ -6952,17 +7019,10 @@ function haRequire() {
 function adminApplyAccess() {
   isHowieAdmin = !!(currentUser && isAdmin &&
     String(currentUser.email || '').toLowerCase() === HOWIE_ADMIN_EMAIL);
-  const homeLabel = document.getElementById('navHomeLabel');
-  const homeIcon = document.getElementById('navHomeIcon');
-  const topBrand = document.getElementById('topBrand');
-  const topBrandText = topBrand?.querySelector('.topbar-brand-text');
-  if (homeLabel) homeLabel.textContent = isHowieAdmin ? 'MANAGEMENT' : 'HOME';
-  if (homeIcon) {
-    homeIcon.classList.toggle('fa-house', !isHowieAdmin);
-    homeIcon.classList.toggle('fa-screwdriver-wrench', isHowieAdmin);
-  }
+  if (!isHowieAdmin) howieManagementMode = false;
+  howieRenderModeSwitch();
+  const topBrandText = document.querySelector('#topBrand .topbar-brand-text');
   if (topBrandText) topBrandText.textContent = 'MUSIC';
-  if (topBrand) topBrand.title = isHowieAdmin ? 'MANAGEMENT' : 'HOME';
   const nameEl = document.getElementById('menuDisplayName');
   if (nameEl && isHowieAdmin) nameEl.textContent = 'Howie (Admin)';
   else if (nameEl && !currentUser) nameEl.textContent = 'Guest';
@@ -7639,7 +7699,10 @@ function chatPresenceText(id){return chatIsUserOnline(id)?'ONLINE':'OFFLINE';}
 function chatPresenceClass(id){return chatIsUserOnline(id)?'online':'offline';}
 function chatAvatarUrl(member){
   const url=String(member?.avatar_url||'').trim();
-  return /^https:\/\/[^\s<>]+$/i.test(url)?url:'';
+  // Profile editor saves 256x256 JPEG as a data URL (not HTTPS).
+  const remote=/^https:\/\/[^\s<>]+$/i.test(url);
+  const profileImage=/^data:image\/(?:jpeg|png|webp|gif);base64,[a-z0-9+/=]+$/i.test(url) && url.length<1500000;
+  return remote || profileImage ? url : '';
 }
 function chatRoomAvatar(room){
   const peer=room.kind==='direct'?(room.members||[]).find(m=>String(m.id)!==String(currentUser?.id)):null;
