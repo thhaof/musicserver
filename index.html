@@ -984,6 +984,13 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
 @media(max-width:620px){.ha-wrap .ha-filters{grid-template-columns:1fr 1fr}.ha-wrap .ha-filters input{grid-column:1/-1}.ha-modal .ha-fieldgrid{grid-template-columns:1fr}.ha-wrap .ha-albumgrid{grid-template-columns:1fr}.ha-wrap .ha-heading{font-size:25px}}
 
 
+
+/* Permission-aware Management layout. Music Editor sees only upload + library editing. */
+.ha-wrap .ha-management-tile.ha-super-only.hidden,
+.ha-wrap .ha-dashboard-section.hidden { display:none!important; }
+.ha-wrap .ha-management-grid.ha-editor-grid { grid-template-columns:repeat(2,minmax(0,270px)); }
+@media(max-width:560px){.ha-wrap .ha-management-grid.ha-editor-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+
 /* HOWIE MANAGEMENT NAVIGATION */
 .ha-wrap .ha-management-heading{margin-bottom:24px}
 .ha-wrap .ha-management-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:15px 0 30px}
@@ -2034,14 +2041,14 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
 <div id="adminDashboardView" class="ha-wrap hidden" aria-label="Management">
   <div class="ha-flex ha-management-heading">
     <div><div class="ha-upper">HOWIE'S MUSIC SERVER</div><h1 class="ha-heading">MANAGEMENT</h1><p class="ha-desc">Dashboard, uploads, backups, library tools and notifications in one place.</p></div>
-    <span class="ha-bubble"><i class="fa-solid fa-shield-halved"></i> HOWIE (ADMIN)</span>
+    <span class="ha-bubble" id="haStaffBadge"><i class="fa-solid fa-shield-halved"></i> HOWIE (SUPER ADMIN)</span>
   </div>
   <div class="ha-management-grid" aria-label="Management sections">
     <button type="button" class="ha-management-tile" onclick="openMusicUploadModal()"><i class="fa-solid fa-cloud-arrow-up"></i><span>UPLOAD MUSIC</span><small>Songs and full albums</small></button>
-    <button type="button" class="ha-management-tile" onclick="adminExportCatalog()"><i class="fa-solid fa-file-arrow-down"></i><span>EXPORT BACKUP</span><small>Download JSON catalog</small></button>
-    <button type="button" class="ha-management-tile" onclick="adminOpenMonitor()"><i class="fa-solid fa-users-viewfinder"></i><span>MONITOR</span><small>Accounts and activity</small></button>
+    <button type="button" class="ha-management-tile ha-super-only" onclick="adminExportCatalog()"><i class="fa-solid fa-file-arrow-down"></i><span>EXPORT BACKUP</span><small>Download JSON catalog</small></button>
+    <button type="button" class="ha-management-tile ha-super-only" onclick="adminOpenMonitor()"><i class="fa-solid fa-users-viewfinder"></i><span>MONITOR</span><small>Accounts and activity</small></button>
     <button type="button" class="ha-management-tile" onclick="adminOpenStudio('songs')"><i class="fa-solid fa-book-open"></i><span>LIBRARY MANAGEMENT</span><small>Edit songs and albums</small></button>
-    <button type="button" class="ha-management-tile ha-message-tile" onclick="openAdminMsgModal()"><i class="fa-solid fa-paper-plane"></i><span>SEND MESSAGE</span><small>Notifications to selected accounts</small></button>
+    <button type="button" class="ha-management-tile ha-message-tile ha-super-only" onclick="openAdminMsgModal()"><i class="fa-solid fa-paper-plane"></i><span>SEND MESSAGE</span><small>Notifications to selected accounts</small></button>
   </div>
   <div id="haDashboardStats" class="ha-dashboard-section">
     <div class="ha-flex"><h2 class="ha-section-title"><i class="fa-solid fa-chart-pie" style="color:#a599fb;margin-right:7px"></i> DASHBOARD</h2><span class="ha-bubble">LIVE CATALOG</span></div>
@@ -3362,8 +3369,9 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
 
     function switchView(viewName, options = {}) {
       // Howie starts on the normal Home, until switching to Management.
-      if (viewName === 'home' && haRequire() && howieManagementMode) viewName = 'adminDashboard';
-      if ((viewName === 'adminDashboard' || viewName === 'adminStudio' || viewName === 'adminMonitor') && !haRequire()) viewName = 'home';
+      if (viewName === 'home' && musicCanEdit() && howieManagementMode) viewName = 'adminDashboard';
+      if (['adminDashboard','adminStudio'].includes(viewName) && !musicCanEdit()) viewName = 'home';
+      if (viewName === 'adminMonitor' && !haRequire()) viewName = 'home';
       if (viewName !== 'adminMonitor' && typeof adminStopMonitorRealtime === 'function') adminStopMonitorRealtime();
       const current = viewFromVisibleDOM();
       if (!options.fromBack && !options.replaceHistory && current !== viewName && !['group','playlist'].includes(current)) {
@@ -6188,7 +6196,7 @@ function togglePlay() {
       const name = currentUsername || '';
       const nameEl = document.getElementById('menuDisplayName');
       const userEl = document.getElementById('menuUsername');
-      if (nameEl) nameEl.textContent = haRequire() ? 'Howie (Admin)' : (currentUser && name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Guest');
+      if (nameEl) nameEl.textContent = haRequire() ? 'Howie (Super Admin)' : (musicCanEdit() ? `${name||'irynna'} (Music Editor)` : (currentUser && name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Guest'));
       if (userEl) userEl.textContent = currentUser && name ? '@' + name : 'Not logged in';
       updateHomeWelcome();
     }
@@ -6648,6 +6656,15 @@ function togglePlay() {
         const { data, error } = await supabaseClient.from('admins').select('user_id').eq('user_id', currentUser.id).maybeSingle();
         isAdmin = !error && !!data;
       } catch (e) { isAdmin = false; }
+      musicStaffRole='none';
+      if (isAdmin) {
+        try {
+          const {data,error}=await supabaseClient.from('music_staff_roles')
+            .select('role').eq('user_id',currentUser.id).maybeSingle();
+          if (error) throw error;
+          if (data && ['super_admin','music_editor'].includes(data.role)) musicStaffRole=data.role;
+        } catch(e) { console.warn('Music staff roles need SQL setup:',e?.message||e); }
+      }
       adminApplyAccess();
       await fetchAdminMessages();
       clearInterval(adminPollTimer);
@@ -6850,7 +6867,7 @@ function togglePlay() {
     function resetNotifState() {
       notifSeenCount = null;
       notifEntries = [];
-      adminMessages = []; msgSeenMs = 0; isAdmin = false;
+      adminMessages = []; msgSeenMs = 0; isAdmin = false; musicStaffRole = 'none';
       clearInterval(adminPollTimer);
       adminApplyAccess();
       if (notifOpen) { notifOpen = false; document.getElementById('notifDropdown')?.classList.add('hidden'); }
@@ -6907,7 +6924,7 @@ function musicCreditsFromFilename(filename) {
 }
 
 function openMusicUploadModal() {
-  if (!haRequire()) return;
+  if (!musicCanEdit()) return;
   closeSettingsMenu();
   document.getElementById('musicUploadStatus').textContent = '';
   openModal('musicUploadModal');
@@ -7073,7 +7090,7 @@ async function musicWorkerRequest(route, token, options = {}) {
 
 async function submitMusicUpload(event) {
   event.preventDefault();
-  if (musicUploadBusy || !haRequire()) return;
+  if (musicUploadBusy || !musicCanEdit()) return;
   if (MUSIC_UPLOAD_API.includes('YOUR-WORKER')) {
     musicUploadStatus('Configure MUSIC_UPLOAD_API in index.html first (see SETUP.md).', true);
     return;
@@ -7100,6 +7117,7 @@ async function submitMusicUpload(event) {
   }));
   if (tracks.some(t => !t.title)) { musicUploadStatus('Every song needs a title.', true); return; }
   musicUploadBusy = true;
+  let musicUploadStage = 'Preparing album';
   const button = document.getElementById('musicUploadSubmit');
   button.disabled = true;
   try {
@@ -7117,13 +7135,15 @@ async function submitMusicUpload(event) {
     ];
     for (let i = 0; i < allUploads.length; i++) {
       const { file, key } = allUploads[i];
-      musicUploadStatus(`Uploading ${i + 1}/${allUploads.length}: ${file.name}`);
+      musicUploadStage = `Uploading ${i + 1}/${allUploads.length}: ${file.name}`;
+      musicUploadStatus(musicUploadStage);
       await musicWorkerRequest('/asset?key=' + encodeURIComponent(key), token, {
         method: 'PUT',
         headers: { 'Content-Type': file.type || (file.name.match(/\.mp3$/i) ? 'audio/mpeg' : 'image/jpeg') },
         body: file
       });
     }
+    musicUploadStage = 'Publishing album';
     musicUploadStatus('All files uploaded. Publishing song records…');
     const published = await musicWorkerRequest('/publish', token, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -7145,7 +7165,7 @@ async function submitMusicUpload(event) {
     renderMusicUploadTracks();
   } catch (error) {
     console.error('Music upload error:', error);
-    musicUploadStatus(error.message || 'Upload failed. Please try again.', true);
+    musicUploadStatus(`${musicUploadStage} — ${error.message || 'Upload failed. Please try again.'}`, true);
   } finally {
     musicUploadBusy = false;
     button.disabled = false;
@@ -7170,8 +7190,16 @@ async function submitMusicUpload(event) {
 /* HOWIE ADMIN MODE — no R2/API secrets are used in the browser.
    Only the verified Howie account can open these screens. Supabase RLS and
    the reorder RPC independently enforce the same rule server-side. */
-const HOWIE_ADMIN_EMAIL = 'howie@howie.xy'; // Must match the SQL setup.
+const HOWIE_ADMIN_EMAIL = 'howie@howie.xy'; // Original Super Admin.
+const MUSIC_EDITOR_EMAIL = 'irynna@howie.xy';
+let musicStaffRole = 'none'; // Loaded from RLS-protected music_staff_roles.
 let isHowieAdmin = false;
+function musicCanEdit(){
+  if (!currentUser || !isAdmin) return false;
+  const email=String(currentUser.email||'').toLowerCase();
+  return (musicStaffRole==='super_admin' && email===HOWIE_ADMIN_EMAIL) ||
+    (musicStaffRole==='music_editor' && email===MUSIC_EDITOR_EMAIL);
+}
 let haTab = 'songs';
 const haSortState={field:'id',direction:'desc'};
 let haPage = 0;
@@ -7224,7 +7252,7 @@ const HA_FIELDS = [
 ];
 let howieManagementMode = false;
 function howieRenderModeSwitch() {
-  const admin = haRequire();
+  const admin = musicCanEdit();
   const toggle = document.getElementById('howieModeSwitch');
   document.querySelector('.howie-home-nav')?.classList.toggle('howie-has-admin', admin);
   const homeLabel = document.getElementById('navHomeLabel');
@@ -7246,7 +7274,7 @@ function howieRenderModeSwitch() {
   if (topBrand) topBrand.title = on ? 'MANAGEMENT' : 'HOME';
 }
 function howieToggleManagement() {
-  if (!haRequire()) return;
+  if (!musicCanEdit()) return;
   howieManagementMode = !howieManagementMode;
   howieRenderModeSwitch();
   switchView('home', { replaceHistory: true });
@@ -7255,29 +7283,39 @@ const HA_ALBUM_FIELDS = ['mainartist', 'album', 'releaseDate', 'genres', 'countr
 const HA_REQUIRED = new Set(['title', 'mainartist', 'album', 'releaseDate', 'genres', 'country', 'releaseType', 'cover', 'src']);
 function haEscape(value) { return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[ch])); }
 function haRequire() {
-  return !!(currentUser && isAdmin && isHowieAdmin &&
-    String(currentUser.email || '').toLowerCase() === HOWIE_ADMIN_EMAIL);
+  return !!(musicCanEdit() && isHowieAdmin && musicStaffRole==='super_admin');
 }
 function adminApplyAccess() {
-  isHowieAdmin = !!(currentUser && isAdmin &&
+  isHowieAdmin = !!(currentUser && isAdmin && musicStaffRole==='super_admin' &&
     String(currentUser.email || '').toLowerCase() === HOWIE_ADMIN_EMAIL);
-  if (!isHowieAdmin) howieManagementMode = false;
+  const canEdit=musicCanEdit();
+  if (!canEdit) howieManagementMode = false;
   howieRenderModeSwitch();
   const topBrandText = document.querySelector('#topBrand .topbar-brand-text');
   if (topBrandText) topBrandText.textContent = 'MUSIC';
   const nameEl = document.getElementById('menuDisplayName');
-  if (nameEl && isHowieAdmin) nameEl.textContent = 'Howie (Admin)';
+  if (nameEl && isHowieAdmin) nameEl.textContent = 'Howie (Super Admin)';
+  else if (nameEl && canEdit) nameEl.textContent = `${currentUsername||'irynna'} (Music Editor)`;
   else if (nameEl && !currentUser) nameEl.textContent = 'Guest';
   else if (nameEl && currentUser) {
     const n = currentUsername || '';
     nameEl.textContent = n ? n.charAt(0).toUpperCase() + n.slice(1) : 'User';
   }
-  if (!isHowieAdmin) {
+  document.querySelectorAll('#adminDashboardView .ha-super-only').forEach(el=>el.classList.toggle('hidden',!isHowieAdmin));
+  document.getElementById('haDashboardStats')?.classList.toggle('hidden',!isHowieAdmin);
+  document.querySelector('#adminDashboardView .ha-management-grid')?.classList.toggle('ha-editor-grid',canEdit&&!isHowieAdmin);
+  const badge=document.getElementById('haStaffBadge');
+  if (badge) badge.innerHTML=isHowieAdmin
+    ? '<i class="fa-solid fa-shield-halved"></i> HOWIE (SUPER ADMIN)'
+    : (canEdit ? '<i class="fa-solid fa-pen-to-square"></i> IRYNNA (MUSIC EDITOR)' : '');
+  if (!isHowieAdmin) document.getElementById('adminMsgModal')?.classList.add('hidden');
+  if (!canEdit) {
     document.getElementById('haEditorModal')?.classList.add('hidden');
     document.getElementById('haOrderModal')?.classList.add('hidden');
-    document.getElementById('adminMsgModal')?.classList.add('hidden');
     haSelected.clear();
-    if (['adminDashboard','adminStudio','adminMonitor'].includes(currentViewName)) switchView('home', {replaceHistory:true});
+    if (['adminDashboard','adminStudio','adminMonitor'].includes(currentViewName)) switchView('home',{replaceHistory:true});
+  } else if (!isHowieAdmin && currentViewName==='adminMonitor') {
+    switchView('adminDashboard',{replaceHistory:true});
   }
 }
 function adminScrollDashboard() {
@@ -7308,9 +7346,9 @@ function adminRenderDashboard() {
   document.getElementById('haRecent').innerHTML=[...songs].sort((a,b)=>b.id-a.id).slice(0,6).map(song=>
     `<div class="ha-recent"><img class="ha-cover" src="${haEscape(song.cover || '')}" alt="" loading="lazy"><div class="ha-grow"><div class="ha-songtitle">${haEscape(song.title)}</div><div class="ha-songsub">${haEscape(song.mainartist)} · ${haEscape(song.album)}</div></div><span class="ha-bubble">ID ${song.id}</span><button class="ha-btn" type="button" onclick="adminOpenEdit(${Number(song.id)})" aria-label="Edit song ${Number(song.id)}">EDIT</button></div>`).join('');
 }
-function adminOpenStudio(tab) { if (!haRequire()) return; switchView('adminStudio'); adminSwitchTab(tab || 'songs'); }
+function adminOpenStudio(tab) { if (!musicCanEdit()) return; switchView('adminStudio'); adminSwitchTab(tab || 'songs'); }
 function adminSwitchTab(tab) {
-  if (!haRequire()) return;
+  if (!musicCanEdit()) return;
   haTab = tab === 'albums' ? 'albums' : 'songs';
   document.getElementById('haSongManager').classList.toggle('hidden', haTab !== 'songs');
   document.getElementById('haAlbumManager').classList.toggle('hidden', haTab !== 'albums');
@@ -7350,7 +7388,7 @@ function adminToggleSortMenu(){
   document.getElementById('haSortTrigger').setAttribute('aria-expanded',String(show));
 }
 function adminChooseSort(field){
-  if(!haRequire()||!['id','title','album','artist'].includes(field))return;
+  if(!musicCanEdit()||!['id','title','album','artist'].includes(field))return;
   if(haSortState.field===field)haSortState.direction=haSortState.direction==='asc'?'desc':'asc';
   else {haSortState.field=field;haSortState.direction=field==='id'?'desc':'asc';}
   document.getElementById('haSortMenu').classList.add('hidden');
@@ -7379,7 +7417,7 @@ function adminFilteredSongs() {
   return source;
 }
 function adminRenderStudio() {
-  if (!haRequire()) return;
+  if (!musicCanEdit()) return;
   adminRefreshSortOptions();
   adminBuildAlbums();
   const filter=document.getElementById('haAlbumFilter');
@@ -7425,18 +7463,18 @@ function adminSelectPage(checked){for(const e of document.querySelectorAll('.ha-
 function adminRenderSelectionState(){document.getElementById('haSelectedCount').textContent=`${haSelected.size} SELECTED`;document.getElementById('haBulkBtn').disabled=!haSelected.size;}
 function adminClearSelection(){haSelected.clear();adminRenderStudio();}
 function adminOpenEdit(id){
-  if(!haRequire())return;
+  if(!musicCanEdit())return;
   const song=songs.find(s=>s.id===Number(id));if(!song)return;
   haEditorContext={kind:'song',ids:[song.id],original:song};
   adminBuildEditor(`EDIT SONG · ID ${song.id}`,`${song.title} · ${song.mainartist}`,HA_FIELDS,song,false);
 }
 function adminOpenBulkEdit(){
-  if(!haRequire()||!haSelected.size)return;
+  if(!musicCanEdit()||!haSelected.size)return;
   haEditorContext={kind:'bulk',ids:[...haSelected]};
   adminBuildEditor(`BULK EDIT · ${haSelected.size} SONGS`,'Check each field you want to update. Unchecked fields stay unchanged.',HA_FIELDS,{},true);
 }
 function adminEditAlbum(index){
-  if(!haRequire())return;
+  if(!musicCanEdit())return;
   adminBuildAlbums();const album=haAlbums[index];if(!album)return;
   haEditorContext={kind:'album',ids:album.tracks.map(s=>s.id),original:album.tracks[0]};
   adminBuildEditor(`EDIT ALBUM · ${album.name}`,`Applies shared album metadata to ${album.tracks.length} songs. Song titles, individual credits, IDs and MP3 URLs are preserved.`,HA_FIELDS.filter(([key])=>HA_ALBUM_FIELDS.includes(key)),album.tracks[0],false);
@@ -7474,7 +7512,7 @@ function adminValidatePatch(patch){
   }
 }
 async function adminSaveEditor(event){
-  event.preventDefault();if(!haRequire()||haSaving||!haEditorContext)return;
+  event.preventDefault();if(!musicCanEdit()||haSaving||!haEditorContext)return;
   const ctx=haEditorContext, fields=document.getElementById('haEditorFields'),patch={};
   for(const input of fields.querySelectorAll('[name]')){
     if(ctx.kind==='bulk'&&!fields.querySelector(`[data-apply="${input.name}"]`)?.checked)continue;
@@ -7511,7 +7549,7 @@ function adminExportCatalog(){
   a.href=url;a.download=`howies-music-catalog-${new Date().toISOString().slice(0,10)}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);
 }
 function adminOpenOrder(index){
-  if(!haRequire())return;
+  if(!musicCanEdit())return;
   adminBuildAlbums();const alb=haAlbums[index];if(!alb)return;
   haOrderAlbum={artist:alb.artist,album:alb.name};
   haOrdering=[...alb.tracks].sort((a,b)=>(a.track_number??999999)-(b.track_number??999999)||a.id-b.id);
@@ -7529,7 +7567,7 @@ function adminMoveOrder(from,toRaw){
 }
 function adminCloseOrder(){if(haSaving)return;document.getElementById('haOrderModal').classList.add('hidden');haOrderAlbum=null;haDragging=null;}
 async function adminSaveOrder(){
-  if(!haRequire()||!haOrderAlbum||haSaving)return;
+  if(!musicCanEdit()||!haOrderAlbum||haSaving)return;
   haSaving=true;document.getElementById('haOrderSave').disabled=true;
   const status=document.getElementById('haOrderStatus');status.textContent='Saving new track order…';
   try{
