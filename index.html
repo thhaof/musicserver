@@ -985,11 +985,13 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
 
 
 
-/* Permission-aware Management layout. Music Editor sees only upload + library editing. */
+/* Permission-aware Management layout. Manager sees only upload + library editing; Dashboard is read-only. */
 .ha-wrap .ha-management-tile.ha-super-only.hidden,
 .ha-wrap .ha-dashboard-section.hidden { display:none!important; }
-.ha-wrap .ha-management-grid.ha-editor-grid { grid-template-columns:repeat(2,minmax(0,270px)); }
-@media(max-width:560px){.ha-wrap .ha-management-grid.ha-editor-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+/* For Manager, fill the available Management width with two equal action tiles. */
+.ha-wrap .ha-management-grid.ha-editor-grid { grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; }
+.ha-wrap .ha-management-grid.ha-editor-grid > .ha-management-tile:not(.hidden) { min-width:0; width:100%; }
+@media(max-width:520px){.ha-wrap .ha-management-grid.ha-editor-grid{grid-template-columns:minmax(0,1fr);}}
 
 /* HOWIE MANAGEMENT NAVIGATION */
 .ha-wrap .ha-management-heading{margin-bottom:24px}
@@ -2040,7 +2042,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       <!-- HOWIE ADMIN MODE: isolated views; never replaces the public player -->
 <div id="adminDashboardView" class="ha-wrap hidden" aria-label="Management">
   <div class="ha-flex ha-management-heading">
-    <div><div class="ha-upper">HOWIE'S MUSIC SERVER</div><h1 class="ha-heading">MANAGEMENT</h1><p class="ha-desc">Dashboard, uploads, backups, library tools and notifications in one place.</p></div>
+    <div><div class="ha-upper">HOWIE'S MUSIC SERVER</div><h1 class="ha-heading">MANAGEMENT</h1><p class="ha-desc" id="haManagementDescription">Dashboard, uploads, backups, library tools and notifications in one place.</p></div>
     <span class="ha-bubble" id="haStaffBadge"><i class="fa-solid fa-shield-halved"></i> HOWIE (SUPER ADMIN)</span>
   </div>
   <div class="ha-management-grid" aria-label="Management sections">
@@ -6196,7 +6198,7 @@ function togglePlay() {
       const name = currentUsername || '';
       const nameEl = document.getElementById('menuDisplayName');
       const userEl = document.getElementById('menuUsername');
-      if (nameEl) nameEl.textContent = haRequire() ? 'Howie (Super Admin)' : (musicCanEdit() ? `${name||'irynna'} (Music Editor)` : (currentUser && name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Guest'));
+      if (nameEl) nameEl.textContent = haRequire() ? 'Howie (Super Admin)' : (musicCanEdit() ? `${name||'irynna'} (Manager)` : (currentUser && name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Guest'));
       if (userEl) userEl.textContent = currentUser && name ? '@' + name : 'Not logged in';
       updateHomeWelcome();
     }
@@ -7295,19 +7297,24 @@ function adminApplyAccess() {
   if (topBrandText) topBrandText.textContent = 'MUSIC';
   const nameEl = document.getElementById('menuDisplayName');
   if (nameEl && isHowieAdmin) nameEl.textContent = 'Howie (Super Admin)';
-  else if (nameEl && canEdit) nameEl.textContent = `${currentUsername||'irynna'} (Music Editor)`;
+  else if (nameEl && canEdit) nameEl.textContent = `${currentUsername||'irynna'} (Manager)`;
   else if (nameEl && !currentUser) nameEl.textContent = 'Guest';
   else if (nameEl && currentUser) {
     const n = currentUsername || '';
     nameEl.textContent = n ? n.charAt(0).toUpperCase() + n.slice(1) : 'User';
   }
   document.querySelectorAll('#adminDashboardView .ha-super-only').forEach(el=>el.classList.toggle('hidden',!isHowieAdmin));
-  document.getElementById('haDashboardStats')?.classList.toggle('hidden',!isHowieAdmin);
+  // Dashboard uses public catalog data and is safe for Manager; sensitive tools remain Super Admin-only.
+  document.getElementById('haDashboardStats')?.classList.toggle('hidden',!canEdit);
+  const managementDescription=document.getElementById('haManagementDescription');
+  if(managementDescription) managementDescription.textContent=isHowieAdmin
+    ? 'Dashboard, uploads, backups, library tools and notifications in one place.'
+    : 'Dashboard, music uploads and library management in one place.';
   document.querySelector('#adminDashboardView .ha-management-grid')?.classList.toggle('ha-editor-grid',canEdit&&!isHowieAdmin);
   const badge=document.getElementById('haStaffBadge');
   if (badge) badge.innerHTML=isHowieAdmin
     ? '<i class="fa-solid fa-shield-halved"></i> HOWIE (SUPER ADMIN)'
-    : (canEdit ? '<i class="fa-solid fa-pen-to-square"></i> IRYNNA (MUSIC EDITOR)' : '');
+    : (canEdit ? '<i class="fa-solid fa-pen-to-square"></i> IRYNNA (MANAGER)' : '');
   if (!isHowieAdmin) document.getElementById('adminMsgModal')?.classList.add('hidden');
   if (!canEdit) {
     document.getElementById('haEditorModal')?.classList.add('hidden');
@@ -7319,7 +7326,7 @@ function adminApplyAccess() {
   }
 }
 function adminScrollDashboard() {
-  if (!haRequire()) return;
+  if (!musicCanEdit()) return;
   document.getElementById('haDashboardStats')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function adminBuildAlbums() {
@@ -7332,7 +7339,7 @@ function adminBuildAlbums() {
   haAlbums = Array.from(groups.values()).sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
 }
 function adminRenderDashboard() {
-  if (!haRequire()) return;
+  if (!musicCanEdit()) return;
   adminBuildAlbums();
   const art = new Set(songs.flatMap(s=>s.artists || [s.mainartist])).size;
   const values = [
