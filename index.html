@@ -1109,6 +1109,36 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
 .chat-sound-volume small{font-size:11px;color:var(--tx-3,#a4a5b9)}
 .chat-sound-status{margin-top:10px;font-size:11px;min-height:15px;color:var(--tx-3,#abb0c5)}
 @media(max-width:500px){.chat-sound-dialog{padding:17px}.chat-sound-option{padding:10px}}
+
+/* V10: Align the ID column to the left; the final header is intentionally blank. */
+#adminStudioView .ha-song-table th:nth-child(4),
+#adminStudioView .ha-song-table td:nth-child(4){text-align:left;}
+
+/* V10: separate accents for important account-menu actions, without recoloring everything. */
+#settingsDropdown .menu-item.menu-accent-account i{color:#60a5fa;}
+#settingsDropdown .menu-item.menu-accent-appearance i{color:#fbbf24;}
+#settingsDropdown .menu-item.menu-accent-privacy i{color:#c084fc;}
+#settingsDropdown .menu-item.menu-accent-online i{color:#34d399;}
+#settingsDropdown .menu-item.menu-accent-chat i{color:#a5a2ff;}
+#settingsDropdown .menu-item.menu-accent-feedback i{color:#fb923c;}
+#settingsDropdown .menu-item.menu-accent-information i{color:#38bdf8;}
+#settingsDropdown button.menu-accent-account:is(:hover,:focus-visible){background:rgba(96,165,250,.13);color:#60a5fa;}
+#settingsDropdown button.menu-accent-privacy:is(:hover,:focus-visible){background:rgba(192,132,252,.13);color:#c084fc;}
+#settingsDropdown button.menu-accent-online:is(:hover,:focus-visible){background:rgba(52,211,153,.12);color:#34d399;}
+#settingsDropdown button.menu-accent-chat:is(:hover,:focus-visible){background:rgba(165,162,255,.13);color:#aaa5ff;}
+#settingsDropdown button.menu-accent-feedback:is(:hover,:focus-visible){background:rgba(251,146,60,.11);color:#fb923c;}
+#settingsDropdown button.menu-accent-information:is(:hover,:focus-visible){background:rgba(56,189,248,.12);color:#38bdf8;}
+
+/* V10: Highlight the filled portion of the notification volume track in real time. */
+#chatSoundVolume{appearance:none;-webkit-appearance:none;height:8px;border:0;border-radius:999px;
+  background:linear-gradient(to right,#8b79f2 0%,#8b79f2 var(--chat-volume-fill,40%),var(--line,#41455a) var(--chat-volume-fill,40%),var(--line,#41455a) 100%);}
+#chatSoundVolume::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#f5f2ff;border:2px solid #8572ef;box-shadow:0 0 0 3px rgba(129,105,239,.18);cursor:pointer;}
+#chatSoundVolume::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:#f5f2ff;border:2px solid #8572ef;cursor:pointer;}
+.chat-receipts-setting{display:flex;align-items:flex-start;gap:14px;justify-content:space-between;border-top:1px solid var(--line,#3c4050);padding:18px 0 6px;margin-top:20px;}
+.chat-receipts-setting strong{font-size:12px;font-weight:850;display:block;margin-bottom:6px;}
+.chat-receipts-setting small{display:block;color:var(--tx-3,#a4a5b9);font-size:11px;line-height:1.5;}
+.chat-receipts-setting input[type="checkbox"]{margin-top:2px;width:20px;height:20px;accent-color:#7567ed;flex-shrink:0;cursor:pointer;}
+.hm-chat-receipt{margin-left:6px;font-weight:750;color:#9d9fee;white-space:nowrap;}
 </style>
 <style id="howie-chat-phase3-styles">
 /* PHASE 3 — CHAT / independent of player, library and Management styles */
@@ -1646,11 +1676,11 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
         </div>
         <div class="menu-sep"></div>
 
-        <button type="button" role="menuitem" onclick="openCoverModal()" class="menu-item">
+        <button type="button" role="menuitem" onclick="openCoverModal()" class="menu-item menu-accent-account">
           <i class="fa-solid fa-user-gear"></i><span>ACCOUNT</span>
         </button>
 
-        <div class="menu-item menu-item-static">
+        <div class="menu-item menu-item-static menu-accent-appearance">
           <i class="fa-solid fa-circle-half-stroke"></i><span>APPEARANCE</span>
         </div>
         <div class="theme-seg" role="group" aria-label="Appearance">
@@ -1658,19 +1688,19 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
           <button type="button" data-theme-btn="light" onclick="setTheme('light')"><i class="fa-solid fa-sun"></i> LIGHT</button>
         </div>
 
-        <button type="button" role="menuitem" onclick="howieOpenPrivacy()" class="menu-item">
+        <button type="button" role="menuitem" onclick="howieOpenPrivacy()" class="menu-item menu-accent-privacy">
           <i class="fa-solid fa-user-shield"></i><span>PRIVACY & ACTIVITY</span>
         </button>
-        <button type="button" role="menuitem" onclick="howieOpenOnline()" class="menu-item">
+        <button type="button" role="menuitem" onclick="howieOpenOnline()" class="menu-item menu-accent-online">
           <i class="fa-solid fa-users"></i><span>WHO'S ONLINE <small id="howieOnlineCount" style="opacity:.7"></small></span>
         </button>
-        <button type="button" role="menuitem" onclick="chatSoundOpenSettings()" class="menu-item">
-          <i class="fa-solid fa-comment-dots"></i><span>CHAT NOTIFICATIONS</span>
+        <button type="button" role="menuitem" onclick="chatSoundOpenSettings()" class="menu-item menu-accent-chat">
+          <i class="fa-solid fa-comments"></i><span>CHATS SETTINGS</span>
         </button>
-        <button type="button" role="menuitem" onclick="openFeedbackModal()" class="menu-item">
-          <i class="fa-solid fa-comment-dots"></i><span>FEEDBACK</span>
+        <button type="button" role="menuitem" onclick="openFeedbackModal()" class="menu-item menu-accent-feedback">
+          <i class="fa-solid fa-comment-medical"></i><span>FEEDBACK</span>
         </button>
-        <button type="button" role="menuitem" onclick="openInfoModal()" class="menu-item">
+        <button type="button" role="menuitem" onclick="openInfoModal()" class="menu-item menu-accent-information">
           <i class="fa-solid fa-circle-info"></i><span>INFORMATION</span>
         </button>
         <div class="menu-sep"></div>
@@ -2000,7 +2030,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
     <select id="haAlbumFilter" class="ha-input" onchange="adminFilterChanged()" aria-label="Filter by album"><option value="">ALL ALBUMS</option></select>
     <div class="ha-custom-sort" id="haSortWrap"><button id="haSortTrigger" type="button" class="ha-input ha-sort-trigger" aria-haspopup="true" aria-expanded="false" onclick="adminToggleSortMenu()"><span id="haSortLabel">ID (NEWEST)</span><i class="fa-solid fa-chevron-down"></i></button><div id="haSortMenu" class="ha-sort-menu hidden" role="menu"><button type="button" data-ha-sort="id" onclick="adminChooseSort('id')">ID</button><button type="button" data-ha-sort="title" onclick="adminChooseSort('title')">TITLE</button><button type="button" data-ha-sort="album" onclick="adminChooseSort('album')">ALBUM</button><button type="button" data-ha-sort="artist" onclick="adminChooseSort('artist')">ARTIST</button></div></div></div>
   <div id="haSongManager"><div class="ha-flex" style="margin-bottom:10px"><p id="haResultCount" class="ha-desc" aria-live="polite"></p><div class="ha-toolbar"><span id="haSelectedCount" class="ha-desc">0 SELECTED</span><button type="button" id="haBulkBtn" class="ha-btn" onclick="adminOpenBulkEdit()" disabled>BULK EDIT</button><button type="button" class="ha-btn" onclick="adminClearSelection()">CLEAR SELECTION</button></div></div>
-    <div class="ha-table-scroll"><table class="ha-song-table"><colgroup><col class="ha-col-check"><col class="ha-col-song"><col class="ha-col-album"><col class="ha-col-id"><col class="ha-col-action"></colgroup><thead><tr><th><input type="checkbox" id="haSelectPage" class="ha-check" aria-label="Select visible page" onchange="adminSelectPage(this.checked)"></th><th>SONG / ARTISTS</th><th>ALBUM</th><th>ID</th><th>ACTION</th></tr></thead><tbody id="haSongRows"></tbody></table></div>
+    <div class="ha-table-scroll"><table class="ha-song-table"><colgroup><col class="ha-col-check"><col class="ha-col-song"><col class="ha-col-album"><col class="ha-col-id"><col class="ha-col-action"></colgroup><thead><tr><th><input type="checkbox" id="haSelectPage" class="ha-check" aria-label="Select visible page" onchange="adminSelectPage(this.checked)"></th><th>SONG</th><th>ALBUM</th><th>ID</th><th aria-label="Edit controls"></th></tr></thead><tbody id="haSongRows"></tbody></table></div>
     <div class="ha-pager"><span id="haPageInfo"></span><div class="ha-toolbar"><button type="button" class="ha-btn" onclick="adminChangePage(-1)">← PREVIOUS</button><button type="button" class="ha-btn" onclick="adminChangePage(1)">NEXT →</button></div></div>
   </div>
   <div id="haAlbumManager" class="hidden"><p id="haAlbumResultCount" class="ha-desc"></p><div id="haAlbumGrid" class="ha-albumgrid"></div></div>
@@ -2234,10 +2264,10 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
 <div id="chatSoundModal" class="howie-live-modal hidden" role="dialog" aria-modal="true" aria-labelledby="chatSoundTitle">
   <div class="howie-live-dialog chat-sound-dialog">
     <div class="chat-sound-head">
-      <h2 id="chatSoundTitle"><i class="fa-solid fa-comment-dots" aria-hidden="true"></i> CHAT NOTIFICATIONS</h2>
-      <button type="button" class="howie-live-button" onclick="chatSoundCloseSettings()" aria-label="Close chat notification settings">✕</button>
+      <h2 id="chatSoundTitle"><i class="fa-solid fa-comments" aria-hidden="true"></i> CHATS SETTINGS</h2>
+      <button type="button" class="howie-live-button" onclick="chatSoundCloseSettings()" aria-label="Close chats settings">✕</button>
     </div>
-    <p>Choose when to hear a short sound for a new incoming chat message.</p>
+    <p>Manage incoming message sounds and read receipts for your account.</p>
     <fieldset class="chat-sound-options" aria-label="Incoming message sound">
       <legend class="chat-sound-label">INCOMING MESSAGE SOUND</legend>
       <label class="chat-sound-option"><input type="radio" name="chatSoundMode" value="smart" checked><span><strong>SMART (RECOMMENDED)</strong><small>Silent while music is playing; sounds when music is paused or stopped.</small></span></label>
@@ -2246,9 +2276,13 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
     </fieldset>
     <div class="chat-sound-volume">
       <label for="chatSoundVolume">NOTIFICATION VOLUME <output id="chatSoundVolumeLabel" for="chatSoundVolume">20%</output></label>
-      <input type="range" id="chatSoundVolume" min="5" max="50" step="5" value="20" oninput="chatSoundVolumeChanged()">
+      <input type="range" id="chatSoundVolume" min="1" max="50" step="1" value="20" oninput="chatSoundVolumeChanged()">
       <small>Separate from the music player's volume.</small>
     </div>
+    <label class="chat-receipts-setting" for="chatReadReceiptsEnabled">
+      <span><strong>READ RECEIPTS — SENT / SEEN</strong><small>Allow people you chat with to see when you have read their messages. Turning this off hides your Seen confirmations. You also won't see other people's Seen confirmations.</small></span>
+      <input type="checkbox" id="chatReadReceiptsEnabled" checked aria-label="Enable read receipts">
+    </label>
     <p id="chatSoundSettingsStatus" role="status" aria-live="polite" class="chat-sound-status"></p>
     <div class="howie-live-buttons">
       <button type="button" class="howie-live-button" onclick="chatSoundPreview()"><i class="fa-solid fa-volume-high" aria-hidden="true"></i> PREVIEW</button>
@@ -7801,16 +7835,19 @@ let chatSoundLastByRoom = new Map();
 let chatSoundLastPlayedAt = 0;
 let chatSoundAccount = null;
 let chatSoundLoading = false;
+let chatReadReceiptsEnabled = true;
 function chatSoundSanitize(value){
   const v=value&&typeof value==='object'?value:{};
   const mode=['smart','always','off'].includes(v.mode)?v.mode:'smart';
-  const volume=Math.min(50,Math.max(5,Math.round((Number(v.volume)||20)/5)*5));
+  const volume=Math.min(50,Math.max(1,Math.round(Number(v.volume)||20)));
   return {mode,volume};
 }
 function chatSoundStatus(value){const el=document.getElementById('chatSoundSettingsStatus');if(el)el.textContent=value||'';}
 function chatSoundUpdateUI(){
   const selected=document.querySelector(`#chatSoundModal input[name="chatSoundMode"][value="${chatSoundPrefs.mode}"]`);
   if(selected)selected.checked=true;
+  const receipts=document.getElementById('chatReadReceiptsEnabled');
+  if(receipts)receipts.checked=chatReadReceiptsEnabled;
   const volume=document.getElementById('chatSoundVolume');if(volume)volume.value=String(chatSoundPrefs.volume);
   chatSoundVolumeChanged();
 }
@@ -7818,6 +7855,7 @@ function chatSoundVolumeChanged(){
   const slider=document.getElementById('chatSoundVolume');
   const label=document.getElementById('chatSoundVolumeLabel');
   if(label&&slider)label.textContent=`${slider.value}%`;
+  if(slider)slider.style.setProperty('--chat-volume-fill',`${(Number(slider.value)/Number(slider.max))*100}%`);
 }
 function chatSoundOpenSettings(){
   if(!currentUser)return;
@@ -7837,13 +7875,17 @@ async function chatSoundLoadSettings(){
   if(!user)return;
   chatSoundAccount=user;
   chatSoundPrefs={...CHAT_SOUND_DEFAULTS};
+  chatReadReceiptsEnabled=true;
   chatSoundReady=false;chatSoundLastByRoom.clear();chatSoundLastPlayedAt=0;
   chatSoundLoading=true;
   try{
     const {data,error}=await supabaseClient.from('user_preferences')
-      .select('chat_notification_settings').eq('user_id',user).maybeSingle();
+      .select('chat_notification_settings,chat_read_receipts_enabled').eq('user_id',user).maybeSingle();
     if(error)throw error;
-    if(String(currentUser?.id)===user)chatSoundPrefs=chatSoundSanitize(data?.chat_notification_settings);
+    if(String(currentUser?.id)===user){
+      chatSoundPrefs=chatSoundSanitize(data?.chat_notification_settings);
+      chatReadReceiptsEnabled=data?.chat_read_receipts_enabled!==false;
+    }
   }catch(e){
     console.warn('Chat sound settings unavailable; using Smart default. Run the V9 SQL setup:',e?.message||e);
   }finally{chatSoundLoading=false;chatSoundUpdateUI();}
@@ -7851,17 +7893,24 @@ async function chatSoundLoadSettings(){
 async function chatSoundSaveSettings(){
   if(!currentUser)return;
   const user=String(currentUser.id),prefs=chatSoundReadForm();
+  const receipts=document.getElementById('chatReadReceiptsEnabled')?.checked!==false;
   const btn=document.getElementById('chatSoundSaveBtn');if(btn)btn.disabled=true;
   chatSoundStatus('SAVING...');
   try{
     const {error}=await supabaseClient.from('user_preferences').upsert({
-      user_id:user,chat_notification_settings:prefs,updated_at:new Date().toISOString()
+      user_id:user,chat_notification_settings:prefs,
+      chat_read_receipts_enabled:receipts,
+      updated_at:new Date().toISOString()
     },{onConflict:'user_id'});
     if(error)throw error;
     if(String(currentUser?.id)!==user)return;
     chatSoundPrefs=prefs;
+    chatReadReceiptsEnabled=receipts;
+    if(!receipts){
+      document.querySelectorAll('#chatMessages [data-chat-receipt-id]').forEach(el=>el.textContent='Sent');
+    }else if(chatActiveId)chatUpdateReceipts();
     chatSoundCloseSettings();
-  }catch(e){chatSoundStatus('COULD NOT SAVE. RUN THE V9 SQL SETUP, THEN TRY AGAIN. '+String(e?.message||e));}
+  }catch(e){chatSoundStatus('COULD NOT SAVE. RUN THE V10 SQL SETUP, THEN TRY AGAIN. '+String(e?.message||e));}
   finally{if(btn)btn.disabled=false;}
 }
 function chatSoundUnlock(){
@@ -7935,6 +7984,7 @@ function chatSoundCheckRoomUpdates(nextRooms){
 function chatSoundStop(){
   chatSoundReady=false;chatSoundAccount=null;chatSoundLastByRoom.clear();chatSoundLastPlayedAt=0;
   chatSoundPrefs={...CHAT_SOUND_DEFAULTS};
+  chatReadReceiptsEnabled=true;
   chatSoundCloseSettings();
 }
 // Browsers (especially mobile) generally need a user gesture before sound can play.
@@ -7957,6 +8007,10 @@ let chatPeopleRequest=0;
 let chatLoading=false;
 let chatSending=false;
 let chatReady=false;
+let chatReadReceiptCounts=new Map();
+let chatReceiptPollTimer=null;
+let chatReceiptFetchSeq=0;
+
 const chatEsc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const chatIsVisible=()=>currentViewName==='chat'&&!document.getElementById('chatView')?.classList.contains('hidden');
 function chatStatus(message){const el=document.getElementById('chatStatus');if(el)el.textContent=message||'';}
@@ -8074,6 +8128,7 @@ async function chatStart(){
   await chatLoadRooms(false);
   if(!currentUser)return;
   chatSubscribe();
+  chatStartReceiptPolling();
   if(!chatRefreshTimer)chatRefreshTimer=setInterval(()=>{
     if(currentUser)chatLoadRooms();
   },45000);
@@ -8081,6 +8136,8 @@ async function chatStart(){
 async function chatStop(){
   chatSoundStop();
   clearTimeout(chatRefreshDelay);clearInterval(chatRefreshTimer);chatRefreshTimer=null;
+  clearInterval(chatReceiptPollTimer);chatReceiptPollTimer=null;
+  chatReceiptFetchSeq++;chatReadReceiptCounts.clear();
   if(chatChannel){const c=chatChannel;chatChannel=null;try{await supabaseClient.removeChannel(c);}catch(_){}}
   if(chatRoomChannel){const c=chatRoomChannel;chatRoomChannel=null;try{await supabaseClient.removeChannel(c);}catch(_){}}
   chatRoomsData=[];chatActiveMessages=[];chatActiveId=null;chatReady=false;
@@ -8140,8 +8197,32 @@ function chatRenderMessages(){
       const s=songs.find(x=>Number(x.id)===Number(m.song_id));
       content=`${m.body?`<div class="hm-chat-text">${chatEsc(m.body)}</div>`:''}<div class="hm-chat-songcard">${s?.cover?`<img src="${chatEsc(s.cover)}" alt="">`:''}<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:800">${chatEsc(s?.title||'Song ID '+m.song_id)}</div><div class="hm-chat-small">${chatEsc(s?.mainartist||'Shared from Music Server')}</div></div>${s?`<button class="hm-chat-btn" type="button" onclick="chatPlaySong(${Number(s.id)})" aria-label="Play shared song"><i class="fa-solid fa-play"></i></button>`:''}</div>`;
     }else content=`<div class="hm-chat-text">${chatEsc(m.body)}</div>`;
-    return `<div class="hm-chat-bubble ${mine?'own':''}">${room.kind==='group'&&!mine?`<div class="hm-chat-author">${chatEsc(membersById.get(String(m.sender_id))||'Member')}</div>`:''}${content}<div class="hm-chat-timestamp"><span>${chatDate(m.created_at)}${m.edited_at?' · edited':''}</span>${mine&&!deleted?`<span class="hm-chat-msg-actions">${m.kind==='text'?`<button type="button" onclick="chatEdit('${chatEsc(m.id)}')">EDIT</button>`:''}<button type="button" onclick="chatDelete('${chatEsc(m.id)}')">UNSEND</button></span>`:''}</div></div>`;
+    return `<div class="hm-chat-bubble ${mine?'own':''}">${room.kind==='group'&&!mine?`<div class="hm-chat-author">${chatEsc(membersById.get(String(m.sender_id))||'Member')}</div>`:''}${content}<div class="hm-chat-timestamp"><span>${chatDate(m.created_at)}${m.edited_at?' · edited':''}${mine&&!deleted?`<span class="hm-chat-receipt" data-chat-receipt-id="${chatEsc(m.id)}">Sent</span>`:''}</span>${mine&&!deleted?`<span class="hm-chat-msg-actions">${m.kind==='text'?`<button type="button" onclick="chatEdit('${chatEsc(m.id)}')">EDIT</button>`:''}<button type="button" onclick="chatDelete('${chatEsc(m.id)}')">UNSEND</button></span>`:''}</div></div>`;
   }).join(''):'<div class="hm-chat-empty">No messages yet. Say hello!</div>';
+}
+/* Read receipt RPC returns only aggregate counts for my outgoing messages. */
+async function chatUpdateReceipts(){
+  const id=chatActiveId,uid=String(currentUser?.id||'');
+  if(!id||!uid||!chatIsVisible()||!chatReadReceiptsEnabled)return;
+  const seq=++chatReceiptFetchSeq;
+  const {data,error}=await supabaseClient.rpc('chat_read_receipts',{p_room:id});
+  if(error){console.warn('Chat read receipts unavailable:',error.message);return;}
+  if(id!==chatActiveId||uid!==String(currentUser?.id||'')||seq!==chatReceiptFetchSeq)return;
+  chatReadReceiptCounts=new Map((data||[]).map(r=>[String(r.message_id),r]));
+  const room=chatFindRoom(id);
+  for(const el of document.querySelectorAll('#chatMessages [data-chat-receipt-id]')){
+    const r=chatReadReceiptCounts.get(el.dataset.chatReceiptId);
+    const seen=Number(r?.seen_count||0),total=Number(r?.recipient_count||0);
+    const value=seen>0 && total>0 && seen>=total?'Seen':
+      room?.kind==='group' && seen>0?`Seen by ${seen}`:'Sent';
+    el.textContent=value;
+  }
+}
+function chatStartReceiptPolling(){
+  if(chatReceiptPollTimer)return;
+  chatReceiptPollTimer=setInterval(()=>{
+    if(chatIsVisible()&&chatActiveId)chatUpdateReceipts();
+  },12000);
 }
 async function chatLoadMessages(scrollDown=true){
   if(!chatActiveId||!currentUser)return;
@@ -8157,6 +8238,7 @@ async function chatLoadMessages(scrollDown=true){
     const {error:readError}=await supabaseClient.rpc('chat_mark_read',{p_room:id});
     if(!readError){const room=chatFindRoom(id);if(room)room.unread_count=0;chatRenderRooms();chatSetBadges();}
   }
+  if(chatReadReceiptsEnabled)chatUpdateReceipts();
 }
 function chatComposerKey(event){if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();chatSend();}}
 async function chatSend(){
