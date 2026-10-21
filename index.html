@@ -1311,6 +1311,18 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       margin: .3rem 0 .45rem;
     }
     #groupDetailHero.group-detail-artist-simple #groupDetailCount { margin-bottom: 0; }
+    /* Match the Genre page: artist heading on the left, BACK at top right. */
+    #groupDetailView.group-detail-artist-mode { position: relative; }
+    #groupDetailView.group-detail-artist-mode > #groupDetailBackBtn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 1;
+      margin: 0;
+    }
+    #groupDetailView.group-detail-artist-mode > #groupDetailHero {
+      padding-right: 7rem;
+    }
   </style>
 </head>
 
@@ -1921,7 +1933,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
          <!-- ALBUM / ARTIST DETAIL VIEW -->
 <div id="groupDetailView" class="hidden">
   <!-- Nút Back -->
-  <button 
+  <button id="groupDetailBackBtn"
     type="button"
     onclick="goBackFromGroupDetail()" 
     class="mb-4 flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-white bg-gray-800/60 hover:bg-gray-800 px-4 py-2 rounded-xl transition cursor-pointer"
@@ -4328,6 +4340,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       document.getElementById('groupDetailCount').innerText = isArtist
         ? [getCategoryReleaseSummary(filteredSongs).text, formatCount(filteredSongs.length, 'SONG')].filter(Boolean).join(' • ')
         : (albumDate ? `RELEASE DATE: ${albumDate}` : '');
+      document.getElementById('groupDetailView')?.classList.toggle('group-detail-artist-mode', isArtist);
       document.getElementById('groupDetailHero')?.classList.toggle('group-detail-artist-simple', isArtist);
       const groupCover = document.getElementById('groupDetailCover');
       const groupAvatar = document.getElementById('groupDetailArtistAvatar');
