@@ -1291,6 +1291,27 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
   #topBrand .topbar-brand-icon{width:1.6rem;height:1.6rem;}
 }
 </style>
+  <style id="howies-v11-banner-style">
+    /* Artist details use the compact, text-first heading used on genre details. */
+    #groupDetailHero.group-detail-artist-simple {
+      display: block;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 0;
+      margin-bottom: 1.5rem;
+    }
+    #groupDetailHero.group-detail-artist-simple #groupDetailCover,
+    #groupDetailHero.group-detail-artist-simple #groupDetailArtistAvatar { display: none !important; }
+    #groupDetailHero.group-detail-artist-simple #groupDetailTitle {
+      font-size: 1.5rem;
+      line-height: 2rem;
+      font-weight: 800;
+      margin: .3rem 0 .45rem;
+    }
+    #groupDetailHero.group-detail-artist-simple #groupDetailCount { margin-bottom: 0; }
+  </style>
 </head>
 
 <body class="h-screen flex flex-col select-none uppercase">
@@ -1908,7 +1929,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
     <i class="fa-solid fa-arrow-left"></i> BACK
   </button>
 
-  <div class="flex flex-col sm:flex-row items-start sm:items-end gap-6 mb-8 bg-gradient-to-r from-blue-950/40 via-transparent to-transparent p-6 rounded-2xl border border-white/5">
+  <div id="groupDetailHero" class="flex flex-col sm:flex-row items-start sm:items-end gap-6 mb-8 bg-gradient-to-r from-blue-950/40 via-transparent to-transparent p-6 rounded-2xl border border-white/5">
     <img id="groupDetailCover" src="" class="w-44 h-44 rounded-2xl object-cover shadow-2xl border border-white/10" alt="Cover">
     <div id="groupDetailArtistAvatar" class="hidden w-44 h-44 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-600/30 via-blue-600/10 to-blue-600/5 text-purple-400 shadow-2xl border border-white/10"><i class="fa-solid fa-microphone-lines text-6xl"></i></div>
             <div class="flex-1">
@@ -3642,6 +3663,15 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
     function getReleaseDate(song) {
       return song?.releaseDate || '';
     }
+    // Album banner date: display DD/MM/YYYY without changing stored Supabase metadata.
+    function groupBannerReleaseDate(raw) {
+      const text = String(raw || '').trim();
+      if (!text) return '';
+      const iso = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s].*)?$/.exec(text);
+      if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(text)) return text;
+      return text;
+    }
 
     function releaseDateValue(song) {
       const value = String(getReleaseDate(song) || '');
@@ -4294,9 +4324,11 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       const filteredSongs = isArtist ? [...getArtistSongs(key)] : [...(albumIndex.get(key) || [])];
       document.getElementById('groupDetailType').innerHTML = isArtist ? 'ARTIST' : albumDescriptionHTML(getAlbumInfo(key));
       document.getElementById('groupDetailTitle').innerText = key;
+      const albumDate = !isArtist ? groupBannerReleaseDate(getAlbumInfo(key).releaseDate) : '';
       document.getElementById('groupDetailCount').innerText = isArtist
         ? [getCategoryReleaseSummary(filteredSongs).text, formatCount(filteredSongs.length, 'SONG')].filter(Boolean).join(' • ')
-        : '';
+        : (albumDate ? `RELEASE DATE: ${albumDate}` : '');
+      document.getElementById('groupDetailHero')?.classList.toggle('group-detail-artist-simple', isArtist);
       const groupCover = document.getElementById('groupDetailCover');
       const groupAvatar = document.getElementById('groupDetailArtistAvatar');
       groupCover.classList.toggle('hidden', isArtist);
@@ -6825,11 +6857,12 @@ function openMusicUploadModal() {
 
 function renderMusicUploadTracks() {
   const fileEl = document.getElementById('musicTrackFiles');
-  // Filenames can remain unchanged. Natural alphabetical order is only the starting order;
-  // the admin can adjust the final album tracklist using the arrow buttons below.
+  // Start with the selected MP3 files in reverse FileList order (bottom-to-top).
+  // Do not sort alphabetically or rename files. Browsers may return FileList
+  // in OS order rather than click order; drag/drop or NO. can refine the order.
   musicSelectedTracks = Array.from(fileEl.files || [])
     .filter(file => /\.mp3$/i.test(file.name))
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+    .reverse();
   musicTrackDrafts = musicSelectedTracks.map(file => {
     const credits = musicCreditsFromFilename(file.name);
     return { title: credits.title, featuringartist: credits.featuring, producer: '' };
