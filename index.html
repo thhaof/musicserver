@@ -2043,7 +2043,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
 <div id="adminDashboardView" class="ha-wrap hidden" aria-label="Management">
   <div class="ha-flex ha-management-heading">
     <div><div class="ha-upper">HOWIE'S MUSIC SERVER</div><h1 class="ha-heading">MANAGEMENT</h1><p class="ha-desc" id="haManagementDescription">Dashboard, uploads, backups, library tools and notifications in one place.</p></div>
-    <span class="ha-bubble" id="haStaffBadge"><i class="fa-solid fa-shield-halved"></i> HOWIE (SUPER ADMIN)</span>
+    <span class="ha-bubble" id="haStaffBadge"><i class="fa-solid fa-shield-halved"></i> HOWIE (ADMIN)</span>
   </div>
   <div class="ha-management-grid" aria-label="Management sections">
     <button type="button" class="ha-management-tile" onclick="openMusicUploadModal()"><i class="fa-solid fa-cloud-arrow-up"></i><span>UPLOAD MUSIC</span><small>Songs and full albums</small></button>
@@ -6198,7 +6198,7 @@ function togglePlay() {
       const name = currentUsername || '';
       const nameEl = document.getElementById('menuDisplayName');
       const userEl = document.getElementById('menuUsername');
-      if (nameEl) nameEl.textContent = haRequire() ? 'Howie (Super Admin)' : (musicCanEdit() ? `${name||'irynna'} (Manager)` : (currentUser && name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Guest'));
+      if (nameEl) nameEl.textContent = haRequire() ? 'Howie (Admin)' : (musicCanEdit() ? `${name||'irynna'} (Manager)` : (currentUser && name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Guest'));
       if (userEl) userEl.textContent = currentUser && name ? '@' + name : 'Not logged in';
       updateHomeWelcome();
     }
@@ -7192,7 +7192,7 @@ async function submitMusicUpload(event) {
 /* HOWIE ADMIN MODE — no R2/API secrets are used in the browser.
    Only the verified Howie account can open these screens. Supabase RLS and
    the reorder RPC independently enforce the same rule server-side. */
-const HOWIE_ADMIN_EMAIL = 'howie@howie.xy'; // Original Super Admin.
+const HOWIE_ADMIN_EMAIL = 'howie@howie.xy'; // Original Admin; internal database role remains super_admin.
 const MUSIC_EDITOR_EMAIL = 'irynna@howie.xy';
 let musicStaffRole = 'none'; // Loaded from RLS-protected music_staff_roles.
 let isHowieAdmin = false;
@@ -7296,7 +7296,7 @@ function adminApplyAccess() {
   const topBrandText = document.querySelector('#topBrand .topbar-brand-text');
   if (topBrandText) topBrandText.textContent = 'MUSIC';
   const nameEl = document.getElementById('menuDisplayName');
-  if (nameEl && isHowieAdmin) nameEl.textContent = 'Howie (Super Admin)';
+  if (nameEl && isHowieAdmin) nameEl.textContent = 'Howie (Admin)';
   else if (nameEl && canEdit) nameEl.textContent = `${currentUsername||'irynna'} (Manager)`;
   else if (nameEl && !currentUser) nameEl.textContent = 'Guest';
   else if (nameEl && currentUser) {
@@ -7304,7 +7304,7 @@ function adminApplyAccess() {
     nameEl.textContent = n ? n.charAt(0).toUpperCase() + n.slice(1) : 'User';
   }
   document.querySelectorAll('#adminDashboardView .ha-super-only').forEach(el=>el.classList.toggle('hidden',!isHowieAdmin));
-  // Dashboard uses public catalog data and is safe for Manager; sensitive tools remain Super Admin-only.
+  // Dashboard uses public catalog data and is safe for Manager; sensitive tools remain Admin-only.
   document.getElementById('haDashboardStats')?.classList.toggle('hidden',!canEdit);
   const managementDescription=document.getElementById('haManagementDescription');
   if(managementDescription) managementDescription.textContent=isHowieAdmin
@@ -7313,7 +7313,7 @@ function adminApplyAccess() {
   document.querySelector('#adminDashboardView .ha-management-grid')?.classList.toggle('ha-editor-grid',canEdit&&!isHowieAdmin);
   const badge=document.getElementById('haStaffBadge');
   if (badge) badge.innerHTML=isHowieAdmin
-    ? '<i class="fa-solid fa-shield-halved"></i> HOWIE (SUPER ADMIN)'
+    ? '<i class="fa-solid fa-shield-halved"></i> HOWIE (ADMIN)'
     : (canEdit ? '<i class="fa-solid fa-pen-to-square"></i> IRYNNA (MANAGER)' : '');
   if (!isHowieAdmin) document.getElementById('adminMsgModal')?.classList.add('hidden');
   if (!canEdit) {
@@ -7640,7 +7640,7 @@ async function adminLoadMonitor(){
   }catch(e){
     if(req!==haMonitorFetchId)return;
     console.warn('Monitor RPC unavailable:',e);
-    status.textContent='MONITOR SETUP REQUIRED: RUN 01_SUPER_ADMIN_MONITOR_SETUP.txt IN SUPABASE SQL EDITOR. '+String(e.message||'');
+    status.textContent='MONITOR SETUP REQUIRED: CHECK YOUR SUPABASE MONITOR SETUP. '+String(e.message||'');
     document.getElementById('haMonitorAccounts').textContent='No account data available.';
     document.getElementById('haMonitorDetails').textContent='The secure Supabase function is not available yet.';
   }
