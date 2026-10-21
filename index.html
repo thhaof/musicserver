@@ -2541,13 +2541,28 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       return match?.releaseType || 'Album';
     }
 
+    // Credit a producer at album level ONLY when a single producer is credited
+    // on every song. Partial, differing, or multiple-producer credits stay
+    // at song level via each song's existing artistLine and metadata.
+    function getAlbumExclusiveProducer(tracks) {
+      if (!tracks.length) return '';
+      const credits = tracks.map(track => String(track.producer || '').normalize('NFC')
+        .replace(/\s+/g, ' ').trim());
+      // Comma, ampersand, slash, semicolon, plus, "and" and "x" designate
+      // multiple credited producers, even when the same team made each track.
+      if (credits.some(credit => !credit || /[,;&/+]|\s(?:and|x)\s/i.test(credit))) return '';
+      const first = credits[0];
+      return credits.every(credit => credit.toLocaleLowerCase() === first.toLocaleLowerCase())
+        ? first : '';
+    }
+
     function getAlbumInfo(name) {
       const list = albumIndex.get(name) || [];
       const first = list[0] || {};
       return {
         name,
         artist: first.mainartist || '',
-        producer: first.producer || '',
+        producer: getAlbumExclusiveProducer(list),
         cover: first.cover || '',
         count: list.length,
         releaseDate: getReleaseDate(first),
@@ -6855,10 +6870,40 @@ function musicTitleFromFilename(filename) {
     .replace(/^\s*\d{1,3}[\s._-]+/, '').trim();
 }
 function musicCreditsFromFilename(filename) {
-  const name = musicTitleFromFilename(filename);
-  const feat = name.match(/\s*\(feat\.\s*(.*?)\)\s*$/i);
-  return feat ? { title: name.slice(0, feat.index).trim(), featuring: feat[1].trim() }
-              : { title: name, featuring: '' };
+  // e.g. "01 - Song (feat. Guest) (prod. Producer).mp3"
+  //   -> Song / Guest / Producer. MP3 file name itself is NEVER changed.
+  let title = musicTitleFromFilename(filename);
+  const featuring = [];
+  const producers = [];
+  const addProducer = value => {
+    const cleaned = String(value || '').replace(/^(?:by)\s+/i, '')
+      .replace(/\.+\s*$/, '').trim();
+    if (cleaned) producers.push(cleaned);
+  };
+
+  // Remove labelled producer credits anywhere in parentheses or brackets.
+  title = title.replace(/[\(\[]\s*prod\.\s*([^\)\]]+?)\s*[\)\]]/gi,
+    (_match, credit) => { addProducer(credit); return ' '; });
+
+  // Preserve automatic extraction of featuring artists, regardless of
+  // whether the feat. tag precedes or follows a prod. tag.
+  title = title.replace(/\s*\(feat\.\s*([^)]*?)\)\s*/gi,
+    (_match, credit) => { if (credit.trim()) featuring.push(credit.trim()); return ' '; });
+
+  // Also accept an unwrapped trailing tag: "Song prod. ProducerName.mp3"
+  // or "Song - prod. ProducerName.mp3" (optional final period).
+  const unwrapped = /(?:^|[\s\-–—])prod\.\s*(.+?)\s*$/i.exec(title);
+  if (unwrapped && unwrapped[1].trim()) {
+    addProducer(unwrapped[1]);
+    title = title.slice(0, unwrapped.index);
+  }
+
+  title = title.replace(/\s+/g, ' ').replace(/[\s\-–—]+$/, '').trim();
+  return {
+    title: title || musicTitleFromFilename(filename),
+    featuring: featuring.join(', '),
+    producer: producers.join(', ')
+  };
 }
 
 function openMusicUploadModal() {
@@ -6878,7 +6923,7 @@ function renderMusicUploadTracks() {
     .reverse();
   musicTrackDrafts = musicSelectedTracks.map(file => {
     const credits = musicCreditsFromFilename(file.name);
-    return { title: credits.title, featuringartist: credits.featuring, producer: '' };
+    return { title: credits.title, featuringartist: credits.featuring, producer: credits.producer };
   });
   paintMusicUploadTracks();
 }
