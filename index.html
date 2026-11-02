@@ -1840,7 +1840,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
           <div class="mb-6">
             <p class="text-xs font-bold text-blue-400 uppercase tracking-widest mb-2">HOWIE'S MUSIC SERVER</p>
             <h1 id="homeWelcomeTitle" class="text-3xl sm:text-4xl font-extrabold text-white break-words">WELCOME BACK!</h1>
-            <p class="text-sm text-gray-400 mt-2">Discover your latest songs, albums and artists.</p>
+            <p class="text-sm text-gray-400 mt-2">Discover and listen to the latest tracks, albums and artists all over the worlds!</p>
           </div>
 
           <div class="flex items-center justify-between mb-5">
@@ -2343,21 +2343,20 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       </div>
       <form id="musicUploadForm" onsubmit="submitMusicUpload(event)" class="space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <label class="text-xs text-gray-400">RELEASE NAME<input id="musicAlbumName" required maxlength="160" class="music-input"></label>
-          <label class="text-xs text-gray-400">MAIN ARTIST<input id="musicMainArtist" required maxlength="160" class="music-input"></label>
+          <label class="text-xs text-gray-400">RELEASE NAME<input id="musicAlbumName" required maxlength="160" class="music-input" placeholder="Song Name"></label>
+          <label class="text-xs text-gray-400">MAIN ARTIST<input id="musicMainArtist" required maxlength="160" class="music-input" placeholder="Artist Name"></label>
           <label class="text-xs text-gray-400">RELEASE DATE (DD/MM/YYYY)<span class="ha-date-wrap"><input id="musicReleaseDate" required onclick="haDateInputClicked(this)" placeholder="DD/MM/YYYY" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" class="music-input" inputmode="numeric"><button type="button" class="ha-date-button" onclick="haShowCalendar(this)" title="Choose a date" aria-label="Choose release date"><i class="fa-solid fa-calendar-days"></i></button><input type="date" class="ha-native-calendar" aria-label="Calendar date" tabindex="-1" onchange="haCalendarChanged(this)"></span></label>
-          <label class="text-xs text-gray-400">RELEASE TYPE<select id="musicReleaseType" class="music-input"><option>Album</option><option>EP</option><option>Single</option><option>Mixtape</option><option>Compilation</option></select></label>
-          <label class="text-xs text-gray-400">GENRES<input id="musicGenres" required maxlength="200" class="music-input" placeholder="Rap/Hip-Hop, Pop"></label>
-          <label class="text-xs text-gray-400">COUNTRY<select id="musicCountry" required class="music-input"><option value="" disabled selected>Select country</option><option value="Vietnam">Vietnam</option><option value="South Korea">South Korea</option><option value="US/UK">US/UK</option><option value="Australia">Australia</option></select></label>
+          <label class="text-xs text-gray-400">RELEASE TYPE<select id="musicReleaseType" class="music-input" required><option value="" disabled selected>Select Type</option><option>Album</option><option>EP</option><option>Single</option><option>Mixtape</option><option>Compilation</option></select></label>
+          <label class="text-xs text-gray-400">GENRES<input id="musicGenres" required maxlength="200" class="music-input" placeholder="e.g. Pop, Rap/Hip-Hop,..."></label>
+          <label class="text-xs text-gray-400">COUNTRY<select id="musicCountry" required class="music-input"><option value="" disabled selected>Select Country</option><option value="Vietnam">Vietnam</option><option value="South Korea">South Korea</option><option value="US/UK">US/UK</option><option value="Australia">Australia</option></select></label>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label class="text-xs text-gray-400">COVER FILE (.JPG / .PNG / .WEBP / .JFIF)<input id="musicCoverFile" type="file" accept=".jpg,.jpeg,.png,.webp,.jfif,image/jpeg,image/png,image/webp" required class="music-file"></label>
           <label class="text-xs text-gray-400">TRACK FILES (.MP3, MULTIPLE)<input id="musicTrackFiles" type="file" accept=".mp3,audio/mpeg" multiple required onchange="renderMusicUploadTracks()" class="music-file"></label>
         </div>
-        <div>
+        <div id="musicTrackInformationSection" class="hidden">
           <div class="flex items-center justify-between mb-2"><span class="text-xs font-bold text-gray-300 uppercase">TRACK INFORMATION</span><span id="musicTrackCount" class="text-xs text-gray-400">0 SONGS</span></div>
           <div id="musicUploadTracks" class="space-y-2 max-h-[48vh] overflow-y-auto rounded-xl" aria-label="Reorder album tracks"></div>
-          <p class="text-[11px] text-gray-500 mt-2">No MP3 renaming needed. Drag the <i class="fa-solid fa-grip-vertical" aria-hidden="true"></i> handle to reorder on desktop, or enter a track position (1, 2, 3...) on any device. Title, featuring and producer move together.</p>
         </div>
         <p id="musicUploadStatus" role="status" aria-live="polite" class="text-xs text-blue-400 normal-case"></p>
         <div class="flex flex-wrap justify-end gap-2 pt-2">
@@ -3026,6 +3025,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
         musicSelectedTracks = []; musicTrackDrafts = []; musicDragFrom = null;
         const tracks=document.getElementById('musicUploadTracks'); if(tracks) tracks.replaceChildren();
         const count=document.getElementById('musicTrackCount'); if(count) count.textContent='0 SONGS';
+        document.getElementById('musicTrackInformationSection')?.classList.add('hidden');
         musicUploadStatus('');
       } else if (id === 'adminMsgModal') {
         document.getElementById('adminMsgTitle').value='';
@@ -6939,6 +6939,7 @@ function saveMusicUploadTrackEdits() {
 function paintMusicUploadTracks() {
   const box = document.getElementById('musicUploadTracks');
   const count = musicSelectedTracks.length;
+  document.getElementById('musicTrackInformationSection')?.classList.toggle('hidden', count === 0);
   document.getElementById('musicTrackCount').textContent = `${count} SONG${count === 1 ? '' : 'S'}`;
   box.innerHTML = musicSelectedTracks.map((file, i) => {
     const draft = musicTrackDrafts[i];
