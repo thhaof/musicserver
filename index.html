@@ -2343,7 +2343,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       </div>
       <form id="musicUploadForm" onsubmit="submitMusicUpload(event)" class="space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <label class="text-xs text-gray-400">RELEASE NAME<input id="musicAlbumName" required maxlength="160" class="music-input" placeholder="Song Name"></label>
+          <label class="text-xs text-gray-400">ALBUM NAME<input id="musicAlbumName" required maxlength="160" class="music-input" placeholder="Album Name"></label>
           <label class="text-xs text-gray-400">MAIN ARTIST<input id="musicMainArtist" required maxlength="160" class="music-input" placeholder="Artist Name"></label>
           <label class="text-xs text-gray-400">RELEASE DATE (DD/MM/YYYY)<span class="ha-date-wrap"><input id="musicReleaseDate" required onclick="haDateInputClicked(this)" placeholder="DD/MM/YYYY" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" class="music-input" inputmode="numeric"><button type="button" class="ha-date-button" onclick="haShowCalendar(this)" title="Choose a date" aria-label="Choose release date"><i class="fa-solid fa-calendar-days"></i></button><input type="date" class="ha-native-calendar" aria-label="Calendar date" tabindex="-1" onchange="haCalendarChanged(this)"></span></label>
           <label class="text-xs text-gray-400">RELEASE TYPE<select id="musicReleaseType" class="music-input" required><option value="" disabled selected>Select Type</option><option>Album</option><option>EP</option><option>Single</option><option>Mixtape</option><option>Compilation</option></select></label>
