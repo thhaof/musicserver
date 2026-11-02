@@ -6173,7 +6173,7 @@ function togglePlay() {
       const name = currentUsername || '';
       const nameEl = document.getElementById('menuDisplayName');
       const userEl = document.getElementById('menuUsername');
-      if (nameEl) nameEl.textContent = haRequire() ? 'Howie (Admin)' : (musicCanEdit() ? `${name||'irynna'} (Manager)` : (currentUser && name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Guest'));
+      if (nameEl) nameEl.textContent = haRequire() ? 'Howie (Admin)' : (musicCanEdit() ? `${name||'irynna'} (DJ)` : (currentUser && name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Guest'));
       if (userEl) userEl.textContent = currentUser && name ? '@' + name : 'Not logged in';
       updateHomeWelcome();
     }
@@ -7275,7 +7275,7 @@ function adminApplyAccess() {
   if (topBrandText) topBrandText.textContent = 'MUSIC';
   const nameEl = document.getElementById('menuDisplayName');
   if (nameEl && isHowieAdmin) nameEl.textContent = 'Howie (Admin)';
-  else if (nameEl && canEdit) nameEl.textContent = `${currentUsername||'irynna'} (Manager)`;
+  else if (nameEl && canEdit) nameEl.textContent = `${currentUsername||'irynna'} (DJ)`;
   else if (nameEl && !currentUser) nameEl.textContent = 'Guest';
   else if (nameEl && currentUser) {
     const n = currentUsername || '';
@@ -7292,7 +7292,7 @@ function adminApplyAccess() {
   const badge=document.getElementById('haStaffBadge');
   if (badge) badge.innerHTML=isHowieAdmin
     ? '<i class="fa-solid fa-shield-halved"></i> HOWIE (ADMIN)'
-    : (canEdit ? '<i class="fa-solid fa-pen-to-square"></i> IRYNNA (MANAGER)' : '');
+    : (canEdit ? '<i class="fa-solid fa-pen-to-square"></i> IRYNNA (DJ)' : '');
   if (!isHowieAdmin) document.getElementById('adminMsgModal')?.classList.add('hidden');
   if (!canEdit) {
     document.getElementById('haEditorModal')?.classList.add('hidden');
