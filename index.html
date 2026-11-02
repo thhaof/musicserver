@@ -1840,6 +1840,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
           <div class="mb-6">
             <p class="text-xs font-bold text-blue-400 uppercase tracking-widest mb-2">HOWIE'S MUSIC SERVER</p>
             <h1 id="homeWelcomeTitle" class="text-3xl sm:text-4xl font-extrabold text-white break-words">WELCOME BACK!</h1>
+            <p class="text-sm text-gray-400 mt-2">Discover your latest songs, albums and artists.</p>
           </div>
 
           <div class="flex items-center justify-between mb-5">
@@ -1847,14 +1848,6 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
             <button onclick="switchView('discover')" class="text-xs font-bold text-blue-400 hover:text-blue-300 uppercase">VIEW ALL SONGS</button>
           </div>
           <div id="homeNewSongs" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-10"></div>
-
-          <div class="flex items-center justify-between mb-5">
-            <h2 class="text-xl font-extrabold text-white uppercase">RECOMMENDED FOR YOU</h2>
-            <button onclick="refreshRecommendedSongs()" title="REFRESH RECOMMENDED SONGS" class="text-xs font-bold text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-2 rounded-xl transition flex items-center gap-2 uppercase">
-              <i class="fa-solid fa-rotate"></i> REFRESH
-            </button>
-          </div>
-          <div id="homeRecommended" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-10"></div>
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-[#151620]/70 rounded-2xl p-5 border border-gray-800/60">
@@ -2348,15 +2341,14 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
         <h2 class="text-lg font-extrabold text-white uppercase"><i class="fa-solid fa-cloud-arrow-up text-blue-400 mr-2"></i>UPLOAD MUSIC</h2>
         <button type="button" onclick="if (!musicUploadBusy) closeModal('musicUploadModal')" class="text-gray-400 hover:text-white" aria-label="Close upload"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <p class="text-xs text-gray-400 mb-5">Choose an album cover and MP3 files. Fill album details once, edit track credits if needed, then upload to R2 and publish to Supabase.</p>
       <form id="musicUploadForm" onsubmit="submitMusicUpload(event)" class="space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <label class="text-xs text-gray-400">ALBUM / EP / SINGLE NAME<input id="musicAlbumName" required maxlength="160" class="music-input" placeholder="HVL"></label>
-          <label class="text-xs text-gray-400">MAIN ARTIST<input id="musicMainArtist" required maxlength="160" class="music-input" placeholder="MCK"></label>
+          <label class="text-xs text-gray-400">RELEASE NAME<input id="musicAlbumName" required maxlength="160" class="music-input"></label>
+          <label class="text-xs text-gray-400">MAIN ARTIST<input id="musicMainArtist" required maxlength="160" class="music-input"></label>
           <label class="text-xs text-gray-400">RELEASE DATE (DD/MM/YYYY)<span class="ha-date-wrap"><input id="musicReleaseDate" required onclick="haDateInputClicked(this)" placeholder="DD/MM/YYYY" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" class="music-input" inputmode="numeric"><button type="button" class="ha-date-button" onclick="haShowCalendar(this)" title="Choose a date" aria-label="Choose release date"><i class="fa-solid fa-calendar-days"></i></button><input type="date" class="ha-native-calendar" aria-label="Calendar date" tabindex="-1" onchange="haCalendarChanged(this)"></span></label>
-          <label class="text-xs text-gray-400">RELEASE TYPE<select id="musicReleaseType" class="music-input"><option>Album</option><option>EP</option><option>Single</option><option>Mixtape</option></select></label>
+          <label class="text-xs text-gray-400">RELEASE TYPE<select id="musicReleaseType" class="music-input"><option>Album</option><option>EP</option><option>Single</option><option>Mixtape</option><option>Compilation</option></select></label>
           <label class="text-xs text-gray-400">GENRES<input id="musicGenres" required maxlength="200" class="music-input" placeholder="Rap/Hip-Hop, Pop"></label>
-          <label class="text-xs text-gray-400">COUNTRY<input id="musicCountry" required maxlength="100" class="music-input" placeholder="Vietnam"></label>
+          <label class="text-xs text-gray-400">COUNTRY<select id="musicCountry" required class="music-input"><option value="" disabled selected>Select country</option><option value="Vietnam">Vietnam</option><option value="South Korea">South Korea</option><option value="US/UK">US/UK</option><option value="Australia">Australia</option></select></label>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label class="text-xs text-gray-400">COVER FILE (.JPG / .PNG / .WEBP / .JFIF)<input id="musicCoverFile" type="file" accept=".jpg,.jpeg,.png,.webp,.jfif,image/jpeg,image/png,image/webp" required class="music-file"></label>
@@ -3477,32 +3469,14 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       return copy.slice(0, count);
     }
 
-    function refreshRecommendedSongs() {
-      const recommended = getRandomSongs(songs, Math.min(9, songs.length));
-      queueContexts.homeRecommended = [...recommended];
-      const container = document.getElementById('homeRecommended');
-      if (container) container.innerHTML = recommended.map((song, idx) => generateSongRowHTML(song, idx, 'homeRecommended')).join('');
-      requestAnimationFrame(observeScrollReveals);
-      updateFloatingNavControls();
-    }
-
     function renderHomeView() {
       if (typeof updateHomeWelcome === 'function') updateHomeWelcome();
       const latest = [...songs].slice(-9).reverse();
-      const pool = [...songs];
-      let recommended;
-      if (keepHomeLists && queueContexts.homeRecommended.length) {
-        recommended = [...queueContexts.homeRecommended];
-        const playing = currentQueue[currentSongIndex];
-        if (playing && playOrigin?.source === 'homeRecommended' && !recommended.some(s => s.id === playing.id)) recommended[0] = playing;
-      } else {
-        recommended = getRandomSongs(pool, Math.min(9, pool.length));
-      }
       keepHomeLists = false;
       queueContexts.homeNew = [...latest];
-      queueContexts.homeRecommended = [...recommended];
+      // Keep a harmless empty legacy queue for already-saved player state.
+      queueContexts.homeRecommended = [];
       document.getElementById('homeNewSongs').innerHTML = latest.map((s, idx) => generateSongRowHTML(s, idx, 'homeNew')).join('');
-      document.getElementById('homeRecommended').innerHTML = recommended.map((s, idx) => generateSongRowHTML(s, idx, 'homeRecommended')).join('');
 
       const albums = [...albumIndex.keys()].slice(-4).reverse().map(getAlbumInfo);
       document.getElementById('homeNewAlbums').innerHTML = albums.map(alb => `<div onclick='openGroupDetail("album", decodeURIComponent(this.dataset.album))' data-album="${encodeDataValue(alb.name)}" class="cursor-pointer group"><img src="${alb.cover}" class="w-full aspect-square object-cover rounded-xl mb-2 group-hover:scale-[1.02] transition"><p class="text-xs font-bold text-white truncate normal-case">${alb.name}</p><p class="text-[10px] text-gray-500 truncate uppercase">${albumDescriptionHTML(alb)}</p></div>`).join('');
@@ -4103,6 +4077,8 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
     function formatReleaseTypeCount(count, type) {
       if (type === 'EP') return formatCount(count, 'EP', 'EPS');
       if (type === 'Single') return formatCount(count, 'SINGLE', 'SINGLES');
+      if (type === 'Mixtape') return formatCount(count, 'MIXTAPE', 'MIXTAPES');
+      if (type === 'Compilation') return formatCount(count, 'COMPILATION', 'COMPILATIONS');
       return formatCount(count, 'ALBUM', 'ALBUMS');
     }
 
@@ -4110,15 +4086,13 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       const names = [...new Set(categorySongs.map(s => s.album).filter(Boolean))];
       const counts = names.reduce((acc, name) => {
         const type = albumType(name);
-        if (type === 'EP') acc.EP++;
-        else if (type === 'Single') acc.Single++;
-        else acc.Album++;
+        acc[type] = (acc[type] || 0) + 1;
         return acc;
-      }, { Album: 0, EP: 0, Single: 0 });
+      }, { Album: 0, EP: 0, Single: 0, Mixtape: 0, Compilation: 0 });
       const parts = [];
-      if (counts.Album) parts.push(formatReleaseTypeCount(counts.Album, 'Album'));
-      if (counts.EP) parts.push(formatReleaseTypeCount(counts.EP, 'EP'));
-      if (counts.Single) parts.push(formatReleaseTypeCount(counts.Single, 'Single'));
+      for (const type of ['Album', 'EP', 'Single', 'Mixtape', 'Compilation']) {
+        if (counts[type]) parts.push(formatReleaseTypeCount(counts[type], type));
+      }
       return { ...counts, total: names.length, text: parts.join(' • ') };
     }
 
@@ -4225,12 +4199,12 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
           const type = albumType(albumName);
           acc[type] = (acc[type] || 0) + 1;
           return acc;
-        }, { Album: 0, EP: 0, Single: 0 });
+        }, { Album: 0, EP: 0, Single: 0, Mixtape: 0, Compilation: 0 });
 
         const genreCountParts = [];
-        if (genreReleaseCounts.Album) genreCountParts.push(formatReleaseTypeCount(genreReleaseCounts.Album, 'Album'));
-        if (genreReleaseCounts.EP) genreCountParts.push(formatReleaseTypeCount(genreReleaseCounts.EP, 'EP'));
-        if (genreReleaseCounts.Single) genreCountParts.push(formatReleaseTypeCount(genreReleaseCounts.Single, 'Single'));
+        for (const type of ['Album', 'EP', 'Single', 'Mixtape', 'Compilation']) {
+          if (genreReleaseCounts[type]) genreCountParts.push(formatReleaseTypeCount(genreReleaseCounts[type], type));
+        }
         if (filtered.length) genreCountParts.push(formatCount(filtered.length, 'SONG'));
         const genreCountText = genreCountParts.join(' • ');
         document.getElementById('categoryViewTitle').textContent = categoryGenre;
@@ -6886,36 +6860,38 @@ let musicSelectedTracks = [];
 let musicTrackDrafts = [];
 
 function musicTitleFromFilename(filename) {
-  return filename.normalize('NFC').replace(/\.mp3$/i, '')
-    .replace(/^\s*\d{1,3}[\s._-]+/, '').trim();
+  // The start of a filename may be part of its actual title: "24K Magic",
+  // "01 - Intro", "100 Degrees". Never strip leading digits automatically.
+  return String(filename || '').normalize('NFC').replace(/\.mp3$/i, '').trim();
 }
 function musicCreditsFromFilename(filename) {
-  // e.g. "01 - Song (feat. Guest) (prod. Producer).mp3"
-  //   -> Song / Guest / Producer. MP3 file name itself is NEVER changed.
+  // Titles keep numeric prefixes exactly as written in the MP3 filename.
+  // Examples: "01 - My Song [feat. Guest] (prod. Producer).mp3",
+  //           "24K Magic (feat. Guest) [prod. Producer].mp3".
+  // The original MP3 file and track ordering are never renamed/modified.
   let title = musicTitleFromFilename(filename);
   const featuring = [];
   const producers = [];
-  const addProducer = value => {
-    const cleaned = String(value || '').replace(/^(?:by)\s+/i, '')
+  const addCredit = (list, value) => {
+    const cleaned = String(value || '').replace(/^by\s+/i, '')
       .replace(/\.+\s*$/, '').trim();
-    if (cleaned) producers.push(cleaned);
+    if (cleaned) list.push(cleaned);
   };
 
-  // Remove labelled producer credits anywhere in parentheses or brackets.
-  title = title.replace(/[\(\[]\s*prod\.\s*([^\)\]]+?)\s*[\)\]]/gi,
-    (_match, credit) => { addProducer(credit); return ' '; });
+  // Recognize matching () OR [] wrappers, whichever order they appear in.
+  // Keep normal parentheses/brackets that do not contain labelled credits.
+  title = title.replace(/\s*(?:\(\s*prod\.\s*([^)]*?)\s*\)|\[\s*prod\.\s*([^\]]*?)\s*\])\s*/gi,
+    (_match, inParens, inBrackets) => { addCredit(producers, inParens || inBrackets); return ' '; });
+  title = title.replace(/\s*(?:\(\s*feat\.\s*([^)]*?)\s*\)|\[\s*feat\.\s*([^\]]*?)\s*\])\s*/gi,
+    (_match, inParens, inBrackets) => { addCredit(featuring, inParens || inBrackets); return ' '; });
 
-  // Preserve automatic extraction of featuring artists, regardless of
-  // whether the feat. tag precedes or follows a prod. tag.
-  title = title.replace(/\s*\(feat\.\s*([^)]*?)\)\s*/gi,
-    (_match, credit) => { if (credit.trim()) featuring.push(credit.trim()); return ' '; });
-
-  // Also accept an unwrapped trailing tag: "Song prod. ProducerName.mp3"
-  // or "Song - prod. ProducerName.mp3" (optional final period).
-  const unwrapped = /(?:^|[\s\-–—])prod\.\s*(.+?)\s*$/i.exec(title);
-  if (unwrapped && unwrapped[1].trim()) {
-    addProducer(unwrapped[1]);
-    title = title.slice(0, unwrapped.index);
+  // Retain support for unwrapped trailing producer credits from V12.
+  // Handle either order when an unwrapped feat. or prod. is present.
+  for (let pass = 0; pass < 2; pass++) {
+    const trailing = /(?:^|[\s\-–—])(feat|prod)\.\s*(.+?)\s*$/i.exec(title);
+    if (!trailing || !trailing[2].trim()) break;
+    addCredit(trailing[1].toLowerCase() === 'prod' ? producers : featuring, trailing[2]);
+    title = title.slice(0, trailing.index);
   }
 
   title = title.replace(/\s+/g, ' ').replace(/[\s\-–—]+$/, '').trim();
@@ -7493,7 +7469,7 @@ function adminBuildEditor(title,hint,fields,values,bulk){
   document.getElementById('haEditorStatus').textContent='';
   document.getElementById('haEditorFields').innerHTML=fields.map(([key,label])=>{
     const large=['src','cover'].includes(key);
-    const options=key==='releaseType'?['Album','EP','Single','Mixtape'].map(o=>`<option value="${o}" ${values[key]===o?'selected':''}>${o}</option>`).join(''):null;
+    const options=key==='releaseType'?['Album','EP','Single','Mixtape','Compilation'].map(o=>`<option value="${o}" ${values[key]===o?'selected':''}>${o}</option>`).join(''):null;
     const formatted=key==='releaseDate'?haDateDisplay(values[key]):key==='genres'&&Array.isArray(values[key])?values[key].join(', '):(values[key]||'');
     const field=options&&!bulk?`<select name="${key}" class="ha-input">${options}</select>`:
       key==='releaseDate'?`<span class="ha-date-wrap"><input name="releaseDate" class="ha-input" onclick="haDateInputClicked(this)" placeholder="DD/MM/YYYY" value="${bulk?'':haEscape(formatted)}" maxlength="10" ${bulk?'disabled':''} inputmode="numeric" autocomplete="off"><button type="button" class="ha-date-button" onclick="haShowCalendar(this)" ${bulk?'disabled':''} title="Choose a date"><i class="fa-solid fa-calendar-days"></i></button><input type="date" class="ha-native-calendar" tabindex="-1" aria-label="Calendar date" onchange="haCalendarChanged(this)"></span>`:
