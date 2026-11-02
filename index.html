@@ -15,7 +15,7 @@
     })();
   </script>
   <title>Howie's Music Server</title>
-  <link id="dynamicFavicon" rel="icon" type="image/png" href="https://pub-05c71ade887741969add5d4ed602eb19.r2.dev/icon%20browser%20tab.png">
+  <link id="dynamicFavicon" rel="icon" type="image/png" href="https://pub-05c71ade887741969add5d4ed602eb19.r2.dev/musicserver%20icon.png">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -2428,7 +2428,8 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_CU85Sw18TcKT4ElOirghww_yZL38QJa";
     const supabaseClient = window.supabase.createClient(
       SUPABASE_URL,
-      SUPABASE_PUBLISHABLE_KEY
+      SUPABASE_PUBLISHABLE_KEY,
+      { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
     );
     // Configure only AFTER deploying worker/worker.js (see SETUP.md).
     const MUSIC_UPLOAD_API = 'https://musicupload.thhaof.workers.dev';
@@ -2436,39 +2437,30 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
     /* =========================================================
        SONG DATABASE
     ========================================================== */
-    // The song catalog now lives in Supabase music_songs, with ./songs.json as an
-    // offline/deployment fallback. Existing IDs remain unchanged for playlists.
+    // Supabase music_songs is the single source of truth.
+    // Never substitute an outdated songs.json backup after the database has been reset.
+    // An empty catalog is valid and must not prevent restoring the saved login session.
     const songs = [];
     const CATALOG_PAGE_SIZE = 500;
     let catalogSource = 'not loaded';
 
     async function fetchMusicCatalog() {
       const collected = [];
-      try {
-        for (let start = 0; start < 100000; start += CATALOG_PAGE_SIZE) {
-          const { data, error } = await supabaseClient.from('music_songs')
-            .select('id,title,mainartist,featuringartist,producer,album,releaseDate,genres,country,releaseType,cover,src,track_number')
-            .order('id', { ascending: true }).range(start, start + CATALOG_PAGE_SIZE - 1);
-          if (error) throw error;
-          collected.push(...(data || []));
-          if (!data || data.length < CATALOG_PAGE_SIZE) break;
-        }
-        if (collected.length >= 987) { catalogSource = 'Supabase'; return collected; }
-        if (collected.length) console.warn('Supabase migration incomplete: expected at least 987 original tracks; using songs.json backup.');
-      } catch (error) {
-        console.warn('Supabase music catalog unavailable; trying songs.json:', error.message || error);
+      for (let start = 0; start < 100000; start += CATALOG_PAGE_SIZE) {
+        const { data, error } = await supabaseClient.from('music_songs')
+          .select('id,title,mainartist,featuringartist,producer,album,releaseDate,genres,country,releaseType,cover,src,track_number')
+          .order('id', { ascending: true }).range(start, start + CATALOG_PAGE_SIZE - 1);
+        if (error) throw new Error('Supabase music_songs: ' + error.message);
+        collected.push(...(data || []));
+        if (!data || data.length < CATALOG_PAGE_SIZE) break;
       }
-      const response = await fetch('./songs.json', { cache: 'no-store' });
-      if (!response.ok) throw new Error('Could not open songs.json (' + response.status + ')');
-      const fallback = await response.json();
-      if (!Array.isArray(fallback) || !fallback.length) throw new Error('songs.json must contain a non-empty array');
-      catalogSource = 'songs.json fallback';
-      return fallback;
+      catalogSource = 'Supabase';
+      return collected;
     }
 
     async function refreshMusicCatalog() {
       const loaded = await fetchMusicCatalog();
-      if (!loaded.length) throw new Error('The music catalog is empty');
+      // A freshly cleared catalog may legitimately contain zero songs.
       // Replace in place: queueContexts.all and any other references remain valid.
       songs.splice(0, songs.length);
       artistSpellings.clear();
@@ -2486,10 +2478,14 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
         song.id = Number(song.id);
         song.genres = normalizeGenres(song.genres);
         song.country = String(song.country || '');
-        song.mainartist = canonicalArtist(String(song.mainartist || '').trim());
+        // A comma separates individual main artists, just as it does for
+        // featuring artists and producers. Keep the combined credit string
+        // for album metadata, but index each credited artist separately.
+        const mainArtists = splitNames(song.mainartist).map(canonicalArtist);
+        song.mainartist = mainArtists.join(', ');
         song.featuringartist = String(song.featuringartist || '');
         song.producer = String(song.producer || '');
-        song.artists = [...new Set([song.mainartist, ...splitNames(song.featuringartist), ...splitNames(song.producer)]
+        song.artists = [...new Set([...mainArtists, ...splitNames(song.featuringartist), ...splitNames(song.producer)]
           .filter(Boolean).map(canonicalArtist))];
         song.artistLine = song.artists.join(', ');
         song._search = normalizeSearchText(`${song.title} ${song.artistLine} ${song.album}`);
@@ -2525,9 +2521,9 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
 
     /* =========================================================
        ARTISTS & ALBUMS
-       Every main artist, featuring artist and producer becomes an
+       Every comma-separated main artist, featuring artist and producer becomes an
        artist (matched case-insensitively). Each song gets:
-         song.artists     -> [main, ...featuring, ...producer]
+         song.artists     -> [...main, ...featuring, ...producer]
          song.artistLine  -> "Main, Featuring, Producer"
     ========================================================== */
     const splitNames = value => String(value || '').split(',').map(v => v.trim()).filter(Boolean);
@@ -2747,6 +2743,8 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       currentUsername = username;
       howieManagementMode = false;
       resetPlaybackStateForLogin();
+      try { await refreshMusicCatalog(); }
+      catch (catalogError) { console.warn('Catalog refresh after login:', catalogError); }
 
       // Ensure the profile exists for this authenticated user.
       const { error: profileError } = await supabaseClient
@@ -2792,6 +2790,11 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
         currentUser = user;
         howieManagementMode = false;
         resetPlaybackStateForLogin();
+
+        // Re-read under the restored user's JWT (RLS can differ from anonymous).
+        // Never use stale songs.json after a full-catalog reset.
+        try { await refreshMusicCatalog(); }
+        catch (catalogError) { console.warn('Catalog refresh after session restore:', catalogError); }
 
         const { data: profile } = await supabaseClient
           .from('profiles')
@@ -4712,7 +4715,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       const titleEl = document.querySelector('title');
       const favicon = document.getElementById('dynamicFavicon');
       const defaultTitle = "Howie's Music Server";
-      const defaultIcon = 'https://pub-05c71ade887741969add5d4ed602eb19.r2.dev/icon%20browser%20tab.png';
+      const defaultIcon = 'https://pub-05c71ade887741969add5d4ed602eb19.r2.dev/musicserver%20icon.png';
 
       // No song in the player/queue: restore the default tab.
       if (!song) {
@@ -6084,10 +6087,9 @@ function togglePlay() {
       try {
         await refreshMusicCatalog();
       } catch (error) {
-        console.error('Cannot initialize song catalog:', error);
-        const label = document.getElementById('welcomeHeader');
-        if (label) label.textContent = 'MUSIC CATALOG UNAVAILABLE — SEE CONSOLE';
-        return;
+        // Login must still be restored if the catalog is empty, RLS-protected,
+        // or briefly unavailable. A later authenticated read may succeed.
+        console.warn('Initial catalog request failed; continuing session restore:', error);
       }
       updateLibraryCounts();
       updateBrowserTabMetadata(null, false);
@@ -7160,7 +7162,7 @@ async function submitMusicUpload(event) {
       musicUploadStatus(`SUCCESS! ${published.inserted} SONGS PUBLISHED. ${count} SONGS TOTAL.`);
     } catch (refreshError) {
       console.warn('Catalog refresh failed after publish:', refreshError);
-      musicUploadStatus(`${published.inserted} SONGS PUBLISHED. Reload the page to refresh the catalog.`);
+      musicUploadStatus(`${published.inserted} SONGS SAVED TO SUPABASE, BUT CATALOG RELOAD FAILED: ${refreshError.message || 'check your connection'}.`, true);
     }
     document.getElementById('musicTrackFiles').value = '';
     document.getElementById('musicCoverFile').value = '';
