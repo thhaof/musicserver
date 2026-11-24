@@ -235,7 +235,7 @@
       gap: 1.5rem;
       align-items: start;
     }
-    /* Artist/Category album cards: same size as Featured Albums cards. */
+    /* Artist album cards: same size as Featured Albums cards. */
     #contentView { container-type: inline-size; --featured-card-w: 100cqw; }
     @media (min-width: 768px)  { #contentView { --featured-card-w: calc((100cqw - 1.25rem) / 2); } }
     @media (min-width: 1024px) { #contentView { --featured-card-w: calc((100cqw - 2.5rem) / 3); } }
@@ -243,19 +243,7 @@
       grid-template-columns: repeat(auto-fill, min(var(--featured-card-w), 100%)) !important;
       justify-content: start;
     }
-
-    /* Categories: force all visible/generated text to uppercase. */
-    #categoryView,
-    #categoryView * {
-      text-transform: uppercase !important;
-    }
-    /* ...except song names (and their artist/album line), which keep original format. */
-    #categoryView .song-item-card,
-    #categoryView .song-item-card * {
-      text-transform: none !important;
-    }
-
-    @media (max-width: 1100px) {
+@media (max-width: 1100px) {
       .artist-detail-grid { grid-template-columns: 1fr; }
     }
 
@@ -460,7 +448,7 @@
 <style>
 /* Artist / album / song names always keep their original capitalization. */
 .keep-case, .keep-case * { text-transform: none !important; }
-#categoryView .keep-case, #categoryView .keep-case * { text-transform: none !important; }
+
 /* ===== Auto Play switch ===== */
 .autoplay-switch { position: relative; width: 2.1rem; height: 1.15rem; border-radius: 9999px; background: #374151; flex-shrink: 0; transition: background-color .2s ease, box-shadow .2s ease; }
 .autoplay-knob { position: absolute; top: 2px; left: 2px; width: calc(1.15rem - 4px); height: calc(1.15rem - 4px); border-radius: 50%; background: #fff; transition: transform .2s ease; }
@@ -911,7 +899,7 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
     #musicUploadModal > div {background:var(--surface-2);color:var(--tx)}
   </style>
 <style id="howie-admin-mode-styles">
-/* HOWIE ADMIN MODE — isolated from the player, uploader, and public pages */
+/* ADMIN MANAGEMENT — isolated from the player, uploader, and public pages */
 .ha-wrap.hidden,#adminMsgModal.hidden,#musicUploadModal.hidden{display:none!important}
 .ha-wrap{color:var(--tx,#f4f4fb);max-width:1500px;margin:0 auto;text-transform:none}
 .ha-wrap *{box-sizing:border-box}
@@ -926,14 +914,13 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
 .ha-wrap .ha-primary{background:#6d60dc;color:#fff;border-color:#766af1}
 .ha-wrap .ha-primary:hover:not(:disabled){background:#8275ec}
 .ha-wrap .ha-card{background:var(--surface-2,#1b1d2a);border:1px solid var(--line,#32364a);border-radius:16px;padding:19px;min-width:0}
-.ha-wrap .ha-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:23px 0}
+.ha-wrap .ha-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:23px 0}
 .ha-wrap .ha-metric small{display:block;color:var(--tx-3,#949aad);font-size:10px;font-weight:850;letter-spacing:.11em;margin:9px 0 5px}
 .ha-wrap .ha-metric strong{font-size:27px;font-variant-numeric:tabular-nums;letter-spacing:-.05em}
 .ha-wrap .ha-metric .ha-icon{font-size:17px}
 .ha-wrap .ha-metric .ha-icon-songs{color:#60a5fa}
 .ha-wrap .ha-metric .ha-icon-albums{color:#818cf8}
 .ha-wrap .ha-metric .ha-icon-artists{color:#c084fc}
-.ha-wrap .ha-metric .ha-icon-categories{color:#34d399}
 .ha-wrap .ha-columns{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(250px,1fr);gap:13px}
 .ha-wrap .ha-section-title{font-size:12px;font-weight:850;letter-spacing:.06em;margin-bottom:13px}
 .ha-wrap .ha-recent{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line,#2c3042)}
@@ -985,17 +972,9 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
 
 
 
-/* Permission-aware Management layout. Manager sees only upload + library editing; Dashboard is read-only. */
-.ha-wrap .ha-management-tile.ha-super-only.hidden,
-.ha-wrap .ha-dashboard-section.hidden { display:none!important; }
-/* For Manager, fill the available Management width with two equal action tiles. */
-.ha-wrap .ha-management-grid.ha-editor-grid { grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; }
-.ha-wrap .ha-management-grid.ha-editor-grid > .ha-management-tile:not(.hidden) { min-width:0; width:100%; }
-@media(max-width:520px){.ha-wrap .ha-management-grid.ha-editor-grid{grid-template-columns:minmax(0,1fr);}}
-
 /* HOWIE MANAGEMENT NAVIGATION */
 .ha-wrap .ha-management-heading{margin-bottom:24px}
-.ha-wrap .ha-management-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:15px 0 30px}
+.ha-wrap .ha-management-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:15px 0 30px}
 .ha-wrap .ha-management-tile{min-height:135px;border:1px solid var(--line,#34364c);border-radius:15px;background:var(--surface-2,#1c1e2c);color:var(--tx,#fff);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:9px;padding:17px;text-align:left;transition:background .18s,border-color .18s,transform .18s}
 .ha-wrap .ha-management-tile:hover{border-color:#9587ff;background:rgba(121,108,226,.16);transform:translateY(-2px)}
 .ha-wrap .ha-management-tile i{font-size:22px;color:#a69afd}
@@ -1259,8 +1238,7 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
 #nav-discover.active-nav{background:linear-gradient(90deg,rgba(59,130,246,.22),rgba(59,130,246,.04));border-left-color:#60a5fa;}
 #nav-albums.active-nav{background:linear-gradient(90deg,rgba(129,140,248,.23),rgba(129,140,248,.04));border-left-color:#818cf8;}
 #nav-artists.active-nav{background:linear-gradient(90deg,rgba(192,132,252,.21),rgba(192,132,252,.04));border-left-color:#c084fc;}
-#nav-category.active-nav{background:linear-gradient(90deg,rgba(52,211,153,.19),rgba(52,211,153,.04));border-left-color:#34d399;}
-#nav-library.active-nav,#nav-discover.active-nav,#nav-albums.active-nav,#nav-artists.active-nav,#nav-category.active-nav{color:var(--tx)!important;}
+#nav-library.active-nav,#nav-discover.active-nav,#nav-albums.active-nav,#nav-artists.active-nav{color:var(--tx)!important;}
 /* Maintain legible navigation colors in light theme as well. */
 html[data-theme="light"] #nav-home.active-nav.howie-management-selected{background:linear-gradient(90deg,rgba(139,92,246,.19),rgba(139,92,246,.04));}
 </style>
@@ -1289,7 +1267,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
 @media(max-width:1023px){
   #topBar{column-gap:.55rem;row-gap:.6rem;}
   #topBrand{margin-right:auto;max-width:calc(100% - 10rem);}
-  #chatTopBtn,#notifWrap,#accountMenuWrap{flex-shrink:0;}
+  #notifWrap,#accountMenuWrap{flex-shrink:0;}
   #topSearchWrap{flex-basis:100%;order:5;}
 }
 @media(max-width:410px){
@@ -1681,8 +1659,6 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       </button>
     </div>
 
-    <!-- Chat shortcut — available to all signed-in accounts -->
-    <div style="position:relative;flex-shrink:0"><button id="chatTopBtn" class="topbar-btn hidden" type="button" title="CHATS" aria-label="Open chats" aria-pressed="false" onclick="switchView('chat')"><i class="fa-solid fa-comments"></i></button><span id="chatTopBadge" class="hidden" style="position:absolute;top:-5px;right:-5px;min-width:17px;border-radius:11px;padding:2px 4px;font-size:9px;font-weight:800;line-height:14px;text-align:center;background:#7563e8;color:white;pointer-events:none">0</span></div>
     <!-- Notifications: new songs, albums and artists -->
     <div id="notifWrap" class="relative flex-shrink-0">
       <button id="notifBtn" type="button" onclick="toggleNotifMenu()" aria-haspopup="true" aria-expanded="false" aria-label="Notifications" title="NOTIFICATIONS" class="topbar-btn notif-btn">
@@ -1777,6 +1753,8 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
               <i class="fa-solid fa-right-left" aria-hidden="true"></i>
             </button>
           </div>
+          <a href="#" onclick="openMusicUploadModal(); return false;" id="nav-upload" class="nav-item hidden flex items-center gap-4 px-4 py-3 text-sm text-gray-300 hover:text-white rounded-xl transition duration-200 uppercase"><i class="fa-solid fa-cloud-arrow-up text-lg w-5 text-center text-blue-400"></i><span>UPLOAD MUSIC</span></a>
+          <a href="#" onclick="switchView('chat'); return false;" id="nav-chat" class="nav-item hidden flex items-center gap-4 px-4 py-3 text-sm text-gray-300 hover:text-white rounded-xl transition duration-200 uppercase"><i class="fa-solid fa-comments text-lg w-5 text-center text-purple-400"></i><span>CHATS</span><span id="chatSidebarBadge" class="hidden ml-auto rounded-full px-2 py-0.5 text-[9px] font-extrabold text-white" style="background:#7563e8">0</span></a>
           <button type="button" onclick="toggleLibraryMenu()" id="nav-library" class="nav-item w-full flex items-center justify-between gap-4 px-4 py-3 text-sm text-gray-300 hover:text-white rounded-xl transition duration-200 uppercase text-left">
             <span class="flex items-center gap-4"><i class="fa-solid fa-book-open text-lg w-5 text-center text-blue-400"></i>LIBRARY</span>
             <i id="libraryChevron" class="fa-solid fa-chevron-down text-[10px] transition-transform"></i>
@@ -1785,7 +1763,6 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
             <a href="#" onclick="switchView('discover'); return false;" id="nav-discover" class="nav-item flex items-center gap-3 px-4 py-2.5 text-xs text-gray-400 hover:text-white rounded-xl transition uppercase"><i class="fa-solid fa-music w-4 text-center text-blue-400"></i><span>SONGS <span id="navSongsCount" class="text-[10px] text-gray-500">0</span></span></a>
             <a href="#" onclick="switchView('albums'); return false;" id="nav-albums" class="nav-item flex items-center gap-3 px-4 py-2.5 text-xs text-gray-400 hover:text-white rounded-xl transition uppercase"><i class="fa-solid fa-compact-disc w-4 text-center text-indigo-400"></i><span>ALBUMS <span id="navAlbumsCount" class="text-[10px] text-gray-500">0</span></span></a>
             <a href="#" onclick="switchView('artists'); return false;" id="nav-artists" class="nav-item flex items-center gap-3 px-4 py-2.5 text-xs text-gray-400 hover:text-white rounded-xl transition uppercase"><i class="fa-solid fa-microphone-lines w-4 text-center text-purple-400"></i><span>ARTISTS <span id="navArtistsCount" class="text-[10px] text-gray-500">0</span></span></a>
-            <a href="#" onclick="switchView('category'); return false;" id="nav-category" class="nav-item flex items-center gap-3 px-4 py-2.5 text-xs text-gray-400 hover:text-white rounded-xl transition uppercase"><i class="fa-solid fa-earth-americas w-4 text-center text-emerald-400"></i><span>CATEGORIES <span id="navCategoriesCount" class="text-[10px] text-gray-500">0</span></span></a>
           </div>
         </nav>
 
@@ -1840,11 +1817,23 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
           <div class="mb-6">
             <p class="text-xs font-bold text-blue-400 uppercase tracking-widest mb-2">HOWIE'S MUSIC SERVER</p>
             <h1 id="homeWelcomeTitle" class="text-3xl sm:text-4xl font-extrabold text-white break-words">WELCOME BACK!</h1>
-            <p class="text-sm text-gray-400 mt-2">Discover and listen to the latest tracks, albums and artists all over the worlds!</p>
+            <p class="text-sm text-gray-400 mt-2">Discover your latest songs, albums and artists.</p>
           </div>
 
+          <section class="mb-8" aria-label="Quick access">
+            <h2 class="text-sm font-extrabold text-gray-300 uppercase tracking-wider mb-3">QUICK ACCESS</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3">
+              <button id="homeQuickUpload" type="button" onclick="openMusicUploadModal()" class="hidden glass-card rounded-xl p-4 text-left min-h-[92px] flex flex-col justify-center gap-2"><i class="fa-solid fa-cloud-arrow-up text-blue-400 text-lg"></i><span class="text-[11px] font-extrabold text-white">UPLOAD MUSIC</span></button>
+              <button type="button" onclick="switchView('search')" class="glass-card rounded-xl p-4 text-left min-h-[92px] flex flex-col justify-center gap-2"><i class="fa-solid fa-magnifying-glass text-cyan-400 text-lg"></i><span class="text-[11px] font-extrabold text-white">SEARCH</span></button>
+              <button type="button" onclick="switchView('discover')" class="glass-card rounded-xl p-4 text-left min-h-[92px] flex flex-col justify-center gap-2"><i class="fa-solid fa-music text-blue-400 text-lg"></i><span class="text-[11px] font-extrabold text-white">SONGS</span></button>
+              <button type="button" onclick="switchView('albums')" class="glass-card rounded-xl p-4 text-left min-h-[92px] flex flex-col justify-center gap-2"><i class="fa-solid fa-compact-disc text-indigo-400 text-lg"></i><span class="text-[11px] font-extrabold text-white">ALBUMS</span></button>
+              <button type="button" onclick="switchView('artists')" class="glass-card rounded-xl p-4 text-left min-h-[92px] flex flex-col justify-center gap-2"><i class="fa-solid fa-microphone-lines text-purple-400 text-lg"></i><span class="text-[11px] font-extrabold text-white">ARTISTS</span></button>
+              <button id="homeQuickChats" type="button" onclick="switchView('chat')" class="hidden glass-card rounded-xl p-4 text-left min-h-[92px] flex flex-col justify-center gap-2"><i class="fa-solid fa-comments text-violet-400 text-lg"></i><span class="text-[11px] font-extrabold text-white">CHATS</span></button>
+            </div>
+          </section>
+
           <div class="flex items-center justify-between mb-5">
-            <h2 class="text-xl font-extrabold text-white uppercase">WHAT'S NEW?</h2>
+            <h2 class="text-xl font-extrabold text-white uppercase tracking-wider">WHAT'S NEW?</h2>
             <button onclick="switchView('discover')" class="text-xs font-bold text-blue-400 hover:text-blue-300 uppercase">VIEW ALL SONGS</button>
           </div>
           <div id="homeNewSongs" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-10"></div>
@@ -1915,20 +1904,6 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
             <select data-sort-kind="artists" onchange="handleSortSelectChange('artists', this)" class="bg-[#1f202e] border border-gray-700/50 text-xs text-gray-300 rounded-xl px-3 py-2 uppercase focus:outline-none focus:border-blue-500"><option value="">SORT BY</option><option value="title">TITLE</option><option value="albums">ALBUM COUNT</option><option value="songs">SONG COUNT</option><option value="release">RELEASE DATE</option></select>
           </div>
           <div id="artistList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
-        </div>
-
-        <!-- CATEGORY VIEW -->
-        <div id="categoryView" class="hidden">
-          <div class="flex items-center justify-between mb-6 gap-4 flex-wrap">
-            <div>
-              <h2 id="categoryViewTitle" class="text-2xl font-extrabold tracking-tight text-white uppercase">CATEGORIES</h2>
-              <p id="categorySubtitle" class="text-xs text-gray-400 mt-1 uppercase">SELECT A COUNTRY</p>
-            </div>
-            <button id="categoryBackBtn" onclick="categoryBack()" class="hidden text-xs font-bold text-gray-400 hover:text-white bg-gray-800/60 hover:bg-gray-800 px-4 py-2 rounded-xl transition uppercase"><i class="fa-solid fa-arrow-left mr-2"></i>BACK</button>
-          </div>
-          <div id="categoryCountryList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
-          <div id="categoryGenreList" class="hidden"></div>
-          <div id="categorySongList" class="hidden bg-[#151620]/70 rounded-2xl p-5 border border-gray-800/60 backdrop-blur-md"></div>
         </div>
 
          <!-- ALBUM / ARTIST DETAIL VIEW -->
@@ -2031,18 +2006,17 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
   <p id="chatStatus" class="hm-chat-status" role="status" aria-live="polite"></p>
 </div>
 
-      <!-- HOWIE ADMIN MODE: isolated views; never replaces the public player -->
+      <!-- ADMIN MANAGEMENT: isolated views; never replaces the public player -->
 <div id="adminDashboardView" class="ha-wrap hidden" aria-label="Management">
   <div class="ha-flex ha-management-heading">
-    <div><div class="ha-upper">HOWIE'S MUSIC SERVER</div><h1 class="ha-heading">MANAGEMENT</h1><p class="ha-desc" id="haManagementDescription">Dashboard, uploads, backups, library tools and notifications in one place.</p></div>
+    <div><div class="ha-upper">HOWIE'S MUSIC SERVER</div><h1 class="ha-heading">MANAGEMENT</h1><p class="ha-desc" id="haManagementDescription">Backups, account monitoring, library tools and notifications in one place.</p></div>
     <span class="ha-bubble" id="haStaffBadge"><i class="fa-solid fa-shield-halved"></i> HOWIE (ADMIN)</span>
   </div>
   <div class="ha-management-grid" aria-label="Management sections">
-    <button type="button" class="ha-management-tile" onclick="openMusicUploadModal()"><i class="fa-solid fa-cloud-arrow-up"></i><span>UPLOAD MUSIC</span><small>Songs and full albums</small></button>
-    <button type="button" class="ha-management-tile ha-super-only" onclick="adminExportCatalog()"><i class="fa-solid fa-file-arrow-down"></i><span>EXPORT BACKUP</span><small>Download JSON catalog</small></button>
-    <button type="button" class="ha-management-tile ha-super-only" onclick="adminOpenMonitor()"><i class="fa-solid fa-users-viewfinder"></i><span>MONITOR</span><small>Accounts and activity</small></button>
-    <button type="button" class="ha-management-tile" onclick="adminOpenStudio('songs')"><i class="fa-solid fa-book-open"></i><span>LIBRARY MANAGEMENT</span><small>Edit songs and albums</small></button>
-    <button type="button" class="ha-management-tile ha-message-tile ha-super-only" onclick="openAdminMsgModal()"><i class="fa-solid fa-paper-plane"></i><span>SEND MESSAGE</span><small>Notifications to selected accounts</small></button>
+    <button type="button" class="ha-management-tile ha-admin-only" onclick="adminExportCatalog()"><i class="fa-solid fa-file-arrow-down"></i><span>EXPORT BACKUP</span><small>Download JSON catalog</small></button>
+    <button type="button" class="ha-management-tile ha-admin-only" onclick="adminOpenMonitor()"><i class="fa-solid fa-users-viewfinder"></i><span>MONITOR</span><small>Accounts and activity</small></button>
+    <button type="button" class="ha-management-tile ha-admin-only" onclick="adminOpenStudio('songs')"><i class="fa-solid fa-book-open"></i><span>LIBRARY MANAGEMENT</span><small>Edit songs and albums</small></button>
+    <button type="button" class="ha-management-tile ha-message-tile ha-admin-only" onclick="openAdminMsgModal()"><i class="fa-solid fa-paper-plane"></i><span>SEND MESSAGE</span><small>Notifications to selected accounts</small></button>
   </div>
   <div id="haDashboardStats" class="ha-dashboard-section">
     <div class="ha-flex"><h2 class="ha-section-title"><i class="fa-solid fa-chart-pie" style="color:#a599fb;margin-right:7px"></i> DASHBOARD</h2><span class="ha-bubble">LIVE CATALOG</span></div>
@@ -2058,16 +2032,16 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
 </div>
 <div id="adminStudioView" class="ha-wrap hidden" aria-label="Music Management Studio">
   <div class="ha-flex"><div><div class="ha-upper">MANAGEMENT</div><h1 class="ha-heading">LIBRARY MANAGEMENT</h1><p class="ha-desc">Edit songs, update complete albums and manage track order.</p></div>
-    <div class="ha-toolbar"><button type="button" class="ha-btn" onclick="switchView('adminDashboard')"><i class="fa-solid fa-arrow-left"></i> BACK</button><button type="button" class="ha-btn ha-primary" onclick="openMusicUploadModal()"><i class="fa-solid fa-plus"></i> UPLOAD MUSIC</button></div></div>
+    <div class="ha-toolbar"><button type="button" class="ha-btn" onclick="switchView('adminDashboard')"><i class="fa-solid fa-arrow-left"></i> BACK</button></div></div>
   <div class="ha-tabs"><button type="button" id="haSongTab" class="ha-tab active" onclick="adminSwitchTab('songs')">SONGS</button><button type="button" id="haAlbumTab" class="ha-tab" onclick="adminSwitchTab('albums')">ALBUMS</button></div>
   <div class="ha-filters"><input id="haSearch" type="search" class="ha-input" placeholder="Search title, artist, album, or ID..." oninput="adminFilterChanged()" aria-label="Search admin library">
     <select id="haAlbumFilter" class="ha-input" onchange="adminFilterChanged()" aria-label="Filter by album"><option value="">ALL ALBUMS</option></select>
     <div class="ha-custom-sort" id="haSortWrap"><button id="haSortTrigger" type="button" class="ha-input ha-sort-trigger" aria-haspopup="true" aria-expanded="false" onclick="adminToggleSortMenu()"><span id="haSortLabel">ID (NEWEST)</span><i class="fa-solid fa-chevron-down"></i></button><div id="haSortMenu" class="ha-sort-menu hidden" role="menu"><button type="button" data-ha-sort="id" onclick="adminChooseSort('id')">ID</button><button type="button" data-ha-sort="title" onclick="adminChooseSort('title')">TITLE</button><button type="button" data-ha-sort="album" onclick="adminChooseSort('album')">ALBUM</button><button type="button" data-ha-sort="artist" onclick="adminChooseSort('artist')">ARTIST</button></div></div></div>
-  <div id="haSongManager"><div class="ha-flex" style="margin-bottom:10px"><p id="haResultCount" class="ha-desc" aria-live="polite"></p><div class="ha-toolbar"><span id="haSelectedCount" class="ha-desc">0 SELECTED</span><button type="button" id="haBulkBtn" class="ha-btn" onclick="adminOpenBulkEdit()" disabled>BULK EDIT</button><button type="button" class="ha-btn" onclick="adminClearSelection()">CLEAR SELECTION</button></div></div>
+  <div id="haSongAdmin"><div class="ha-flex" style="margin-bottom:10px"><p id="haResultCount" class="ha-desc" aria-live="polite"></p><div class="ha-toolbar"><span id="haSelectedCount" class="ha-desc">0 SELECTED</span><button type="button" id="haBulkBtn" class="ha-btn" onclick="adminOpenBulkEdit()" disabled>BULK EDIT</button><button type="button" class="ha-btn" onclick="adminClearSelection()">CLEAR SELECTION</button></div></div>
     <div class="ha-table-scroll"><table class="ha-song-table"><colgroup><col class="ha-col-check"><col class="ha-col-song"><col class="ha-col-album"><col class="ha-col-id"><col class="ha-col-action"></colgroup><thead><tr><th><input type="checkbox" id="haSelectPage" class="ha-check" aria-label="Select visible page" onchange="adminSelectPage(this.checked)"></th><th>SONG</th><th>ALBUM</th><th>ID</th><th aria-label="Edit controls"></th></tr></thead><tbody id="haSongRows"></tbody></table></div>
     <div class="ha-pager"><span id="haPageInfo"></span><div class="ha-toolbar"><button type="button" class="ha-btn" onclick="adminChangePage(-1)">← PREVIOUS</button><button type="button" class="ha-btn" onclick="adminChangePage(1)">NEXT →</button></div></div>
   </div>
-  <div id="haAlbumManager" class="hidden"><p id="haAlbumResultCount" class="ha-desc"></p><div id="haAlbumGrid" class="ha-albumgrid"></div></div>
+  <div id="haAlbumAdmin" class="hidden"><p id="haAlbumResultCount" class="ha-desc"></p><div id="haAlbumGrid" class="ha-albumgrid"></div></div>
   <p id="haStudioStatus" class="ha-status" role="status" aria-live="polite"></p>
 </div>
 
@@ -2343,7 +2317,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       </div>
       <form id="musicUploadForm" onsubmit="submitMusicUpload(event)" class="space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <label class="text-xs text-gray-400">ALBUM NAME<input id="musicAlbumName" required maxlength="160" class="music-input" placeholder="Album Name"></label>
+          <label class="text-xs text-gray-400">RELEASE NAME<input id="musicAlbumName" required maxlength="160" class="music-input" placeholder="Song Name"></label>
           <label class="text-xs text-gray-400">MAIN ARTIST<input id="musicMainArtist" required maxlength="160" class="music-input" placeholder="Artist Name"></label>
           <label class="text-xs text-gray-400">RELEASE DATE (DD/MM/YYYY)<span class="ha-date-wrap"><input id="musicReleaseDate" required onclick="haDateInputClicked(this)" placeholder="DD/MM/YYYY" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" class="music-input" inputmode="numeric"><button type="button" class="ha-date-button" onclick="haShowCalendar(this)" title="Choose a date" aria-label="Choose release date"><i class="fa-solid fa-calendar-days"></i></button><input type="date" class="ha-native-calendar" aria-label="Calendar date" tabindex="-1" onchange="haCalendarChanged(this)"></span></label>
           <label class="text-xs text-gray-400">RELEASE TYPE<select id="musicReleaseType" class="music-input" required><option value="" disabled selected>Select Type</option><option>Album</option><option>EP</option><option>Single</option><option>Mixtape</option><option>Compilation</option></select></label>
@@ -2351,7 +2325,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
           <label class="text-xs text-gray-400">COUNTRY<select id="musicCountry" required class="music-input"><option value="" disabled selected>Select Country</option><option value="Vietnam">Vietnam</option><option value="South Korea">South Korea</option><option value="US/UK">US/UK</option><option value="Australia">Australia</option></select></label>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <label class="text-xs text-gray-400">COVER FILE (.JPG / .PNG / .WEBP / .JFIF)<input id="musicCoverFile" type="file" accept=".jpg,.jpeg,.png,.webp,.jfif,image/jpeg,image/png,image/webp" required class="music-file"></label>
+          <label class="text-xs text-gray-400">COVER FILE (OPTIONAL — DEFAULT MUSIC NOTE IF EMPTY)<input id="musicCoverFile" type="file" accept=".jpg,.jpeg,.png,.webp,.jfif,image/jpeg,image/png,image/webp" class="music-file"></label>
           <label class="text-xs text-gray-400">TRACK FILES (.MP3, MULTIPLE)<input id="musicTrackFiles" type="file" accept=".mp3,audio/mpeg" multiple required onchange="renderMusicUploadTracks()" class="music-file"></label>
         </div>
         <div id="musicTrackInformationSection" class="hidden">
@@ -2500,9 +2474,8 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
     }
 
     /* =========================================================
-       CATEGORIES
-       Country / genre / release metadata comes directly from each song
-       object in the Supabase catalog. No artist-based fallback mapping is used.
+       SONG METADATA
+       Country and genres remain song metadata used by search, display and upload.
     ========================================================== */
     function normalizeGenres(value) {
       if (Array.isArray(value)) return value.map(v => String(v).trim()).filter(Boolean);
@@ -2579,24 +2552,6 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       return `<div class="${ARTIST_AVATAR_CLASSES} ${extraClasses}"><i class="fa-solid fa-microphone-lines ${iconSize}"></i></div>`;
     }
 
-    function getSongCategory(song) {
-      return {
-        country: song?.country || '',
-        genres: normalizeGenres(song?.genres)
-      };
-    }
-
-    function formatCountryName(country) {
-      return String(country || '').trim().toUpperCase();
-    }
-
-    function getCategorySongs(country, genre = null) {
-      return songs.filter(song => {
-        const meta = getSongCategory(song);
-        return meta.country === country && (!genre || meta.genres.includes(genre));
-      });
-    }
-
     /* =========================================================
        GLOBAL APP STATE
     ========================================================== */
@@ -2616,7 +2571,6 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       homeRecommended: [],
       search: [],
       group: [],
-      category: [],
       playlist: [],
       shared: []
     };
@@ -2632,8 +2586,6 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
     let currentViewName = 'home';
     let viewHistory = [];
     let libraryOpen = false;
-    let categoryCountry = null;
-    let categoryGenre = null;
     let sharedPlaylistMode = false;
     let settingsOpen = false;
 
@@ -2731,6 +2683,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
 
       currentUser = data.user;
       currentUsername = username;
+      updateSignedInNavigation();
       howieManagementMode = false;
       resetPlaybackStateForLogin();
       try { await refreshMusicCatalog(); }
@@ -2778,6 +2731,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       if (data.session && data.session.user) {
         const user = data.session.user;
         currentUser = user;
+        updateSignedInNavigation();
         howieManagementMode = false;
         resetPlaybackStateForLogin();
 
@@ -2833,6 +2787,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       playbackSaveTimer = null;
       playbackRestored = false;
       currentUser = null;
+      updateSignedInNavigation();
       resetPlayModes();
       playlists = [];
       currentActivePlaylistId = null;
@@ -2979,7 +2934,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       renderSidebarPlaylists();
       loadPublicPlaylists();
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active-nav'));
-      ['homeView','searchView','discoverView','albumsView','artistsView','categoryView','groupDetailView','adminDashboardView','adminStudioView','adminMonitorView'].forEach(v => document.getElementById(v)?.classList.add('hidden'));
+      ['homeView','searchView','discoverView','albumsView','artistsView','groupDetailView','adminDashboardView','adminStudioView','adminMonitorView'].forEach(v => document.getElementById(v)?.classList.add('hidden'));
       document.getElementById('playlistDetailView').classList.remove('hidden');
       document.getElementById('playlistDetailTitle').innerText = pl.name;
       setPlaylistCreator(pl.creatorName || (currentUser && pl.user_id === currentUser.id ? profileNameCache[currentUser.id] : ''));
@@ -3322,7 +3277,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
     }
 
     function viewFromVisibleDOM() {
-      const map = { homeView:'home', searchView:'search', discoverView:'discover', albumsView:'albums', artistsView:'artists', categoryView:'category', groupDetailView:'group', playlistDetailView:'playlist', adminDashboardView:'adminDashboard', adminStudioView:'adminStudio', adminMonitorView:'adminMonitor', chatView:'chat' };
+      const map = { homeView:'home', searchView:'search', discoverView:'discover', albumsView:'albums', artistsView:'artists', groupDetailView:'group', playlistDetailView:'playlist', adminDashboardView:'adminDashboard', adminStudioView:'adminStudio', adminMonitorView:'adminMonitor', chatView:'chat' };
       for (const [id,name] of Object.entries(map)) {
         const el=document.getElementById(id);
         if (el && !el.classList.contains('hidden')) return name;
@@ -3375,15 +3330,8 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
         viewHistory.push(current);
       }
       currentViewName = viewName;
-      // Keep the top-bar chat shortcut visibly selected while CHATS is open.
-      const chatShortcut=document.getElementById('chatTopBtn');
-      if(chatShortcut){
-        const chatSelected=viewName==='chat';
-        chatShortcut.classList.toggle('chat-top-active',chatSelected);
-        chatShortcut.setAttribute('aria-pressed',String(chatSelected));
-      }
       currentActivePlaylistId = null;
-      nestedAlbumReturn = null;   // a normal page change always ends the "album opened from artist/category" trail
+      nestedAlbumReturn = null;   // a normal page change always ends the "album opened from artist" trail
       if (viewName !== 'playlist') {
         currentActivePublicPlaylistId = null;
         refreshPublicPlaylistActiveStyles();
@@ -3391,7 +3339,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active-nav'));
       renderSidebarPlaylists();
 
-      const views = ['homeView','searchView','discoverView','albumsView','artistsView','categoryView','groupDetailView','playlistDetailView','adminDashboardView','adminStudioView','adminMonitorView','chatView'];
+      const views = ['homeView','searchView','discoverView','albumsView','artistsView','groupDetailView','playlistDetailView','adminDashboardView','adminStudioView','adminMonitorView','chatView'];
       views.forEach(v => { const el=document.getElementById(v); if(el) el.classList.add('hidden'); });
 
       if (viewName === 'chat') {
@@ -3432,13 +3380,6 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
         document.getElementById('nav-artists').classList.add('active-nav');
         document.getElementById('artistsView').classList.remove('hidden');
         renderArtistsView();
-      } else if (viewName === 'category') {
-        categoryCountry = null;
-        categoryGenre = null;
-        toggleLibraryMenu(true);
-        document.getElementById('nav-category').classList.add('active-nav');
-        document.getElementById('categoryView').classList.remove('hidden');
-        renderCategoryView();
       }
       const activeView = document.getElementById(viewName === 'group' ? 'groupDetailView' : viewName === 'playlist' ? 'playlistDetailView' : `${viewName}View`);
       if (activeView) animateViewEntry(activeView);
@@ -3664,7 +3605,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
     // DEFAULT SORT for every list on the website: Release Date, newest -> oldest.
     // (Change DEFAULT_SORT if you ever want a different default.)
     const DEFAULT_SORT = { field: 'release', direction: 'desc' };
-    const SORT_KINDS = ['songs','artistSongs','albums','artistAlbums','artists','playlist','publicPlaylist','category','categoryAlbums'];
+    const SORT_KINDS = ['songs','artistSongs','albums','artistAlbums','artists','playlist','publicPlaylist'];
     const sortStates = {};
     SORT_KINDS.forEach(kind => { sortStates[kind] = { ...DEFAULT_SORT }; });
     function resetSortStatesToDefault() {
@@ -3728,7 +3669,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       // ARTIST is not an available sort field inside an Artist's Albums/Songs sections.
       if (sortStates.artistSongs.field === 'artist') sortStates.artistSongs.field = '';
       if (sortStates.artistAlbums.field === 'artist') sortStates.artistAlbums.field = '';
-      ['songs','artistSongs','albums','artistAlbums','artists','playlist','publicPlaylist','category','categoryAlbums'].forEach(updateSortSelect);
+      ['songs','artistSongs','albums','artistAlbums','artists','playlist','publicPlaylist'].forEach(updateSortSelect);
     }
     function saveSortPreferencesLocal() {
       try { const key = currentUser?.id ? `${SORT_PREFS_STORAGE_KEY}_${currentUser.id}` : SORT_PREFS_STORAGE_KEY; localStorage.setItem(key, JSON.stringify(getSortPreferencesSnapshot())); } catch(e) {}
@@ -3799,8 +3740,6 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       else if (kind === 'artistAlbums') renderArtistAlbumsOnly();
       else if (kind === 'artists') renderArtistsView();
       else if (kind === 'playlist' || kind === 'publicPlaylist') renderActivePlaylistSongs();
-      else if (kind === 'categoryAlbums') renderCategoryAlbumsOnly();
-      else if (kind === 'category') renderCategoryView();
     }
 
     function handleSortSelectChange(kind, select) {
@@ -3870,11 +3809,9 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
         artistSongs: [['title','TITLE'],['album','ALBUM'],['release','RELEASE DATE']],
         albums: [['title','TITLE'],['artist','ARTIST'],['release','RELEASE DATE']],
         artistAlbums: [['title','TITLE'],['release','RELEASE DATE']],
-        categoryAlbums: [['title','TITLE'],['artist','ARTIST'],['release','RELEASE DATE']],
         artists: [['title','TITLE'],['albums','ALBUM COUNT'],['songs','SONG COUNT'],['release','RELEASE DATE']],
         playlist: [['playlist','PLAYLIST ORDER'],['title','TITLE'],['artist','ARTIST'],['album','ALBUM'],['release','RELEASE DATE']],
         publicPlaylist: [['playlist','PLAYLIST ORDER'],['title','TITLE'],['artist','ARTIST'],['album','ALBUM'],['release','RELEASE DATE']],
-        category: [['title','TITLE'],['artist','ARTIST'],['album','ALBUM'],['release','RELEASE DATE']]
       }[kind] || [];
 
       label.textContent = sortLabel(state.field, state.direction);
@@ -3950,12 +3887,10 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
             artistSongs: [['title','TITLE'],['album','ALBUM'],['release','RELEASE DATE']],
             albums: [['title','TITLE'],['artist','ARTIST'],['release','RELEASE DATE']],
             artistAlbums: [['title','TITLE'],['release','RELEASE DATE']],
-            categoryAlbums: [['title','TITLE'],['artist','ARTIST'],['release','RELEASE DATE']],
-            artists: [['title','TITLE'],['albums','ALBUM COUNT'],['songs','SONG COUNT'],['release','RELEASE DATE']],
+                artists: [['title','TITLE'],['albums','ALBUM COUNT'],['songs','SONG COUNT'],['release','RELEASE DATE']],
             playlist: [['playlist','PLAYLIST ORDER'],['title','TITLE'],['artist','ARTIST'],['album','ALBUM'],['release','RELEASE DATE']],
             publicPlaylist: [['playlist','PLAYLIST ORDER'],['title','TITLE'],['artist','ARTIST'],['album','ALBUM'],['release','RELEASE DATE']],
-            category: [['title','TITLE'],['artist','ARTIST'],['album','ALBUM'],['release','RELEASE DATE']]
-          }[kind] || [];
+              }[kind] || [];
           menu.innerHTML = '';
           // Keep the original option order; never move the selected item.
           const ordered = state.field
@@ -4025,12 +3960,9 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       const songNav = document.getElementById('navSongsCount');
       const albumNav = document.getElementById('navAlbumsCount');
       const artistNav = document.getElementById('navArtistsCount');
-      const categoryNav = document.getElementById('navCategoriesCount');
-      const categoryCount = new Set(songs.map(s => s.country).filter(Boolean)).size;
       if (songNav) songNav.textContent = `${songs.length}`;
       if (albumNav) albumNav.textContent = `${albumCount}`;
       if (artistNav) artistNav.textContent = `${artistCount}`;
-      if (categoryNav) categoryNav.textContent = `${categoryCount}`;
       const albumHeading = document.querySelector('#albumsView h2');
       const artistHeading = document.querySelector('#artistsView h2');
       if (albumHeading) albumHeading.innerHTML = `FEATURED ALBUMS <span class="text-xs font-medium text-gray-500 align-middle">${albumCount}</span>`;
@@ -4082,8 +4014,8 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       return formatCount(count, 'ALBUM', 'ALBUMS');
     }
 
-    function getCategoryReleaseSummary(categorySongs) {
-      const names = [...new Set(categorySongs.map(s => s.album).filter(Boolean))];
+    function getReleaseTypeSummary(releaseSongs) {
+      const names = [...new Set(releaseSongs.map(s => s.album).filter(Boolean))];
       const counts = names.reduce((acc, name) => {
         const type = albumType(name);
         acc[type] = (acc[type] || 0) + 1;
@@ -4096,16 +4028,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       return { ...counts, total: names.length, text: parts.join(' • ') };
     }
 
-
-    function forceCategoryUppercase() {
-      const categoryView = document.getElementById('categoryView');
-      if (!categoryView) return;
-      categoryView.querySelectorAll('*').forEach(el => {
-        el.style.textTransform = 'uppercase';
-      });
-    }
-
-    // One album card, used inside Artist and Category pages (opens the album, remembers where to return to).
+    // One album card, used inside Artist pages (opens the album, remembers where to return to).
     function nestedAlbumCardHTML(alb, source, sourceKey) {
       return `
         <button type="button" onclick='openNestedAlbum("${source}", JSON.parse(decodeURIComponent(this.dataset.sourceKey)), decodeURIComponent(this.dataset.album))' data-source-key="${encodeDataValue(JSON.stringify(sourceKey))}" data-album="${encodeDataValue(alb.name)}" class="glass-card p-5 rounded-2xl text-left group">
@@ -4120,130 +4043,13 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
         </button>`;
     }
 
-    function categoryAlbumsSectionHTML(categorySongs) {
-      const categoryAlbums = sortAlbumCollection(getAlbumsOf(categorySongs), sortStates.categoryAlbums);
-      return `
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-2 min-w-0"><h2 class="text-lg font-extrabold text-white uppercase">ALBUMS</h2><span class="text-xs text-gray-500 uppercase">${categoryAlbums.length}</span></div>
-          <select data-sort-kind="categoryAlbums" onchange="handleSortSelectChange('categoryAlbums', this)" class="bg-[#1f202e] border border-gray-700/50 text-xs text-gray-300 rounded-xl px-3 py-2 uppercase focus:outline-none focus:border-blue-500"><option value="">SORT BY</option><option value="title">TITLE</option><option value="release">RELEASE DATE</option></select>
-        </div>
-        <div class="artist-albums-grid grid grid-cols-1 gap-5">
-          ${categoryAlbums.map(alb => nestedAlbumCardHTML(alb, 'category', { country: categoryCountry, genre: categoryGenre })).join('')}
-        </div>`;
-    }
-
-    function renderCategoryAlbumsOnly() {
-      if (!categoryCountry || !categoryGenre) return;
-      const section = document.querySelector('#categoryView .artist-detail-grid section');
-      if (!section) return;
-      section.innerHTML = categoryAlbumsSectionHTML(getCategorySongs(categoryCountry, categoryGenre));
-      updateSortSelect('categoryAlbums');
-      forceCategoryUppercase();
-    }
-
-    function renderCategoryView() {
-      const countryList = document.getElementById('categoryCountryList');
-      const genreList = document.getElementById('categoryGenreList');
-      const songList = document.getElementById('categorySongList');
-      const backBtn = document.getElementById('categoryBackBtn');
-      const subtitle = document.getElementById('categorySubtitle');
-      if (!countryList || !genreList || !songList) return;
-
-      const countries = [...new Set(songs.map(s => getSongCategory(s).country).filter(Boolean))].sort(compareText);
-      countryList.classList.toggle('hidden', !!categoryCountry);
-      genreList.classList.toggle('hidden', !categoryCountry || !!categoryGenre);
-      songList.classList.toggle('hidden', !categoryGenre);
-      backBtn?.classList.toggle('hidden', !categoryCountry);
-
-      if (!categoryCountry) {
-        document.getElementById('categoryViewTitle').textContent = 'CATEGORIES';
-        subtitle.innerHTML = `<span class="text-xs text-gray-400 uppercase">${formatCount(countries.length, 'COUNTRY', 'COUNTRIES')}</span>`;
-        countryList.innerHTML = countries.map(country => {
-          const countrySongs = getCategorySongs(country);
-          const genres = [...new Set(countrySongs.flatMap(song => getSongCategory(song).genres))].sort(compareText);
-          const releaseSummary = getCategoryReleaseSummary(countrySongs);
-
-          const countryStats = [];
-          if (genres.length) countryStats.push(`${formatCount(genres.length, 'GENRE')}`);
-          if (releaseSummary.text) countryStats.push(releaseSummary.text);
-          if (countrySongs.length) countryStats.push(formatCount(countrySongs.length, 'SONG'));
-          return `<button type="button" onclick='openCategoryCountry(${JSON.stringify(country)})' class="glass-card p-5 rounded-2xl cursor-pointer group text-left w-full">
-            <div class="w-full h-28 rounded-xl bg-gradient-to-br from-emerald-600/25 via-blue-600/10 to-purple-600/10 border border-white/5 flex items-center justify-center mb-4 group-hover:border-emerald-400/30 transition"><i class="fa-solid fa-earth-americas text-4xl text-emerald-400/80 group-hover:text-emerald-300 transition"></i></div>
-            <h3 class="font-bold text-base text-white uppercase">${formatCountryName(country)}</h3>
-            <p class="text-xs text-gray-400 mt-1">${countryStats.join(' • ')}</p>
-          </button>`;
-        }).join('');
-        return;
-      }
-
-      const countrySongs = getCategorySongs(categoryCountry);
-      const genres = [...new Set(countrySongs.flatMap(song => getSongCategory(song).genres))].sort(compareText);
-      document.getElementById('categoryViewTitle').textContent = formatCountryName(categoryCountry);
-      subtitle.innerHTML = categoryGenre ? '' : `<span class="text-xs text-gray-400 uppercase">${formatCount(genres.length, 'GENRE')}</span>`;
-      genreList.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">${genres.map(genre => {
-        const genreSongs = getCategorySongs(categoryCountry, genre);
-        const count = genreSongs.length;
-        const releaseSummary = getCategoryReleaseSummary(genreSongs);
-
-        const genreStats = [];
-        if (releaseSummary.text) genreStats.push(releaseSummary.text);
-        if (count) genreStats.push(formatCount(count, 'SONG'));
-        return `<div onclick='openCategoryGenre(${JSON.stringify(genre)})' class="glass-card p-5 rounded-2xl cursor-pointer group"><div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-400/10 flex items-center justify-center mb-4 group-hover:bg-blue-500/20 transition"><i class="fa-solid fa-music text-blue-400"></i></div><h3 class="font-bold text-base text-white">${genre}</h3><p class="text-xs text-gray-400 mt-1">${genreStats.join(' • ')}</p></div>`;
-      }).join('')}</div>`;
-
-      if (categoryGenre) {
-        const filtered = getCategorySongs(categoryCountry, categoryGenre);
-        const sortedCategorySongs = sortSongsArray(filtered, sortStates.category);
-        const genreAlbumNames = [...new Set(filtered.map(s => s.album).filter(Boolean))];
-        const genreReleaseCounts = genreAlbumNames.reduce((acc, albumName) => {
-          const type = albumType(albumName);
-          acc[type] = (acc[type] || 0) + 1;
-          return acc;
-        }, { Album: 0, EP: 0, Single: 0, Mixtape: 0, Compilation: 0 });
-
-        const genreCountParts = [];
-        for (const type of ['Album', 'EP', 'Single', 'Mixtape', 'Compilation']) {
-          if (genreReleaseCounts[type]) genreCountParts.push(formatReleaseTypeCount(genreReleaseCounts[type], type));
-        }
-        if (filtered.length) genreCountParts.push(formatCount(filtered.length, 'SONG'));
-        const genreCountText = genreCountParts.join(' • ');
-        document.getElementById('categoryViewTitle').textContent = categoryGenre;
-        subtitle.textContent = `${formatCountryName(categoryCountry)} • ${genreCountText}`;
-        songList.innerHTML = `<div class="artist-detail-grid">
-          <section class="bg-[#151620]/70 rounded-2xl p-5 border border-gray-800/60 min-w-0">
-            ${categoryAlbumsSectionHTML(filtered)}
-          </section>
-          <section class="bg-[#151620]/70 rounded-2xl p-5 border border-gray-800/60 min-w-0">
-            <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
-              <div class="flex items-center gap-2 min-w-0"><h2 class="text-lg font-extrabold text-white uppercase">SONGS <span class="text-xs font-medium text-gray-500 align-middle">${filtered.length}</span></h2>
-                <button type="button" onclick="playAllQueue([...sortSongsArray(getCategorySongs(categoryCountry, categoryGenre), sortStates.category)])" class="bg-blue-600/90 hover:bg-blue-500 text-white px-3.5 py-2 rounded-xl text-[10px] font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition active:scale-95 uppercase flex-shrink-0" title="PLAY ALL SONGS"><i class="fa-solid fa-play"></i> PLAY ALL</button>
-              </div>
-              <div class="flex items-center gap-3">
-                <select data-sort-kind="category" onchange="handleSortSelectChange('category', this)" class="bg-[#1f202e] border border-gray-700/50 text-xs text-gray-300 rounded-xl px-3 py-2 uppercase focus:outline-none focus:border-blue-500"><option value="">SORT BY</option><option value="title">TITLE</option><option value="album">ALBUM</option><option value="release">RELEASE DATE</option></select>
-              </div>
-            </div>
-            <div class="flex flex-col gap-2">${sortedCategorySongs.map((song, idx) => generateSongRowHTML(song, idx, 'category')).join('')}</div>
-          </section>
-        </div>`;
-        updateSortSelect('category');
-        updateSortSelect('categoryAlbums');
-        queueContexts.category = [...sortedCategorySongs];
-      }
-      requestAnimationFrame(() => { observeScrollReveals(); updateFloatingNavControls(); });
-      forceCategoryUppercase();
-    }
-
-    function openCategoryCountry(country) { categoryCountry = country; categoryGenre = null; renderCategoryView(); }
-    function openCategoryGenre(genre) { categoryGenre = genre; renderCategoryView(); }
-    function categoryBack() { if (categoryGenre) categoryGenre = null; else categoryCountry = null; renderCategoryView(); }
-
     function renderArtistsView() {
       const container = document.getElementById('artistList');
       const artistValues = [...artistIndex].map(([name, artistSongs]) => ({
         name,
         count: artistSongs.length,
         albumCount: new Set(artistSongs.map(s => s.album)).size,
-        releaseText: getCategoryReleaseSummary(artistSongs).text,
+        releaseText: getReleaseTypeSummary(artistSongs).text,
         latest: artistSongs.reduce((max, song) => { const t = releaseDateValue(song); return t != null && t > max ? t : max; }, -Infinity)
       }));
       const state = sortStates.artists;
@@ -4315,7 +4121,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
     }
 
     function openGroupDetail(type, key) {
-      // Opening an album/artist any other way must not inherit an old "came from artist/category" trail.
+      // Opening an album/artist any other way must not inherit an old "came from artist" trail.
       if (!nestedKeep) nestedAlbumReturn = null;
       nestedKeep = false;
       const parent = viewFromVisibleDOM();
@@ -4329,7 +4135,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active-nav'));
       currentActivePlaylistId = null;
       renderSidebarPlaylists();
-      const views = ['homeView','searchView','discoverView','albumsView','artistsView','categoryView','groupDetailView','playlistDetailView','adminDashboardView','adminStudioView','adminMonitorView','chatView'];
+      const views = ['homeView','searchView','discoverView','albumsView','artistsView','groupDetailView','playlistDetailView','adminDashboardView','adminStudioView','adminMonitorView','chatView'];
       views.forEach(v => document.getElementById(v)?.classList.add('hidden'));
       document.getElementById('groupDetailView').classList.remove('hidden');
 
@@ -4339,7 +4145,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       document.getElementById('groupDetailTitle').innerText = key;
       const albumDate = !isArtist ? groupBannerReleaseDate(getAlbumInfo(key).releaseDate) : '';
       document.getElementById('groupDetailCount').innerText = isArtist
-        ? [getCategoryReleaseSummary(filteredSongs).text, formatCount(filteredSongs.length, 'SONG')].filter(Boolean).join(' • ')
+        ? [getReleaseTypeSummary(filteredSongs).text, formatCount(filteredSongs.length, 'SONG')].filter(Boolean).join(' • ')
         : (albumDate ? `RELEASE DATE: ${albumDate}` : '');
       document.getElementById('groupDetailView')?.classList.toggle('group-detail-artist-mode', isArtist);
       document.getElementById('groupDetailHero')?.classList.toggle('group-detail-artist-simple', isArtist);
@@ -4397,7 +4203,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       currentActivePublicPlaylistId=null;
       refreshPublicPlaylistActiveStyles();
       renderSidebarPlaylists();
-      const views=['homeView','searchView','discoverView','albumsView','artistsView','categoryView','groupDetailView','adminDashboardView','adminStudioView','adminMonitorView'];
+      const views=['homeView','searchView','discoverView','albumsView','artistsView','groupDetailView','adminDashboardView','adminStudioView','adminMonitorView'];
       views.forEach(v=>document.getElementById(v)?.classList.add('hidden'));
       document.getElementById('playlistDetailView').classList.remove('hidden');
       const pl=playlists.find(p=>p.id===playlistId);
@@ -4487,7 +4293,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       document.getElementById('welcomeHeader').innerText='SHARED PLAYLIST';
       const ids=(data.playlist_songs||[]).map(x=>Number(x.song_id));
       const playlistSongs=songs.filter(s=>ids.includes(s.id));
-      ['homeView','searchView','discoverView','albumsView','artistsView','categoryView','groupDetailView','adminDashboardView','adminStudioView','adminMonitorView'].forEach(v=>document.getElementById(v)?.classList.add('hidden'));
+      ['homeView','searchView','discoverView','albumsView','artistsView','groupDetailView','adminDashboardView','adminStudioView','adminMonitorView'].forEach(v=>document.getElementById(v)?.classList.add('hidden'));
       document.getElementById('playlistDetailView').classList.remove('hidden');
       document.getElementById('playlistDetailTitle').innerText=data.name;
       setPlaylistCreator('');
@@ -4543,17 +4349,6 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
         nestedAlbumReturn = null;
         if (ret.source === 'artist') {
           openGroupDetail('artist', ret.sourceKey);
-          requestAnimationFrame(() => requestAnimationFrame(() => {
-            const main = document.querySelector('main'); if (main) main.scrollTop = ret.scrollTop;
-          }));
-        } else if (ret.source === 'category') {
-          categoryCountry = ret.sourceKey.country;
-          categoryGenre = ret.sourceKey.genre;
-          const views = ['homeView','searchView','discoverView','albumsView','artistsView','categoryView','groupDetailView','playlistDetailView','adminDashboardView','adminStudioView','adminMonitorView','chatView'];
-          views.forEach(v => document.getElementById(v)?.classList.add('hidden'));
-          document.getElementById('categoryView')?.classList.remove('hidden');
-          currentViewName = 'category';
-          renderCategoryView();
           requestAnimationFrame(() => requestAnimationFrame(() => {
             const main = document.querySelector('main'); if (main) main.scrollTop = ret.scrollTop;
           }));
@@ -4741,8 +4536,8 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
     }
 
     // Remember the page the person started playback from (Songs, an album,
-    // an artist, a playlist, a category, search...).
-    // Snapshot of "where the user is" (page + album/artist/playlist/category being viewed).
+    // an artist, a playlist, search...).
+    // Snapshot of "where the user is" (page + album/artist/playlist being viewed).
     function captureLocation(source = null) {
       const view = viewFromVisibleDOM();
       const onGroup = view === 'group';
@@ -4756,8 +4551,6 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
         playlistId: view === 'playlist' ? currentActivePlaylistId : null,
         publicPlaylistId: onPublic ? (currentActivePublicPlaylistId ?? currentPublicPlaylist?.id ?? sharedPlaylistData?.id ?? null) : null,
         shared: onPublic && sharedPlaylistMode,
-        country: view === 'category' ? categoryCountry : null,
-        genre: view === 'category' ? categoryGenre : null,
         query: view === 'search' ? (document.getElementById('searchInput')?.value || '') : ''
       };
     }
@@ -4768,37 +4561,32 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       if (!o) return false;
       let opened = false;
       if (o.view === 'group' && o.groupKey != null && o.groupType) {
-        // Album opened from an artist / category page: rebuild that trail so BACK still works.
+        // Albums opened from an Artist page preserve that return path.
         if (o.nested?.source === 'artist') {
           openGroupDetail('artist', o.nested.sourceKey);
           openNestedAlbum('artist', o.nested.sourceKey, o.groupKey);
-        } else if (o.nested?.source === 'category') {
-          switchView('category');
-          categoryCountry = o.nested.sourceKey?.country ?? null;
-          categoryGenre = o.nested.sourceKey?.genre ?? null;
-          renderCategoryView();
-          openNestedAlbum('category', o.nested.sourceKey, o.groupKey);
         } else {
           openGroupDetail(o.groupType, o.groupKey);
         }
         opened = true;
       } else if (o.view === 'playlist') {
-        const publicPl = o.publicPlaylistId != null ? (publicPlaylistCache.get(String(o.publicPlaylistId)) || (o.shared ? sharedPlaylistData : null)) : null;
-        if (publicPl) { openPublicPlaylistDetail(publicPl); opened = true; }
-        else if (o.playlistId != null && playlists.some(p => p.id === o.playlistId)) { openPlaylistDetail(o.playlistId); opened = true; }
-      } else if (o.view === 'category') {
-        switchView('category');
-        categoryCountry = o.country;
-        categoryGenre = o.genre;
-        renderCategoryView();
-        opened = true;
+        const publicPl = o.publicPlaylistId != null
+          ? (publicPlaylistCache.get(String(o.publicPlaylistId)) || (o.shared ? sharedPlaylistData : null))
+          : null;
+        if (publicPl) {
+          openPublicPlaylistDetail(publicPl);
+          opened = true;
+        } else if (o.playlistId != null && playlists.some(p => p.id === o.playlistId)) {
+          openPlaylistDetail(o.playlistId);
+          opened = true;
+        }
       } else if (o.view === 'search') {
         const input = document.getElementById('searchInput');
         if (input) input.value = o.query || '';
         switchView('search');
         opened = true;
       } else if (o.view === 'home') {
-        keepHomeLists = true;        // same "Recommended" songs as before
+        keepHomeLists = true;
         switchView('home');
         opened = true;
       } else if (o.view && o.view !== 'group' && o.view !== 'playlist') {
@@ -4808,7 +4596,10 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       if (opened && opts.scroll != null) {
         const main = document.querySelector('main');
         const top = Number(opts.scroll) || 0;
-        requestAnimationFrame(() => { if (main) main.scrollTop = top; requestAnimationFrame(() => { if (main) main.scrollTop = top; }); });
+        requestAnimationFrame(() => {
+          if (main) main.scrollTop = top;
+          requestAnimationFrame(() => { if (main) main.scrollTop = top; });
+        });
       }
       return opened;
     }
@@ -6173,7 +5964,7 @@ function togglePlay() {
       const name = currentUsername || '';
       const nameEl = document.getElementById('menuDisplayName');
       const userEl = document.getElementById('menuUsername');
-      if (nameEl) nameEl.textContent = haRequire() ? 'Howie (Admin)' : (musicCanEdit() ? `${name||'irynna'} (DJ)` : (currentUser && name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Guest'));
+      if (nameEl) nameEl.textContent = haRequire() ? 'Howie (Admin)' : (currentUser && name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Guest');
       if (userEl) userEl.textContent = currentUser && name ? '@' + name : 'Not logged in';
       updateHomeWelcome();
     }
@@ -6634,13 +6425,13 @@ function togglePlay() {
         isAdmin = !error && !!data;
       } catch (e) { isAdmin = false; }
       musicStaffRole='none';
-      if (isAdmin) {
+      if (isAdmin && String(currentUser.email || '').toLowerCase() === HOWIE_ADMIN_EMAIL) {
         try {
           const {data,error}=await supabaseClient.from('music_staff_roles')
             .select('role').eq('user_id',currentUser.id).maybeSingle();
           if (error) throw error;
-          if (data && ['super_admin','music_editor'].includes(data.role)) musicStaffRole=data.role;
-        } catch(e) { console.warn('Music staff roles need SQL setup:',e?.message||e); }
+          if (data?.role === 'super_admin') musicStaffRole='super_admin';
+        } catch(e) { console.warn('Admin role needs SQL setup:',e?.message||e); }
       }
       adminApplyAccess();
       await fetchAdminMessages();
@@ -6844,7 +6635,7 @@ function togglePlay() {
     function resetNotifState() {
       notifSeenCount = null;
       notifEntries = [];
-      adminMessages = []; msgSeenMs = 0; isAdmin = false; musicStaffRole = 'none';
+      adminMessages = []; msgSeenMs = 0; isAdmin = false; musicStaffRole = 'none'; isHowieAdmin = false;
       clearInterval(adminPollTimer);
       adminApplyAccess();
       if (notifOpen) { notifOpen = false; document.getElementById('notifDropdown')?.classList.add('hidden'); }
@@ -6902,8 +6693,16 @@ function musicCreditsFromFilename(filename) {
   };
 }
 
+function updateSignedInNavigation() {
+  const signedIn = !!currentUser;
+  for (const id of ['nav-upload','nav-chat','homeQuickUpload','homeQuickChats']) {
+    document.getElementById(id)?.classList.toggle('hidden', !signedIn);
+  }
+}
+function musicCanUpload() { return !!currentUser; }
+
 function openMusicUploadModal() {
-  if (!musicCanEdit()) return;
+  if (!musicCanUpload()) { document.getElementById("authModal")?.classList.remove("hidden"); return; }
   closeSettingsMenu();
   document.getElementById('musicUploadStatus').textContent = '';
   openModal('musicUploadModal');
@@ -7068,18 +6867,48 @@ async function musicWorkerRequest(route, token, options = {}) {
   return result;
 }
 
+async function createDefaultMusicNoteCover() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512; canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Could not create the default music-note cover.');
+  const bg = ctx.createLinearGradient(0, 0, 512, 512);
+  bg.addColorStop(0, '#17172b'); bg.addColorStop(.55, '#29205b'); bg.addColorStop(1, '#111827');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, 512, 512);
+  const glowA = ctx.createRadialGradient(135, 125, 5, 135, 125, 250);
+  glowA.addColorStop(0, 'rgba(124,91,255,.50)'); glowA.addColorStop(1, 'rgba(124,91,255,0)');
+  ctx.fillStyle = glowA; ctx.fillRect(0, 0, 512, 512);
+  const glowB = ctx.createRadialGradient(410, 405, 2, 410, 405, 230);
+  glowB.addColorStop(0, 'rgba(50,150,255,.32)'); glowB.addColorStop(1, 'rgba(50,150,255,0)');
+  ctx.fillStyle = glowB; ctx.fillRect(0, 0, 512, 512);
+  ctx.strokeStyle = 'rgba(255,255,255,.13)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(24, 24, 464, 464, 42); ctx.stroke();
+  // Draw a clear single musical note without relying on external fonts/assets.
+  const note = ctx.createLinearGradient(190, 105, 350, 390);
+  note.addColorStop(0, '#ffffff'); note.addColorStop(.55, '#d9d1ff'); note.addColorStop(1, '#8ec5ff');
+  ctx.fillStyle = note;
+  ctx.beginPath(); ctx.moveTo(304, 115); ctx.lineTo(304, 328); ctx.lineTo(338, 320); ctx.lineTo(338, 148); ctx.lineTo(392, 135); ctx.lineTo(392, 99); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(260, 344, 58, 38, -.28, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(354, 323, 54, 35, -.28, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.72)'; ctx.font = '700 17px Montserrat, Arial, sans-serif';
+  ctx.textAlign = 'center'; ctx.fillText("HOWIE'S MUSIC SERVER", 256, 447);
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+  if (!blob) throw new Error('Could not encode the default music-note cover.');
+  return new File([blob], 'default-music-note.png', { type: 'image/png' });
+}
+
 async function submitMusicUpload(event) {
   event.preventDefault();
-  if (musicUploadBusy || !musicCanEdit()) return;
+  if (musicUploadBusy || !musicCanUpload()) return;
   if (MUSIC_UPLOAD_API.includes('YOUR-WORKER')) {
     musicUploadStatus('Configure MUSIC_UPLOAD_API in index.html first (see SETUP.md).', true);
     return;
   }
   const form = document.getElementById('musicUploadForm');
   if (!form.reportValidity()) return;
-  const coverFile = document.getElementById('musicCoverFile').files[0];
-  if (!coverFile || !musicSelectedTracks.length) {
-    musicUploadStatus('Choose a cover and at least one MP3.', true);
+  const selectedCoverFile = document.getElementById('musicCoverFile').files[0] || null;
+  if (!musicSelectedTracks.length) {
+    musicUploadStatus('Choose at least one MP3 track.', true);
     return;
   }
   const read = id => document.getElementById(id).value.trim().normalize('NFC');
@@ -7101,6 +6930,8 @@ async function submitMusicUpload(event) {
   const button = document.getElementById('musicUploadSubmit');
   button.disabled = true;
   try {
+    const coverFile = selectedCoverFile || await createDefaultMusicNoteCover();
+    if (!selectedCoverFile) musicUploadStatus('No cover selected. Using the default music-note cover…');
     const { data: { session }, error } = await supabaseClient.auth.getSession();
     if (error || !session?.access_token) throw new Error('Log in again to upload music.');
     const token = session.access_token;
@@ -7167,18 +6998,14 @@ async function submitMusicUpload(event) {
 </div>
 
 <script id="howie-admin-mode-scripts">
-/* HOWIE ADMIN MODE — no R2/API secrets are used in the browser.
+/* ADMIN MANAGEMENT — no R2/API secrets are used in the browser.
    Only the verified Howie account can open these screens. Supabase RLS and
    the reorder RPC independently enforce the same rule server-side. */
-const HOWIE_ADMIN_EMAIL = 'howie@howie.xy'; // Original Admin; internal database role remains super_admin.
-const MUSIC_EDITOR_EMAIL = 'irynna@howie.xy';
-let musicStaffRole = 'none'; // Loaded from RLS-protected music_staff_roles.
+const HOWIE_ADMIN_EMAIL = 'howie@howie.xy'; // Displayed simply as Admin; internal role identifier is retained for compatibility.
+let musicStaffRole = 'none'; // Only the original Admin role is retained.
 let isHowieAdmin = false;
 function musicCanEdit(){
-  if (!currentUser || !isAdmin) return false;
-  const email=String(currentUser.email||'').toLowerCase();
-  return (musicStaffRole==='super_admin' && email===HOWIE_ADMIN_EMAIL) ||
-    (musicStaffRole==='music_editor' && email===MUSIC_EDITOR_EMAIL);
+  return !!(currentUser && isAdmin && isHowieAdmin && musicStaffRole === 'super_admin');
 }
 let haTab = 'songs';
 const haSortState={field:'id',direction:'desc'};
@@ -7263,44 +7090,27 @@ const HA_ALBUM_FIELDS = ['mainartist', 'album', 'releaseDate', 'genres', 'countr
 const HA_REQUIRED = new Set(['title', 'mainartist', 'album', 'releaseDate', 'genres', 'country', 'releaseType', 'cover', 'src']);
 function haEscape(value) { return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[ch])); }
 function haRequire() {
-  return !!(musicCanEdit() && isHowieAdmin && musicStaffRole==='super_admin');
+  return musicCanEdit();
 }
 function adminApplyAccess() {
-  isHowieAdmin = !!(currentUser && isAdmin && musicStaffRole==='super_admin' &&
+  isHowieAdmin = !!(currentUser && isAdmin && musicStaffRole === 'super_admin' &&
     String(currentUser.email || '').toLowerCase() === HOWIE_ADMIN_EMAIL);
-  const canEdit=musicCanEdit();
-  if (!canEdit) howieManagementMode = false;
+  if (!isHowieAdmin) howieManagementMode = false;
   howieRenderModeSwitch();
-  const topBrandText = document.querySelector('#topBrand .topbar-brand-text');
-  if (topBrandText) topBrandText.textContent = 'MUSIC';
   const nameEl = document.getElementById('menuDisplayName');
-  if (nameEl && isHowieAdmin) nameEl.textContent = 'Howie (Admin)';
-  else if (nameEl && canEdit) nameEl.textContent = `${currentUsername||'irynna'} (DJ)`;
-  else if (nameEl && !currentUser) nameEl.textContent = 'Guest';
-  else if (nameEl && currentUser) {
-    const n = currentUsername || '';
-    nameEl.textContent = n ? n.charAt(0).toUpperCase() + n.slice(1) : 'User';
-  }
-  document.querySelectorAll('#adminDashboardView .ha-super-only').forEach(el=>el.classList.toggle('hidden',!isHowieAdmin));
-  // Dashboard uses public catalog data and is safe for Manager; sensitive tools remain Admin-only.
-  document.getElementById('haDashboardStats')?.classList.toggle('hidden',!canEdit);
-  const managementDescription=document.getElementById('haManagementDescription');
-  if(managementDescription) managementDescription.textContent=isHowieAdmin
-    ? 'Dashboard, uploads, backups, library tools and notifications in one place.'
-    : 'Dashboard, music uploads and library management in one place.';
-  document.querySelector('#adminDashboardView .ha-management-grid')?.classList.toggle('ha-editor-grid',canEdit&&!isHowieAdmin);
-  const badge=document.getElementById('haStaffBadge');
-  if (badge) badge.innerHTML=isHowieAdmin
-    ? '<i class="fa-solid fa-shield-halved"></i> HOWIE (ADMIN)'
-    : (canEdit ? '<i class="fa-solid fa-pen-to-square"></i> IRYNNA (DJ)' : '');
-  if (!isHowieAdmin) document.getElementById('adminMsgModal')?.classList.add('hidden');
-  if (!canEdit) {
+  if (nameEl) nameEl.textContent = isHowieAdmin ? 'Howie (Admin)' : (currentUser && currentUsername ? currentUsername.charAt(0).toUpperCase() + currentUsername.slice(1) : 'Guest');
+  document.querySelectorAll('#adminDashboardView .ha-admin-only').forEach(el => el.classList.toggle('hidden', !isHowieAdmin));
+  document.getElementById('haDashboardStats')?.classList.toggle('hidden', !isHowieAdmin);
+  const description = document.getElementById('haManagementDescription');
+  if (description) description.textContent = 'Backups, account monitoring, library tools and notifications in one place.';
+  const badge = document.getElementById('haStaffBadge');
+  if (badge) badge.innerHTML = isHowieAdmin ? '<i class="fa-solid fa-shield-halved"></i> HOWIE (ADMIN)' : '';
+  if (!isHowieAdmin) {
+    document.getElementById('adminMsgModal')?.classList.add('hidden');
     document.getElementById('haEditorModal')?.classList.add('hidden');
     document.getElementById('haOrderModal')?.classList.add('hidden');
     haSelected.clear();
-    if (['adminDashboard','adminStudio','adminMonitor'].includes(currentViewName)) switchView('home',{replaceHistory:true});
-  } else if (!isHowieAdmin && currentViewName==='adminMonitor') {
-    switchView('adminDashboard',{replaceHistory:true});
+    if (['adminDashboard','adminStudio','adminMonitor'].includes(currentViewName)) switchView('home', {replaceHistory:true});
   }
 }
 function adminScrollDashboard() {
@@ -7323,8 +7133,7 @@ function adminRenderDashboard() {
   const values = [
     ['fa-music', 'ha-icon-songs', songs.length.toLocaleString('en-US'),'SONGS'],
     ['fa-compact-disc', 'ha-icon-albums', haAlbums.length.toLocaleString('en-US'),'ALBUMS'],
-    ['fa-microphone-lines', 'ha-icon-artists', art.toLocaleString('en-US'),'ARTISTS'],
-    ['fa-earth-americas', 'ha-icon-categories', new Set(songs.map(s=>s.country).filter(Boolean)).size.toLocaleString('en-US'),'CATEGORIES']
+    ['fa-microphone-lines', 'ha-icon-artists', art.toLocaleString('en-US'),'ARTISTS']
   ];
   document.getElementById('haMetrics').innerHTML=values.map(([icon,iconClass,value,label])=>
     `<div class="ha-card ha-metric"><i class="fa-solid ${icon} ha-icon ${iconClass}"></i><small>${label}</small><strong>${value}</strong></div>`).join('');
@@ -7335,8 +7144,8 @@ function adminOpenStudio(tab) { if (!musicCanEdit()) return; switchView('adminSt
 function adminSwitchTab(tab) {
   if (!musicCanEdit()) return;
   haTab = tab === 'albums' ? 'albums' : 'songs';
-  document.getElementById('haSongManager').classList.toggle('hidden', haTab !== 'songs');
-  document.getElementById('haAlbumManager').classList.toggle('hidden', haTab !== 'albums');
+  document.getElementById('haSongAdmin').classList.toggle('hidden', haTab !== 'songs');
+  document.getElementById('haAlbumAdmin').classList.toggle('hidden', haTab !== 'albums');
   document.getElementById('haSongTab').classList.toggle('active', haTab === 'songs');
   document.getElementById('haAlbumTab').classList.toggle('active', haTab === 'albums');
   adminRenderStudio();
@@ -8164,7 +7973,7 @@ function chatDisplayName(room){
 function chatFindRoom(id){return chatRoomsData.find(r=>String(r.id)===String(id));}
 function chatSetBadges(){
   const total=chatRoomsData.reduce((sum,room)=>sum+Number(room.unread_count||0),0);
-  for(const id of ['chatTopBadge','chatSidebarBadge']){
+  for(const id of ['chatSidebarBadge']){
     const badge=document.getElementById(id);if(!badge)continue;
     badge.classList.toggle('hidden',total===0);
     badge.textContent=total>99?'99+':String(total);
@@ -8235,8 +8044,8 @@ function chatSubscribe(){
 }
 async function chatStart(){
   if(!currentUser)return;
+  updateSignedInNavigation();
   document.getElementById('nav-chat')?.classList.remove('hidden');
-  document.getElementById('chatTopBtn')?.classList.remove('hidden');
   await chatSoundLoadSettings();
   if(!currentUser)return;
   await chatLoadRooms(false);
@@ -8260,7 +8069,6 @@ async function chatStop(){
   document.getElementById('chatComposeModal')?.classList.add('hidden');
   document.getElementById('chatSongModal')?.classList.add('hidden');
   document.getElementById('nav-chat')?.classList.add('hidden');
-  document.getElementById('chatTopBtn')?.classList.add('hidden');
   chatSetBadges();chatRenderRooms();chatRenderActiveHeader();
 }
 async function chatOnView(){
