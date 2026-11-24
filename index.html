@@ -1234,11 +1234,10 @@ html[data-theme="light"] .notif-item.msg .notif-kind { color: #b45309; }
 .howie-mode-switch[aria-pressed="true"]{background:rgba(139,92,246,.21);color:#c4a5ff;border-color:rgba(167,139,250,.5);}
 /* Every Library submenu selection uses the color of its own symbol. */
 #nav-library > span > i{color:#4bc7d5!important;}
-#nav-library.active-nav{background:linear-gradient(90deg,rgba(61,195,208,.19),rgba(61,195,208,.04));border-left-color:#40c3cf;}
 #nav-discover.active-nav{background:linear-gradient(90deg,rgba(59,130,246,.22),rgba(59,130,246,.04));border-left-color:#60a5fa;}
 #nav-albums.active-nav{background:linear-gradient(90deg,rgba(129,140,248,.23),rgba(129,140,248,.04));border-left-color:#818cf8;}
 #nav-artists.active-nav{background:linear-gradient(90deg,rgba(192,132,252,.21),rgba(192,132,252,.04));border-left-color:#c084fc;}
-#nav-library.active-nav,#nav-discover.active-nav,#nav-albums.active-nav,#nav-artists.active-nav{color:var(--tx)!important;}
+#nav-discover.active-nav,#nav-albums.active-nav,#nav-artists.active-nav{color:var(--tx)!important;}
 /* Maintain legible navigation colors in light theme as well. */
 html[data-theme="light"] #nav-home.active-nav.howie-management-selected{background:linear-gradient(90deg,rgba(139,92,246,.19),rgba(139,92,246,.04));}
 </style>
@@ -1311,6 +1310,36 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       padding-right: 7rem;
     }
   </style>
+
+<style id="howie-v19-settings-polish">
+/* The selected Appearance option keeps its own visual accent. */
+.theme-seg button[data-theme-btn="dark"].is-active{background:#475569;color:#fff;box-shadow:0 6px 16px -6px rgba(71,85,105,.7)}
+.theme-seg button[data-theme-btn="light"].is-active{background:#fbbf24;color:#30220a;box-shadow:0 6px 16px -6px rgba(245,158,11,.55)}
+/* Other Settings screens echo the accent color of their outer menu item. */
+#coverModal>div>h3{color:#60a5fa}
+#feedbackModal>div>h3{color:#fb923c}
+#feedbackModal input:focus,#feedbackModal textarea:focus,#feedbackModal select:focus{border-color:#fb923c!important;box-shadow:0 0 0 2px rgba(251,146,60,.13)}
+#feedbackModal #feedbackSendBtn{background:#ea580c!important;box-shadow:0 6px 18px -8px rgba(234,88,12,.7)!important}
+#infoModal h3 i,#infoModal .info-body h4,#infoModal .info-body a{color:#38bdf8!important}
+#infoModal button{background:#0284c7!important;box-shadow:0 6px 18px -8px rgba(2,132,199,.65)!important}
+/* Privacy's inner panels use the same violet accent as the Privacy item in Settings. */
+.privacy-hub-dialog{width:min(100%,760px);max-height:92vh;overflow:auto}
+.privacy-hub-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:8px}
+.privacy-hub-header h2{font-size:23px;letter-spacing:.02em;color:#c084fc;margin:3px 0 0}
+.privacy-hub-eyebrow{font-size:9px;font-weight:850;letter-spacing:.13em;color:#c084fc}
+.privacy-hub-eyebrow i{margin-right:6px}
+.privacy-hub-section{border:1px solid rgba(192,132,252,.23);background:rgba(192,132,252,.035);border-radius:15px;padding:15px 16px;margin-top:14px}
+.privacy-hub-section>h3,.privacy-hub-section .chat-sound-head h3{font-size:12px;font-weight:900;letter-spacing:.075em;color:#c084fc;margin:0 0 9px}
+.privacy-hub-section>h3 i,.privacy-hub-section .chat-sound-head h3 i{margin-right:7px}
+.privacy-hub-section .howie-live-button.main{background:#7c3aed;border-color:#a78bfa}
+.privacy-hub-section .howie-live-button.main:hover{background:#8b5cf6}
+.privacy-hub-section .chat-sound-option:has(input:checked){border-color:#c084fc;background:rgba(192,132,252,.13)}
+.privacy-hub-section .chat-sound-option input,.privacy-hub-section .chat-receipts-setting input[type="checkbox"]{accent-color:#c084fc}
+.privacy-hub-section #chatSoundVolume{accent-color:#c084fc}
+.privacy-hub-footer{padding-top:2px}
+@media(max-width:620px){.privacy-hub-dialog{padding:16px}.privacy-hub-section{padding:12px}}
+</style>
+
 </head>
 
 <body class="h-screen flex flex-col select-none uppercase">
@@ -1707,13 +1736,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
         </div>
 
         <button type="button" role="menuitem" onclick="howieOpenPrivacy()" class="menu-item menu-accent-privacy">
-          <i class="fa-solid fa-user-shield"></i><span>PRIVACY & ACTIVITY</span>
-        </button>
-        <button type="button" role="menuitem" onclick="howieOpenOnline()" class="menu-item menu-accent-online">
-          <i class="fa-solid fa-users"></i><span>WHO'S ONLINE <small id="howieOnlineCount" style="opacity:.7"></small></span>
-        </button>
-        <button type="button" role="menuitem" onclick="chatSoundOpenSettings()" class="menu-item menu-accent-chat">
-          <i class="fa-solid fa-comments"></i><span>CHATS SETTINGS</span>
+          <i class="fa-solid fa-shield-halved"></i><span>PRIVACY</span>
         </button>
         <button type="button" role="menuitem" onclick="openFeedbackModal()" class="menu-item menu-accent-feedback">
           <i class="fa-solid fa-comment-medical"></i><span>FEEDBACK</span>
@@ -1749,16 +1772,18 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
               <i id="navHomeIcon" class="fa-solid fa-house text-lg w-5 text-center text-blue-400"></i>
               <span id="navHomeLabel">HOME</span>
             </a>
-            <button type="button" id="howieModeSwitch" class="howie-mode-switch hidden" onclick="howieToggleManagement()" aria-label="Switch to Management" title="Switch to Management" aria-pressed="false">
+            <button type="button" id="howieModeSwitch" class="howie-mode-switch hidden" onclick="howieToggleManagement()" aria-label="Switch to Manage" title="Switch to Manage" aria-pressed="false">
               <i class="fa-solid fa-right-left" aria-hidden="true"></i>
             </button>
           </div>
-          <a href="#" onclick="openMusicUploadModal(); return false;" id="nav-upload" class="nav-item hidden flex items-center gap-4 px-4 py-3 text-sm text-gray-300 hover:text-white rounded-xl transition duration-200 uppercase"><i class="fa-solid fa-cloud-arrow-up text-lg w-5 text-center text-blue-400"></i><span>UPLOAD MUSIC</span></a>
+          <a href="#" onclick="openMusicUploadModal(); return false;" id="nav-upload" class="nav-item hidden flex items-center gap-4 px-4 py-3 text-sm text-gray-300 hover:text-white rounded-xl transition duration-200 uppercase"><i class="fa-solid fa-cloud-arrow-up text-lg w-5 text-center text-blue-400"></i><span>UPLOAD</span></a>
           <a href="#" onclick="switchView('chat'); return false;" id="nav-chat" class="nav-item hidden flex items-center gap-4 px-4 py-3 text-sm text-gray-300 hover:text-white rounded-xl transition duration-200 uppercase"><i class="fa-solid fa-comments text-lg w-5 text-center text-purple-400"></i><span>CHATS</span><span id="chatSidebarBadge" class="hidden ml-auto rounded-full px-2 py-0.5 text-[9px] font-extrabold text-white" style="background:#7563e8">0</span></a>
-          <button type="button" onclick="toggleLibraryMenu()" id="nav-library" class="nav-item w-full flex items-center justify-between gap-4 px-4 py-3 text-sm text-gray-300 hover:text-white rounded-xl transition duration-200 uppercase text-left">
+          <div id="nav-library" class="w-full flex items-center justify-between gap-4 px-4 py-3 text-sm text-gray-300 uppercase">
             <span class="flex items-center gap-4"><i class="fa-solid fa-book-open text-lg w-5 text-center text-blue-400"></i>LIBRARY</span>
-            <i id="libraryChevron" class="fa-solid fa-chevron-down text-[10px] transition-transform"></i>
-          </button>
+            <button type="button" onclick="toggleLibraryMenu()" id="nav-library-toggle" aria-expanded="false" title="TOGGLE LIBRARY" aria-label="Toggle Library" class="text-gray-400 hover:text-white text-xs w-7 h-7 rounded-lg hover:bg-gray-800 flex items-center justify-center transition flex-shrink-0">
+              <i id="libraryChevron" class="fa-solid fa-chevron-down text-[10px] transition-transform"></i>
+            </button>
+          </div>
           <div id="libraryMenu" class="hidden pl-4 pr-1 flex flex-col gap-1">
             <a href="#" onclick="switchView('discover'); return false;" id="nav-discover" class="nav-item flex items-center gap-3 px-4 py-2.5 text-xs text-gray-400 hover:text-white rounded-xl transition uppercase"><i class="fa-solid fa-music w-4 text-center text-blue-400"></i><span>SONGS <span id="navSongsCount" class="text-[10px] text-gray-500">0</span></span></a>
             <a href="#" onclick="switchView('albums'); return false;" id="nav-albums" class="nav-item flex items-center gap-3 px-4 py-2.5 text-xs text-gray-400 hover:text-white rounded-xl transition uppercase"><i class="fa-solid fa-compact-disc w-4 text-center text-indigo-400"></i><span>ALBUMS <span id="navAlbumsCount" class="text-[10px] text-gray-500">0</span></span></a>
@@ -1814,7 +1839,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
 
         <!-- HOME VIEW -->
         <div id="homeView">
-          <div class="mb-6">
+          <div class="mb-3">
             <p class="text-xs font-bold text-blue-400 uppercase tracking-widest mb-2">HOWIE'S MUSIC SERVER</p>
             <h1 id="homeWelcomeTitle" class="text-3xl sm:text-4xl font-extrabold text-white break-words">WELCOME BACK!</h1>
             <p class="text-sm text-gray-400 mt-2">Discover your latest songs, albums and artists.</p>
@@ -1822,9 +1847,8 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
 
           <section class="mb-8" aria-label="Quick access">
             <h2 class="text-sm font-extrabold text-gray-300 uppercase tracking-wider mb-3">QUICK ACCESS</h2>
-            <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3">
-              <button id="homeQuickUpload" type="button" onclick="openMusicUploadModal()" class="hidden glass-card rounded-xl p-4 text-left min-h-[92px] flex flex-col justify-center gap-2"><i class="fa-solid fa-cloud-arrow-up text-blue-400 text-lg"></i><span class="text-[11px] font-extrabold text-white">UPLOAD MUSIC</span></button>
-              <button type="button" onclick="switchView('search')" class="glass-card rounded-xl p-4 text-left min-h-[92px] flex flex-col justify-center gap-2"><i class="fa-solid fa-magnifying-glass text-cyan-400 text-lg"></i><span class="text-[11px] font-extrabold text-white">SEARCH</span></button>
+            <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3">
+              <button id="homeQuickUpload" type="button" onclick="openMusicUploadModal()" class="hidden glass-card rounded-xl p-4 text-left min-h-[92px] flex flex-col justify-center gap-2"><i class="fa-solid fa-cloud-arrow-up text-blue-400 text-lg"></i><span class="text-[11px] font-extrabold text-white">UPLOAD</span></button>
               <button type="button" onclick="switchView('discover')" class="glass-card rounded-xl p-4 text-left min-h-[92px] flex flex-col justify-center gap-2"><i class="fa-solid fa-music text-blue-400 text-lg"></i><span class="text-[11px] font-extrabold text-white">SONGS</span></button>
               <button type="button" onclick="switchView('albums')" class="glass-card rounded-xl p-4 text-left min-h-[92px] flex flex-col justify-center gap-2"><i class="fa-solid fa-compact-disc text-indigo-400 text-lg"></i><span class="text-[11px] font-extrabold text-white">ALBUMS</span></button>
               <button type="button" onclick="switchView('artists')" class="glass-card rounded-xl p-4 text-left min-h-[92px] flex flex-col justify-center gap-2"><i class="fa-solid fa-microphone-lines text-purple-400 text-lg"></i><span class="text-[11px] font-extrabold text-white">ARTISTS</span></button>
@@ -2007,12 +2031,12 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
 </div>
 
       <!-- ADMIN MANAGEMENT: isolated views; never replaces the public player -->
-<div id="adminDashboardView" class="ha-wrap hidden" aria-label="Management">
+<div id="adminDashboardView" class="ha-wrap hidden" aria-label="Manage">
   <div class="ha-flex ha-management-heading">
-    <div><div class="ha-upper">HOWIE'S MUSIC SERVER</div><h1 class="ha-heading">MANAGEMENT</h1><p class="ha-desc" id="haManagementDescription">Backups, account monitoring, library tools and notifications in one place.</p></div>
+    <div><div class="ha-upper">HOWIE'S MUSIC SERVER</div><h1 class="ha-heading">MANAGE</h1><p class="ha-desc" id="haManagementDescription">Backups, account monitoring, library tools and notifications in one place.</p></div>
     <span class="ha-bubble" id="haStaffBadge"><i class="fa-solid fa-shield-halved"></i> HOWIE (ADMIN)</span>
   </div>
-  <div class="ha-management-grid" aria-label="Management sections">
+  <div class="ha-management-grid" aria-label="Manage sections">
     <button type="button" class="ha-management-tile ha-admin-only" onclick="adminExportCatalog()"><i class="fa-solid fa-file-arrow-down"></i><span>EXPORT BACKUP</span><small>Download JSON catalog</small></button>
     <button type="button" class="ha-management-tile ha-admin-only" onclick="adminOpenMonitor()"><i class="fa-solid fa-users-viewfinder"></i><span>MONITOR</span><small>Accounts and activity</small></button>
     <button type="button" class="ha-management-tile ha-admin-only" onclick="adminOpenStudio('songs')"><i class="fa-solid fa-book-open"></i><span>LIBRARY MANAGEMENT</span><small>Edit songs and albums</small></button>
@@ -2025,13 +2049,13 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
   </div>
 </div>
 <div id="adminMonitorView" class="ha-wrap hidden" aria-label="Account Monitor">
-  <div class="ha-flex ha-management-heading"><div><div class="ha-upper">MANAGEMENT</div><h1 class="ha-heading">MONITOR</h1><p class="ha-desc">Online status, latest playback and playlists.</p></div>
+  <div class="ha-flex ha-management-heading"><div><div class="ha-upper">MANAGE</div><h1 class="ha-heading">MONITOR</h1><p class="ha-desc">Online status, latest playback and playlists.</p></div>
     <div class="ha-toolbar"><span id="haMonitorRealtimeStatus" class="ha-monitor-live-status" data-mode="connecting" role="status" aria-live="polite">CONNECTING TO LIVE UPDATES</span><button type="button" class="ha-btn" onclick="switchView('adminDashboard')"><i class="fa-solid fa-arrow-left"></i> BACK</button><button type="button" class="ha-btn ha-primary" onclick="adminLoadMonitor()"><i class="fa-solid fa-rotate"></i> REFRESH</button></div></div>
     <div class="ha-monitor-layout"><div class="ha-card"><label class="ha-label" for="haMonitorSearch">SEARCH ACCOUNTS</label><input id="haMonitorSearch" class="ha-input" placeholder="Username..." oninput="adminRenderMonitorAccounts()"><div id="haMonitorAccounts" class="ha-monitor-accounts"></div></div><div id="haMonitorDetails" class="ha-card"><p class="ha-desc">Choose an account to view status, latest playback and playlists.</p></div></div>
   <p id="haMonitorStatus" class="ha-status" aria-live="polite"></p>
 </div>
-<div id="adminStudioView" class="ha-wrap hidden" aria-label="Music Management Studio">
-  <div class="ha-flex"><div><div class="ha-upper">MANAGEMENT</div><h1 class="ha-heading">LIBRARY MANAGEMENT</h1><p class="ha-desc">Edit songs, update complete albums and manage track order.</p></div>
+<div id="adminStudioView" class="ha-wrap hidden" aria-label="Manage Studio">
+  <div class="ha-flex"><div><div class="ha-upper">MANAGE</div><h1 class="ha-heading">LIBRARY MANAGEMENT</h1><p class="ha-desc">Edit songs, update complete albums and manage track order.</p></div>
     <div class="ha-toolbar"><button type="button" class="ha-btn" onclick="switchView('adminDashboard')"><i class="fa-solid fa-arrow-left"></i> BACK</button></div></div>
   <div class="ha-tabs"><button type="button" id="haSongTab" class="ha-tab active" onclick="adminSwitchTab('songs')">SONGS</button><button type="button" id="haAlbumTab" class="ha-tab" onclick="adminSwitchTab('albums')">ALBUMS</button></div>
   <div class="ha-filters"><input id="haSearch" type="search" class="ha-input" placeholder="Search title, artist, album, or ID..." oninput="adminFilterChanged()" aria-label="Search admin library">
@@ -2257,54 +2281,55 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
     </button>
   </div>
 
-<!-- PHASE 1: user-controlled online status and listening privacy -->
-<div id="howiePrivacyModal" class="howie-live-modal hidden" role="dialog" aria-modal="true" aria-labelledby="howiePrivacyTitle">
-  <div class="howie-live-dialog">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h2 id="howiePrivacyTitle">PRIVACY &amp; ACTIVITY</h2><button type="button" class="howie-live-button" onclick="howieClosePrivacy()" aria-label="Close privacy settings">✕</button></div>
-    <p>Choose what other listeners can see. Listening activity is also available to the site administrator.</p>
-    <div class="howie-live-field"><label><span>SHOW ME AS ONLINE</span><input type="checkbox" id="howiePrivacyOnline" checked></label><small>Show or hide your online indicator from other listeners.</small></div>
-    <div class="howie-live-field"><label for="howiePrivacyAudience"><span>WHO CAN SEE MY CURRENT SONG?</span><select id="howiePrivacyAudience"><option value="nobody">NOBODY</option><option value="everyone">EVERYONE</option><option value="friends">FRIENDS ONLY</option></select></label><small>Friends Only is not available until the friends feature is implemented.</small></div>
-    <p id="howiePrivacyStatus" aria-live="polite" style="margin-top:12px"></p>
-    <div class="howie-live-buttons"><button type="button" class="howie-live-button" onclick="howieClosePrivacy()">CANCEL</button><button type="button" class="howie-live-button main" onclick="howieSavePrivacy()">SAVE PREFERENCES</button></div>
-  </div>
-</div>
-<!-- Chat sound preferences: independent of the music player and per-account -->
-<div id="chatSoundModal" class="howie-live-modal hidden" role="dialog" aria-modal="true" aria-labelledby="chatSoundTitle">
-  <div class="howie-live-dialog chat-sound-dialog">
-    <div class="chat-sound-head">
-      <h2 id="chatSoundTitle"><i class="fa-solid fa-comments" aria-hidden="true"></i> CHATS SETTINGS</h2>
-      <button type="button" class="howie-live-button" onclick="chatSoundCloseSettings()" aria-label="Close chats settings">✕</button>
+<!-- Unified Privacy settings: activity, online accounts, and chat preferences -->
+<div id="privacyHubModal" class="howie-live-modal hidden" role="dialog" aria-modal="true" aria-labelledby="privacyHubTitle">
+  <div class="howie-live-dialog privacy-hub-dialog">
+    <div class="privacy-hub-header">
+      <div><span class="privacy-hub-eyebrow"><i class="fa-solid fa-shield-halved"></i> ACCOUNT SETTINGS</span><h2 id="privacyHubTitle">PRIVACY</h2></div>
+      <button type="button" class="howie-live-button" onclick="howieClosePrivacy()" aria-label="Close Privacy">✕</button>
     </div>
-    <p>Manage incoming message sounds and read receipts for your account.</p>
-    <fieldset class="chat-sound-options" aria-label="Incoming message sound">
-      <legend class="chat-sound-label">INCOMING MESSAGE SOUND</legend>
-      <label class="chat-sound-option"><input type="radio" name="chatSoundMode" value="smart" checked><span><strong>SMART (RECOMMENDED)</strong><small>Silent while music is playing; sounds when music is paused or stopped.</small></span></label>
-      <label class="chat-sound-option"><input type="radio" name="chatSoundMode" value="always"><span><strong>ALWAYS ON</strong><small>Play a soft sound even while music is playing.</small></span></label>
-      <label class="chat-sound-option"><input type="radio" name="chatSoundMode" value="off"><span><strong>OFF</strong><small>Chat notifications remain visual only.</small></span></label>
-    </fieldset>
-    <div class="chat-sound-volume">
-      <label for="chatSoundVolume">NOTIFICATION VOLUME <output id="chatSoundVolumeLabel" for="chatSoundVolume">20%</output></label>
-      <input type="range" id="chatSoundVolume" min="1" max="50" step="1" value="20" oninput="chatSoundVolumeChanged()">
-      <small>Separate from the music player's volume.</small>
-    </div>
-    <label class="chat-receipts-setting" for="chatReadReceiptsEnabled">
-      <span><strong>READ RECEIPTS — SENT / SEEN</strong><small>Allow people you chat with to see when you have read their messages. Turning this off hides your Seen confirmations. You also won't see other people's Seen confirmations.</small></span>
-      <input type="checkbox" id="chatReadReceiptsEnabled" checked aria-label="Enable read receipts">
-    </label>
-    <p id="chatSoundSettingsStatus" role="status" aria-live="polite" class="chat-sound-status"></p>
-    <div class="howie-live-buttons">
-      <button type="button" class="howie-live-button" onclick="chatSoundPreview()"><i class="fa-solid fa-volume-high" aria-hidden="true"></i> PREVIEW</button>
-      <button type="button" class="howie-live-button" onclick="chatSoundCloseSettings()">CANCEL</button>
-      <button type="button" class="howie-live-button main" id="chatSoundSaveBtn" onclick="chatSoundSaveSettings()">SAVE PREFERENCES</button>
-    </div>
-  </div>
-</div>
-<div id="howieOnlineModal" class="howie-live-modal hidden" role="dialog" aria-modal="true" aria-labelledby="howieOnlineTitle">
-  <div class="howie-live-dialog">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h2 id="howieOnlineTitle">WHO'S ONLINE</h2><button type="button" class="howie-live-button" onclick="howieCloseOnline()" aria-label="Close online accounts">✕</button></div>
-    <p>Accounts currently sharing their online status.</p>
-    <div id="howieOnlineRows" aria-live="polite"></div>
-    <div class="howie-live-buttons"><button class="howie-live-button" type="button" onclick="howieRefreshOnline(true)">REFRESH</button><button class="howie-live-button main" type="button" onclick="howieCloseOnline()">CLOSE</button></div>
+    <p>Manage your visibility, see who's online, and control chat notifications in one place.</p>
+
+    <section id="howiePrivacyModal" class="privacy-hub-section" aria-labelledby="howiePrivacyTitle">
+      <h3 id="howiePrivacyTitle"><i class="fa-solid fa-user-shield"></i> PRIVACY &amp; ACTIVITY</h3>
+      <p>Choose what other listeners can see. Listening activity is also available to the site administrator.</p>
+      <div class="howie-live-field"><label><span>SHOW ME AS ONLINE</span><input type="checkbox" id="howiePrivacyOnline" checked></label><small>Show or hide your online indicator from other listeners.</small></div>
+      <div class="howie-live-field"><label for="howiePrivacyAudience"><span>WHO CAN SEE MY CURRENT SONG?</span><select id="howiePrivacyAudience"><option value="nobody">NOBODY</option><option value="everyone">EVERYONE</option><option value="friends">FRIENDS ONLY</option></select></label><small>Friends Only is not available until the friends feature is implemented.</small></div>
+      <p id="howiePrivacyStatus" aria-live="polite" style="margin-top:12px"></p>
+      <div class="howie-live-buttons"><button type="button" class="howie-live-button main" onclick="howieSavePrivacy()">SAVE PRIVACY</button></div>
+    </section>
+
+    <section id="howieOnlineModal" class="privacy-hub-section" aria-labelledby="howieOnlineTitle">
+      <h3 id="howieOnlineTitle"><i class="fa-solid fa-users"></i> WHO'S ONLINE <small id="howieOnlineCount" style="opacity:.7"></small></h3>
+      <p>Accounts currently sharing their online status.</p>
+      <div id="howieOnlineRows" aria-live="polite"></div>
+      <div class="howie-live-buttons"><button class="howie-live-button" type="button" onclick="howieRefreshOnline(true)">REFRESH</button></div>
+    </section>
+
+    <section id="chatSoundModal" class="privacy-hub-section" aria-labelledby="chatSoundTitle">
+      <div class="chat-sound-head"><h3 id="chatSoundTitle"><i class="fa-solid fa-comments"></i> CHAT SETTINGS</h3></div>
+      <p>Manage incoming message sounds and read receipts for your account.</p>
+      <fieldset class="chat-sound-options" aria-label="Incoming message sound">
+        <legend class="chat-sound-label">INCOMING MESSAGE SOUND</legend>
+        <label class="chat-sound-option"><input type="radio" name="chatSoundMode" value="always" checked><span><strong>ALWAYS ON</strong><small>Play a notification sound even while music is playing.</small></span></label>
+        <label class="chat-sound-option"><input type="radio" name="chatSoundMode" value="off"><span><strong>OFF</strong><small>Chat notifications remain visual only.</small></span></label>
+      </fieldset>
+      <div class="chat-sound-volume">
+        <label for="chatSoundVolume">NOTIFICATION VOLUME <output id="chatSoundVolumeLabel" for="chatSoundVolume">100%</output></label>
+        <input type="range" id="chatSoundVolume" min="1" max="100" step="1" value="100" oninput="chatSoundVolumeChanged()">
+        <small>Separate from the music player's volume.</small>
+      </div>
+      <label class="chat-receipts-setting" for="chatReadReceiptsEnabled">
+        <span><strong>READ RECEIPTS — SENT / SEEN</strong><small>Allow people you chat with to see when you have read their messages. Turning this off hides your Seen confirmations. You also won't see other people's Seen confirmations.</small></span>
+        <input type="checkbox" id="chatReadReceiptsEnabled" checked aria-label="Enable read receipts">
+      </label>
+      <p id="chatSoundSettingsStatus" role="status" aria-live="polite" class="chat-sound-status"></p>
+      <div class="howie-live-buttons">
+        <button type="button" class="howie-live-button" onclick="chatSoundPreview()"><i class="fa-solid fa-volume-high" aria-hidden="true"></i> PREVIEW</button>
+        <button type="button" class="howie-live-button main" id="chatSoundSaveBtn" onclick="chatSoundSaveSettings()">SAVE CHAT SETTINGS</button>
+      </div>
+    </section>
+    <div class="howie-live-buttons privacy-hub-footer"><button type="button" class="howie-live-button" onclick="howieClosePrivacy()">DONE</button></div>
   </div>
 </div>
   <!-- Admin-only music importer. Existing player layout is unchanged. -->
@@ -2312,17 +2337,15 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
        >
     <div class="bg-[#181922] border border-gray-700 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto p-5 sm:p-7 normal-case">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-extrabold text-white uppercase"><i class="fa-solid fa-cloud-arrow-up text-blue-400 mr-2"></i>UPLOAD MUSIC</h2>
+        <h2 class="text-lg font-extrabold text-white uppercase"><i class="fa-solid fa-cloud-arrow-up text-blue-400 mr-2"></i>UPLOAD</h2>
         <button type="button" onclick="if (!musicUploadBusy) closeModal('musicUploadModal')" class="text-gray-400 hover:text-white" aria-label="Close upload"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <form id="musicUploadForm" onsubmit="submitMusicUpload(event)" class="space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label class="text-xs text-gray-400">RELEASE NAME<input id="musicAlbumName" required maxlength="160" class="music-input" placeholder="Song Name"></label>
           <label class="text-xs text-gray-400">MAIN ARTIST<input id="musicMainArtist" required maxlength="160" class="music-input" placeholder="Artist Name"></label>
-          <label class="text-xs text-gray-400">RELEASE DATE (DD/MM/YYYY)<span class="ha-date-wrap"><input id="musicReleaseDate" required onclick="haDateInputClicked(this)" placeholder="DD/MM/YYYY" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" class="music-input" inputmode="numeric"><button type="button" class="ha-date-button" onclick="haShowCalendar(this)" title="Choose a date" aria-label="Choose release date"><i class="fa-solid fa-calendar-days"></i></button><input type="date" class="ha-native-calendar" aria-label="Calendar date" tabindex="-1" onchange="haCalendarChanged(this)"></span></label>
+          <label class="text-xs text-gray-400">RELEASE DATE (DD/MM/YYYY)<span class="ha-date-wrap"><input id="musicReleaseDate" required maxlength="10" placeholder="DD/MM/YYYY" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" class="music-input" inputmode="numeric" autocomplete="off"><button type="button" class="ha-date-button" onclick="haShowCalendar(this)" title="Choose a date" aria-label="Choose release date"><i class="fa-solid fa-calendar-days"></i></button><input type="date" class="ha-native-calendar" aria-label="Calendar date" tabindex="-1" onchange="haCalendarChanged(this)"></span></label>
           <label class="text-xs text-gray-400">RELEASE TYPE<select id="musicReleaseType" class="music-input" required><option value="" disabled selected>Select Type</option><option>Album</option><option>EP</option><option>Single</option><option>Mixtape</option><option>Compilation</option></select></label>
-          <label class="text-xs text-gray-400">GENRES<input id="musicGenres" required maxlength="200" class="music-input" placeholder="e.g. Pop, Rap/Hip-Hop,..."></label>
-          <label class="text-xs text-gray-400">COUNTRY<select id="musicCountry" required class="music-input"><option value="" disabled selected>Select Country</option><option value="Vietnam">Vietnam</option><option value="South Korea">South Korea</option><option value="US/UK">US/UK</option><option value="Australia">Australia</option></select></label>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label class="text-xs text-gray-400">COVER FILE (OPTIONAL — DEFAULT MUSIC NOTE IF EMPTY)<input id="musicCoverFile" type="file" accept=".jpg,.jpeg,.png,.webp,.jfif,image/jpeg,image/png,image/webp" class="music-file"></label>
@@ -2412,7 +2435,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       const collected = [];
       for (let start = 0; start < 100000; start += CATALOG_PAGE_SIZE) {
         const { data, error } = await supabaseClient.from('music_songs')
-          .select('id,title,mainartist,featuringartist,producer,album,releaseDate,genres,country,releaseType,cover,src,track_number')
+          .select('id,title,mainartist,featuringartist,producer,album,releaseDate,releaseType,cover,src,track_number')
           .order('id', { ascending: true }).range(start, start + CATALOG_PAGE_SIZE - 1);
         if (error) throw new Error('Supabase music_songs: ' + error.message);
         collected.push(...(data || []));
@@ -2436,12 +2459,10 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
         const song = { ...original };
         // Normalize decomposed Vietnamese accents (NFD) so the existing font renders
         // consistently. Never normalize src or cover: R2 URLs must remain unchanged.
-        for (const key of ['title', 'mainartist', 'featuringartist', 'producer', 'album', 'releaseDate', 'genres', 'country', 'releaseType']) {
+        for (const key of ['title', 'mainartist', 'featuringartist', 'producer', 'album', 'releaseDate', 'releaseType']) {
           if (typeof song[key] === 'string') song[key] = song[key].normalize('NFC');
         }
         song.id = Number(song.id);
-        song.genres = normalizeGenres(song.genres);
-        song.country = String(song.country || '');
         // A comma separates individual main artists, just as it does for
         // featuring artists and producers. Keep the combined credit string
         // for album metadata, but index each credited artist separately.
@@ -2475,13 +2496,7 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
 
     /* =========================================================
        SONG METADATA
-       Country and genres remain song metadata used by search, display and upload.
     ========================================================== */
-    function normalizeGenres(value) {
-      if (Array.isArray(value)) return value.map(v => String(v).trim()).filter(Boolean);
-      return String(value || '').split(',').map(v => v.trim()).filter(Boolean);
-    }
-
     /* =========================================================
        ARTISTS & ALBUMS
        Every comma-separated main artist, featuring artist and producer becomes an
@@ -3238,11 +3253,9 @@ html[data-theme="light"] #nav-home.active-nav.howie-management-selected{backgrou
       const menu = document.getElementById('libraryMenu');
       const chevron = document.getElementById('libraryChevron');
       menu.classList.toggle('hidden', !libraryOpen);
-      chevron.style.transform = libraryOpen ? 'rotate(180deg)' : 'rotate(0deg)';
-      if (typeof force !== 'boolean') {
-        const parent = document.getElementById('nav-library');
-        parent?.classList.toggle('active-nav', libraryOpen);
-      }
+      chevron.style.transform = libraryOpen ? 'rotate(0deg)' : 'rotate(-90deg)';
+      const toggle = document.getElementById('nav-library-toggle');
+      toggle?.setAttribute('aria-expanded', libraryOpen ? 'true' : 'false');
     }
 
     function toggleSettingsMenu(force) {
@@ -5414,8 +5427,8 @@ function togglePlay() {
 
     /* =========================================================
        AUTO PLAY
-       When the queue ends, keep playing similar songs
-       (same artist > same genre > same country) that are not in the queue yet.
+       When the queue ends, keep playing songs by the same artist
+       that are not in the queue yet.
     ========================================================== */
     const AUTOPLAY_STORAGE_KEY = 'howies-music-server-autoplay';
     let autoPlayEnabled = false;
@@ -5519,14 +5532,11 @@ function togglePlay() {
       const inQueue = new Set(currentQueue.map(s => s.id));
       const pool = songs.filter(s => !inQueue.has(s.id));
       if (!pool.length) return [];
-      const lastGenres = new Set(last ? normalizeGenres(last.genres) : []);
       return pool
         .map(s => {
           let score = Math.random();
           if (last) {
             if (s.mainartist === last.mainartist) score += 3;
-            if (normalizeGenres(s.genres).some(g => lastGenres.has(g))) score += 2;
-            if (s.country && s.country === last.country) score += 1;
           }
           return { s, score };
         })
@@ -6914,8 +6924,7 @@ async function submitMusicUpload(event) {
   const read = id => document.getElementById(id).value.trim().normalize('NFC');
   const album = {
     album: read('musicAlbumName'), mainartist: read('musicMainArtist'),
-    releaseDate: read('musicReleaseDate'), genres: read('musicGenres'),
-    country: read('musicCountry'), releaseType: read('musicReleaseType')
+    releaseDate: read('musicReleaseDate'), releaseType: read('musicReleaseType')
   };
   const rows = [...document.querySelectorAll('#musicUploadTracks .track-fields')];
   const tracks = musicSelectedTracks.map((file, index) => ({
@@ -7054,7 +7063,6 @@ const HA_FIELDS = [
   ['title', 'SONG TITLE'], ['mainartist', 'MAIN ARTIST'],
   ['featuringartist', 'FEATURING ARTIST'], ['producer', 'PRODUCER'],
   ['album', 'ALBUM / EP / SINGLE'], ['releaseDate', 'RELEASE DATE (DD/MM/YYYY)'],
-  ['genres', 'GENRES'], ['country', 'COUNTRY'],
   ['releaseType', 'RELEASE TYPE'], ['cover', 'COVER IMAGE URL'], ['src', 'MP3 URL']
 ];
 let howieManagementMode = false;
@@ -7068,17 +7076,17 @@ function howieRenderModeSwitch() {
   if (toggle) {
     toggle.classList.toggle('hidden', !admin);
     toggle.setAttribute('aria-pressed', String(on));
-    toggle.title = on ? 'Switch to Home' : 'Switch to Management';
+    toggle.title = on ? 'Switch to Home' : 'Switch to Manage';
     toggle.setAttribute('aria-label', toggle.title);
   }
-  if (homeLabel) homeLabel.textContent = on ? 'MANAGEMENT' : 'HOME';
+  if (homeLabel) homeLabel.textContent = on ? 'MANAGE' : 'HOME';
   document.getElementById('nav-home')?.classList.toggle('howie-management-selected', on);
   if (homeIcon) {
     homeIcon.classList.toggle('fa-house', !on);
     homeIcon.classList.toggle('fa-screwdriver-wrench', on);
   }
   const topBrand = document.getElementById('topBrand');
-  if (topBrand) topBrand.title = on ? 'MANAGEMENT' : 'HOME';
+  if (topBrand) topBrand.title = on ? 'MANAGE' : 'HOME';
 }
 function howieToggleManagement() {
   if (!musicCanEdit()) return;
@@ -7086,8 +7094,8 @@ function howieToggleManagement() {
   howieRenderModeSwitch();
   switchView('home', { replaceHistory: true });
 }
-const HA_ALBUM_FIELDS = ['mainartist', 'album', 'releaseDate', 'genres', 'country', 'releaseType', 'cover'];
-const HA_REQUIRED = new Set(['title', 'mainartist', 'album', 'releaseDate', 'genres', 'country', 'releaseType', 'cover', 'src']);
+const HA_ALBUM_FIELDS = ['mainartist', 'album', 'releaseDate', 'releaseType', 'cover'];
+const HA_REQUIRED = new Set(['title', 'mainartist', 'album', 'releaseDate', 'releaseType', 'cover', 'src']);
 function haEscape(value) { return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[ch])); }
 function haRequire() {
   return musicCanEdit();
@@ -7280,7 +7288,7 @@ function adminBuildEditor(title,hint,fields,values,bulk){
   document.getElementById('haEditorFields').innerHTML=fields.map(([key,label])=>{
     const large=['src','cover'].includes(key);
     const options=key==='releaseType'?['Album','EP','Single','Mixtape','Compilation'].map(o=>`<option value="${o}" ${values[key]===o?'selected':''}>${o}</option>`).join(''):null;
-    const formatted=key==='releaseDate'?haDateDisplay(values[key]):key==='genres'&&Array.isArray(values[key])?values[key].join(', '):(values[key]||'');
+    const formatted=key==='releaseDate'?haDateDisplay(values[key]):(values[key]||'');
     const field=options&&!bulk?`<select name="${key}" class="ha-input">${options}</select>`:
       key==='releaseDate'?`<span class="ha-date-wrap"><input name="releaseDate" class="ha-input" onclick="haDateInputClicked(this)" placeholder="DD/MM/YYYY" value="${bulk?'':haEscape(formatted)}" maxlength="10" ${bulk?'disabled':''} inputmode="numeric" autocomplete="off"><button type="button" class="ha-date-button" onclick="haShowCalendar(this)" ${bulk?'disabled':''} title="Choose a date"><i class="fa-solid fa-calendar-days"></i></button><input type="date" class="ha-native-calendar" tabindex="-1" aria-label="Calendar date" onchange="haCalendarChanged(this)"></span>`:
       `<input name="${key}" class="ha-input" value="${bulk?'':haEscape(formatted)}" maxlength="${large?2000:300}" ${bulk?'disabled':''} autocomplete="off">`;
@@ -7338,7 +7346,7 @@ async function adminAfterChanges(){
 function adminExportCatalog(){
   if(!haRequire())return;
   if(!window.confirm('Export a JSON backup of the current music catalog?'))return;
-  const data=songs.map(s=>({id:s.id,title:s.title,mainartist:s.mainartist,featuringartist:s.featuringartist,producer:s.producer,album:s.album,releaseDate:s.releaseDate,genres:Array.isArray(s.genres)?s.genres.join(', '):s.genres,country:s.country,releaseType:s.releaseType,cover:s.cover,src:s.src,track_number:s.track_number??null}));
+  const data=songs.map(s=>({id:s.id,title:s.title,mainartist:s.mainartist,featuringartist:s.featuringartist,producer:s.producer,album:s.album,releaseDate:s.releaseDate,releaseType:s.releaseType,cover:s.cover,src:s.src,track_number:s.track_number??null}));
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
   a.href=url;a.download=`howies-music-catalog-${new Date().toISOString().slice(0,10)}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);
 }
@@ -7562,8 +7570,7 @@ function howieLiveStop(){
   howieLivePrefs={show_online:true,listening_audience:'nobody'};
   howieLivePendingRequest=null;howieLiveLastSignature='';
   howieRenderOnline();
-  document.getElementById('howiePrivacyModal')?.classList.add('hidden');
-  document.getElementById('howieOnlineModal')?.classList.add('hidden');
+  document.getElementById('privacyHubModal')?.classList.add('hidden');
 }
 function howieIsOnline(id){return howieLiveMap.has(String(id));}
 function howieGetOnlineCount(){return howieLiveMap.size;}
@@ -7632,7 +7639,7 @@ async function howieLiveStart(){
       // Every minute refresh profiles, playlists and recover from missed
       // events; song updates normally arrive immediately via Realtime.
       if(privacyPollTicks%4===0&&haRequire()&&currentViewName==='adminMonitor')adminLoadMonitor();
-      if(!document.getElementById('howieOnlineModal')?.classList.contains('hidden'))howieRefreshOnline(false);
+      if(!document.getElementById('privacyHubModal')?.classList.contains('hidden'))howieRefreshOnline(false);
     },15000);
     await howiePublishActivity(true);
   }catch(error){
@@ -7686,9 +7693,13 @@ function howieOpenPrivacy(){
   document.getElementById('howiePrivacyOnline').checked=howieLivePrefs.show_online!==false;
   document.getElementById('howiePrivacyAudience').value=howieLivePrefs.listening_audience||'nobody';
   document.getElementById('howiePrivacyStatus').textContent='';
-  document.getElementById('howiePrivacyModal').classList.remove('hidden');
+  chatSoundStatus('');
+  chatSoundUpdateUI();
+  document.getElementById('privacyHubModal')?.classList.remove('hidden');
+  howieRenderOnline();
+  howieRefreshOnline(true);
 }
-function howieClosePrivacy(){document.getElementById('howiePrivacyModal')?.classList.add('hidden');}
+function howieClosePrivacy(){document.getElementById('privacyHubModal')?.classList.add('hidden');}
 async function howieSavePrivacy(){
   if(!currentUser)return;
   const id=currentUser.id;
@@ -7707,17 +7718,15 @@ async function howieSavePrivacy(){
     await howieTrackPresence();
     await howiePublishActivity(true);
     status.textContent='PREFERENCES SAVED.';
-    setTimeout(()=>{if(currentUser?.id===id)howieClosePrivacy();},700);
     if(haRequire()&&currentViewName==='adminMonitor')adminLoadMonitor();
   }catch(err){status.textContent='COULD NOT SAVE: '+String(err?.message||err);}
 }
 function howieOpenOnline(){
   if(!currentUser)return;
-  if(typeof closeSettingsMenu==='function')closeSettingsMenu();
-  document.getElementById('howieOnlineModal').classList.remove('hidden');
+  howieOpenPrivacy();
   howieRenderOnline();howieRefreshOnline(true);
 }
-function howieCloseOnline(){document.getElementById('howieOnlineModal')?.classList.add('hidden');}
+function howieCloseOnline(){howieClosePrivacy();}
 async function howieRefreshOnline(showStatus){
   if(!currentUser)return;
   try{
@@ -7750,7 +7759,7 @@ window.addEventListener('pagehide',()=>{if(howieLiveChannel){try{howieLiveChanne
 
 /* PHASE 3 / V9: User-specific notification sound settings and incoming-only chime.
    New activity is filtered client-side; no music player APIs are modified. */
-const CHAT_SOUND_DEFAULTS = Object.freeze({mode:'smart',volume:20});
+const CHAT_SOUND_DEFAULTS = Object.freeze({mode:'always',volume:100});
 let chatSoundPrefs = {...CHAT_SOUND_DEFAULTS};
 let chatSoundContext = null;
 let chatSoundReady = false;
@@ -7761,8 +7770,12 @@ let chatSoundLoading = false;
 let chatReadReceiptsEnabled = true;
 function chatSoundSanitize(value){
   const v=value&&typeof value==='object'?value:{};
-  const mode=['smart','always','off'].includes(v.mode)?v.mode:'smart';
-  const volume=Math.min(50,Math.max(1,Math.round(Number(v.volume)||20)));
+  // Smart is no longer offered. Legacy Smart preferences migrate to Always On.
+  const mode=v.mode==='off'?'off':'always';
+  let volume=Number(v.volume);
+  if(!Number.isFinite(volume)||volume<1)volume=100;
+  if(v.mode==='smart'&&volume===20)volume=100; // Previous default was 20%.
+  volume=Math.min(100,Math.max(1,Math.round(volume)));
   return {mode,volume};
 }
 function chatSoundStatus(value){const el=document.getElementById('chatSoundSettingsStatus');if(el)el.textContent=value||'';}
@@ -7782,16 +7795,15 @@ function chatSoundVolumeChanged(){
 }
 function chatSoundOpenSettings(){
   if(!currentUser)return;
-  closeSettingsMenu();
+  howieOpenPrivacy();
   chatSoundStatus('');
   chatSoundUpdateUI();
-  document.getElementById('chatSoundModal')?.classList.remove('hidden');
   chatSoundUnlock(); // The settings button click is a user gesture.
 }
-function chatSoundCloseSettings(){document.getElementById('chatSoundModal')?.classList.add('hidden');}
+function chatSoundCloseSettings(){howieClosePrivacy();}
 function chatSoundReadForm(){
   const selected=document.querySelector('#chatSoundModal input[name="chatSoundMode"]:checked');
-  return chatSoundSanitize({mode:selected?.value||'smart',volume:document.getElementById('chatSoundVolume')?.value});
+  return chatSoundSanitize({mode:selected?.value||'always',volume:document.getElementById('chatSoundVolume')?.value});
 }
 async function chatSoundLoadSettings(){
   const user=String(currentUser?.id||'');
@@ -7810,7 +7822,7 @@ async function chatSoundLoadSettings(){
       chatReadReceiptsEnabled=data?.chat_read_receipts_enabled!==false;
     }
   }catch(e){
-    console.warn('Chat sound settings unavailable; using Smart default. Run the V9 SQL setup:',e?.message||e);
+    console.warn('Chat sound settings unavailable; using Always On at 100% by default:',e?.message||e);
   }finally{chatSoundLoading=false;chatSoundUpdateUI();}
 }
 async function chatSoundSaveSettings(){
@@ -7832,8 +7844,8 @@ async function chatSoundSaveSettings(){
     if(!receipts){
       document.querySelectorAll('#chatMessages [data-chat-receipt-id]').forEach(el=>el.textContent='Sent');
     }else if(chatActiveId)chatUpdateReceipts();
-    chatSoundCloseSettings();
-  }catch(e){chatSoundStatus('COULD NOT SAVE. RUN THE V10 SQL SETUP, THEN TRY AGAIN. '+String(e?.message||e));}
+    chatSoundStatus('CHAT PREFERENCES SAVED.');
+  }catch(e){chatSoundStatus('COULD NOT SAVE CHAT PREFERENCES. '+String(e?.message||e));}
   finally{if(btn)btn.disabled=false;}
 }
 function chatSoundUnlock(){
@@ -7870,13 +7882,8 @@ function chatSoundPreview(){
   // A manually requested preview is allowed even when automatic sounds are Off.
   if(!chatSoundChime(chatSoundReadForm().volume))chatSoundStatus('SOUND BLOCKED BY BROWSER. TAP THE PAGE, THEN TRY AGAIN.');
 }
-function chatSoundMusicPlaying(){
-  const player=document.getElementById('audioPlayer');
-  return !!(player&&!player.paused&&!player.ended);
-}
 function chatSoundShouldPlay(roomId){
   if(chatSoundPrefs.mode==='off')return false;
-  if(chatSoundPrefs.mode==='smart'&&chatSoundMusicPlaying())return false;
   // An open conversation doesn't need an audible alert for its own messages.
   if(chatIsVisible()&&String(chatActiveId)===String(roomId))return false;
   return true;
@@ -8085,7 +8092,7 @@ function chatRenderActiveHeader(){
   const other=room?.kind==='direct'?room.members.find(x=>String(x.id)!==String(currentUser?.id)):null;
   if(sub){
     if(!room) sub.textContent='Messages are visible only to members.';
-    else if(room.kind==='group') sub.textContent=`${room.members.length} members · private group`;
+    else if(room.kind==='group') sub.textContent=`${room.members.length} members · Private Group`;
     else if(other) sub.innerHTML=`<span class="hm-chat-presence ${chatPresenceClass(other.id)}">● ${chatPresenceText(other.id)}</span>`;
     else sub.textContent='';
   }
